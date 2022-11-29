@@ -1,10 +1,7 @@
 # approx-model-or-approx-soln
 
-When is an approximate solution to a more realistic model better than an optimal solution to a highly stylized one?
 
-
-## Pretty darn good control: when are approximate solutions better than
-approximate models?
+## Pretty darn good control: when are approximate solutions better than approximate models?
 
 
 Existing methods for optimal control methods struggle to deal with the
