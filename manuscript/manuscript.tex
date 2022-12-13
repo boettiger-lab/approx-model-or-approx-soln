@@ -4,12 +4,14 @@
 %
 \smartqed  % flush right qed marks, e.g. at end of proof
 %
-\usepackage{amsmath}
+\usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 
 \usepackage[hyphens]{url} % not crucial - just used below for the URL
 \usepackage{hyperref}
+
+\def \der #1 #2 {\frac{\mathrm{d}#1}{\mathrm{d}#2}}
 
 %
 % \usepackage{mathptmx}      % use Times fonts if available on your TeX system
@@ -101,16 +103,35 @@ Your text comes here. Separate text sections with \cite{Mislevy06Cog}.
 % Text with citations by \cite{Galyardt14mmm}.
 In this section we first review two well-established techniques commonly used in sustainable fishery management. 
 These are the maximum sustainable yield (MSY) and the constant escapement (CE) approaches. 
-After this, reinforcement learning is briefly reviewed
+After this, deep reinforcement learning is briefly reviewed
 
 \hypertarget{sec:2}{%
 \subsection{Fishery management}\label{sec:fishery}}
 
 \hypertarget{sec:3}{%
-\subsection{Reinforcement learning}\label{sec:rl}}
+\subsection{Deep reinforcement learning}\label{sec:rl}}
 
 \hypertarget{sec:4}{%
-\section{A three-species dynamical model}\label{sec:model}}
+\section{A hierarchy of dynamical models}\label{sec:model}}
+
+In this section we present three models of increasing complexity which plausibly describe the population dynamics of a marine ecosystem.
+These models will form the test beds for the comparison between classical fishery management strategies and DRL.
+
+\hypertarget{paragraph-headings}{%
+\paragraph{A one-dimensional tipping point model.}\label{p:may}}
+Our first model has been used in~\cite{may77} to study the possible dangers of driving a dynamical ecosystem past a tipping point.
+Its dynamics is given by
+\begin{align}
+  \label{eq:may77}
+  \der{V} t = rV\left(
+    1-V/K
+    \right) 
+    -
+    \frac{\beta H V^2}{V_0^2 + V^2}. 
+\end{align}
+Here the only dynamic degree of freedom is $V$, while $r,\ K,\ \beta,\ V_0,$ and $H$ are fixed parameters.
+This model describes a population $V$ which grows logistically up to a carrying capacity of $K$, and whose growth is controlled by a constant population $H$ of predators.
+For fixed values of $r,\ K,\ V_0$ and $\beta$, varying $H$ may produce a \emph{catastrophe} (see Fig.~\ref{fig:tbd}). 
 
 \hypertarget{sec:5}{%
 \section{Results}\label{sec:results}}
