@@ -124,8 +124,8 @@ After this, deep reinforcement learning is briefly reviewed
 In this section we present three models of increasing complexity which plausibly describe the population dynamics of a marine ecosystem.
 These models will form the test beds for the comparison between classical fishery management strategies and DRL.
 
-\hypertarget{paragraph-headings}{%
-\paragraph{A one-dimensional tipping point model.}\label{p:may}}
+\hypertarget{sec:4.1}{%
+\subsection{A one-dimensional tipping point model.}\label{p:may}}
 
 Consider a population $V$ whose dynamics is given by
 \begin{align}
@@ -136,8 +136,8 @@ Consider a population $V$ whose dynamics is given by
     -
     \frac{\beta H V^2}{V_0^2 + V^2}. 
 \end{align}
-This model has been used in~\cite{may77} to study the possible dangers of driving a 
-Here the only dynamic degree of freedom is $V$, while $r,\ K,\ \beta,\ V_0,$ and $H > 0$ are fixed positive parameters.
+This model has been used in~\cite{may77} to describe a grazing ecosystem, where a species $V$ of vegetation is harvested by a constant herbivore population $H$. 
+% Here the only dynamic degree of freedom is $V$, while $r,\ K,\ \beta,\ V_0,$ and $H > 0$ are fixed positive constants.
 
 In~\eqref{eq:may77}, a population $V$ grows logistically with rate $r$ up to carrying capacity $K$.
 This is expressed by the first term in the equation,
@@ -148,10 +148,17 @@ Moreover, $V$ is predated on by a (constant) population $H$, as can be seen from
 \begin{align*}
   F(V,\ H \div \beta,\ V_0) := \frac{\beta H V^2}{V_0^2 + V^2}
 \end{align*}
-which saturates to $F\to\beta H$ as $V\to\infty$, and whose half maximum is $V_0$, i.e.\ $F(V=V_0,\ H; \beta,\ V_0)=\beta H/2$.
+which saturates to $\beta H$ as $V\to\infty$, and whose half maximum is $V_0$, i.e.\ $F(V=V_0,\ H; \beta,\ V_0)=\beta H/2$.
+
+Ref.~\cite{may77} studies the fixed points of~\eqref{eq:may77} in order to show that in certain parameter regimes, its dynamics can undergo a \emph{catastrophe}.
+A catastrophe is a sudden change in the state of the system from one stable state to another---often, the final state is ecologically detrimental, possibly associated with extinction or near-extinction events.
+
+Fig.~\ref{fig:tbd} shows the stable $V$ populations for differing values of $H$. 
+Here one sees that as $H\to T_2$, the top stable state is annihilated with the unstable fixed point.
+This way, if, e.g.\ $H$ were to slowly drift until $H=T_2$, the system would collapse to the low stable state, leading to a near extinction of $V$.
 
 
-For fixed values of $r,\ K,\ V_0$ and $\beta$, varying $H$ may produce a \emph{catastrophe} (see Fig.~\ref{fig:tbd})---a sudden disappearance of a stable fixed point of the system which . 
+% For fixed values of $r,\ K,\ V_0$ and $\beta$, varying $H$ may produce a \emph{catastrophe} (see Fig.~\ref{fig:tbd})---a sudden disappearance of a stable fixed point of the system which . 
 
 \hypertarget{sec:5}{%
 \section{Results}\label{sec:results}}
