@@ -11,7 +11,14 @@
 \usepackage[hyphens]{url} % not crucial - just used below for the URL
 \usepackage{hyperref}
 
-\def \der #1 #2 {\frac{\mathrm{d}#1}{\mathrm{d}#2}}
+% common operators
+\newcommand*{\der}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}
+
+% structural markers
+\def\div{\;|\;}
+\def\bigdiv{\;\big|\;}
+\def\Bigdiv{\;\Big|\;}
+\def\Biggdiv{\;\Bigg|\;}
 
 %
 % \usepackage{mathptmx}      % use Times fonts if available on your TeX system
@@ -112,26 +119,39 @@ After this, deep reinforcement learning is briefly reviewed
 \subsection{Deep reinforcement learning}\label{sec:rl}}
 
 \hypertarget{sec:4}{%
-\section{A hierarchy of dynamical models}\label{sec:model}}
+\section{Dynamical models used}\label{sec:model}}
 
 In this section we present three models of increasing complexity which plausibly describe the population dynamics of a marine ecosystem.
 These models will form the test beds for the comparison between classical fishery management strategies and DRL.
 
 \hypertarget{paragraph-headings}{%
 \paragraph{A one-dimensional tipping point model.}\label{p:may}}
-Our first model has been used in~\cite{may77} to study the possible dangers of driving a dynamical ecosystem past a tipping point.
-Its dynamics is given by
+
+Consider a population $V$ whose dynamics is given by
 \begin{align}
   \label{eq:may77}
-  \der{V} t = rV\left(
+  \der{V}{t} = rV\left(
     1-V/K
     \right) 
     -
     \frac{\beta H V^2}{V_0^2 + V^2}. 
 \end{align}
-Here the only dynamic degree of freedom is $V$, while $r,\ K,\ \beta,\ V_0,$ and $H$ are fixed parameters.
-This model describes a population $V$ which grows logistically up to a carrying capacity of $K$, and whose growth is controlled by a constant population $H$ of predators.
-For fixed values of $r,\ K,\ V_0$ and $\beta$, varying $H$ may produce a \emph{catastrophe} (see Fig.~\ref{fig:tbd}). 
+This model has been used in~\cite{may77} to study the possible dangers of driving a 
+Here the only dynamic degree of freedom is $V$, while $r,\ K,\ \beta,\ V_0,$ and $H > 0$ are fixed positive parameters.
+
+In~\eqref{eq:may77}, a population $V$ grows logistically with rate $r$ up to carrying capacity $K$.
+This is expressed by the first term in the equation,
+\begin{align*}
+  L(V \div r,\ K) := rV\left(1 - V / K\right).
+\end{align*}
+Moreover, $V$ is predated on by a (constant) population $H$, as can be seen from the negative term
+\begin{align*}
+  F(V,\ H \div \beta,\ V_0) := \frac{\beta H V^2}{V_0^2 + V^2}
+\end{align*}
+which saturates to $F\to\beta H$ as $V\to\infty$, and whose half maximum is $V_0$, i.e.\ $F(V=V_0,\ H; \beta,\ V_0)=\beta H/2$.
+
+
+For fixed values of $r,\ K,\ V_0$ and $\beta$, varying $H$ may produce a \emph{catastrophe} (see Fig.~\ref{fig:tbd})---a sudden disappearance of a stable fixed point of the system which . 
 
 \hypertarget{sec:5}{%
 \section{Results}\label{sec:results}}
