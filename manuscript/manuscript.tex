@@ -7,6 +7,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
+\usepackage{xcolor}
 
 \usepackage[hyphens]{url} % not crucial - just used below for the URL
 \usepackage{hyperref}
@@ -19,6 +20,11 @@
 \def\bigdiv{\;\big|\;}
 \def\Bigdiv{\;\Big|\;}
 \def\Biggdiv{\;\Bigg|\;}
+\def\darg{\;\cdot\;}
+
+% comments / colors
+\definecolor{Fabulous}{RGB}{220,0,100}
+\newcommand{\fm}[1]{{\color{Fabulous}\bf [FMM: #1]}}
 
 %
 % \usepackage{mathptmx}      % use Times fonts if available on your TeX system
@@ -155,7 +161,32 @@ A catastrophe is a sudden change in the state of the system from one stable stat
 
 Fig.~\ref{fig:tbd} shows the stable $V$ populations for differing values of $H$. 
 Here one sees that as $H\to T_2$, the top stable state is annihilated with the unstable fixed point.
-This way, if, e.g.\ $H$ were to slowly drift until $H=T_2$, the system would collapse to the low stable state, leading to a near extinction of $V$.
+A possible situation of concern here is the following:
+The system begins in the high stable point for some $H<T_2$.
+Slowly, $H$ slowly drifts upward, bringing the system up to $H=T_2$.
+At this point, the system suddenly finds itself in the lower stable point's ‘‘basin’’---this leads to a quick collapse of $V$ down to the stable point.
+Along a similar vein, if the system's evolution is noisy, then this catastrophe may happen for lower $H$ values: for $H$ close enough to $T_2$, there is a large probability that the $V$ crosses the unstable state and collapses towards the lower stable state.
+\fm{Maybe this can be explained in the figure better?}
+
+This way, if, e.g.\ the system is at the high stable state for low $H$, and $H$ were to slowly drift until $H=T_2$, the system would collapse to the low stable state, leading to a near extinction of $V$.
+
+\hypertarget{paragraph-headings}{%
+\paragraph{System~\eqref{eq:may77} as a simple fishery model.}\label{p:may as fishery}}
+We reinterpret the model~\eqref{eq:may77} as a simplified model for a fishery.
+There is some precedent for this already in~\cite{may77}, however our approach here is not in 1-to-1 correspondence to the approach used in that reference.
+\fm{Refers to the fact that in the reference $F(\darg)$ is our harvest quota, using constant effort.
+But here, it is a predation term, we compete with the predator in this case.}
+
+
+% Ref.~\cite{may77} points out that the system presented above can be reinterpreted as a simple model for a fishery, where quotas are set using a constant effort rule.
+% Here, the natural dynamics of $V$ is purely logistic growth, which is hampered by human harvesting according to the function $F$.
+% This way, $H$ is the effort allowed for the sake of quotas.
+% \footnote{%
+%   The non-linearity of the $F$ function is justified in the fact that, for low very populations $V$, the effort necessary to obtain a constant-size catch grows faster than $H\sim 1/V$.
+%   Here, for our case, $H\sim 1/V^2$ is used.
+% }
+
+We use this 
 
 
 % For fixed values of $r,\ K,\ V_0$ and $\beta$, varying $H$ may produce a \emph{catastrophe} (see Fig.~\ref{fig:tbd})---a sudden disappearance of a stable fixed point of the system which . 
