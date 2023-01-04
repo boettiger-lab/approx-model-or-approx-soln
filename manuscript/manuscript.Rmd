@@ -46,22 +46,25 @@ output: rticles::springer_article
 
 Your text comes here. Separate text sections with \cite{Mislevy06Cog}.
 
-# Section title {#sec:1}
 
-Text with citations by \cite{Galyardt14mmm}.
+# Figures brainstorm
 
-## Subsection title {#sec:2}
+Figure 1: 1-D and 3-D model conceptual figure. something about the objective / decision
+Figure 2: Stability / multistability in the 1D and 3D models.  state space + time views
 
-as required. Don't forget to give each section
-and subsection a unique label (see Sect. \ref{sec:1}).
+Figure 3: The 1-D optimal management solution.  'constant escapement' intuition etc
 
-#### Paragraph headings 
+Results figures:
+- timeseries example of management under the RL policy.  probably compare to managing under 1-D solution / rule-of-thumb methods
+- state-space view of management doughnut 
+- visualization / encapsulation of the policy heatmaps, slices, policy vs position along ellipse 
+- reward plot over time (comparing methods)
 
-Use paragraph headings as needed.
 
-\begin{align}
-a^2+b^2=c^2
-\end{align}
+
+
+
+
 
 ## Acknowledgements
 
