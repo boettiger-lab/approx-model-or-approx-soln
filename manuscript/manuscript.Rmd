@@ -85,7 +85,7 @@ This changes the state as
 \begin{align*}
   (V_1,\ V_2,\ H) \mapsto ((1-q)V_1,\ V_2,\ H)
 \end{align*}
-and secures a reward of $qA$ to the agent.
+and secures a reward of $qV_1$ to the agent.
 Afterwards, the environment undergoes its natural dynamics.
 
 
