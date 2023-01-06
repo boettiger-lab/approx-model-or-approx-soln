@@ -44,11 +44,29 @@ output: rticles::springer_article
 
 # Introduction {#intro}
 
-Your text comes here. Separate text sections with \cite{Mislevy06Cog}.
+<!-- Your text comes here. Separate text sections with \cite{Mislevy06Cog}. -->
 
-# Section title {#sec:1}
+# Reinforcement learning {#sec:DRL}
 
-Text with citations by \cite{Galyardt14mmm}.
+Reinforcement learning (RL) is a way of approaching *control problems* through machine learning.
+An RL application can be conceptually separated into two parts: an *agent*, and an *environment*.
+The agent may *act* on the environment.
+This produces two effects: on the one hand, the state of the environment is changed, and on the other, the agent receives a *reward* (see Fig. ).
+The reward depends on what action the agent chose, and on the initial and final states of the environment.
+The reward encodes the goal which we desire the agent to acheive---in other words, it encodes how we wish the agent controls the environment.
+The main part of any RL algorithm is then to progressively improve the agent's *policy*, the function the agent uses to choose which action to take given the state of the environment.
+This is done by aggregating experience and learning from it.
+
+
+
+
+# Sustainable fishery management {#sec:fishery}
+
+# Results
+
+# Discussion
+
+<!-- Text with citations by \cite{Galyardt14mmm}.
 
 ## Subsection title {#sec:2}
 
@@ -61,7 +79,7 @@ Use paragraph headings as needed.
 
 \begin{align}
 a^2+b^2=c^2
-\end{align}
+\end{align} -->
 
 ## Acknowledgements
 
