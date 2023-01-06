@@ -46,6 +46,21 @@ output: rticles::springer_article
 
 <!-- Your text comes here. Separate text sections with \cite{Mislevy06Cog}. -->
 
+
+# Figures brainstorm
+
+Figure 1: 1-D and 3-D model conceptual figure. something about the objective / decision
+Figure 2: Stability / multistability in the 1D and 3D models.  state space + time views
+
+Figure 3: The 1-D optimal management solution.  'constant escapement' intuition etc
+
+Results figures:
+- timeseries example of management under the RL policy.  probably compare to managing under 1-D solution / rule-of-thumb methods
+- state-space view of management doughnut 
+- visualization / encapsulation of the policy heatmaps, slices, policy vs position along ellipse 
+- reward plot over time (comparing methods)
+
+
 # Reinforcement learning {#sec:DRL}
 
 Reinforcement learning (RL) is a way of approaching *control problems* through machine learning.
@@ -58,24 +73,6 @@ The main part of any RL algorithm is then to progressively improve the agent's *
 This is done by aggregating experience and learning from it.
 
 
-
-
-# Sustainable fishery management {#sec:fishery}
-
-# Results
-
-# Discussion
-
-<!-- Text with citations by \cite{Galyardt14mmm}.
-
-## Subsection title {#sec:2}
-
-as required. Don't forget to give each section
-and subsection a unique label (see Sect. \ref{sec:1}).
-
-#### Paragraph headings 
-
-Use paragraph headings as needed.
 
 \begin{align}
 a^2+b^2=c^2
