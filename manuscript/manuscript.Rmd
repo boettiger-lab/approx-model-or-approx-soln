@@ -137,6 +137,8 @@ $$
 $$
 We call this policy *variable total allowable catch (VTAC)*.
 
+## Dangers: Noisy parameters, noisy observations and model inaccuracy
+
 
 # Reinforcement learning {#sec:RL}
 
