@@ -80,26 +80,57 @@ Results figures:
 - visualization / encapsulation of the policy heatmaps, slices, policy vs position along ellipse 
 - reward plot over time (comparing methods)
 
+# Fisheries: approximate models and approximate solutions
+
+<!-- Introduce the 1D and 3D models, and have Figure 1 already here. -->
+
 
 # Reinforcement learning {#sec:DRL}
 
 Reinforcement learning (RL) is a way of approaching *control problems* through machine learning.
 An RL application can be conceptually separated into two parts: an *agent*, and an *environment*.
-The *environment* is commonly a computer simulation.
+The *environment* is commonly a computer simulation, although it sometimes can be a real world system.
 The *agent*, on the other hand, is a computer program which interacts with the environment.
 That is, the agent may act on the environment and change its state.
-Such an action and its consequence, moreover, give the agent a *reward* which encodes our goal for the agent.
+This, moreover, gives the agent a *reward* which encodes the control goal.
 The main part of an RL algorithm is then to progressively improve the agent's *policy*, in order to maximize the cumulative reward received. 
 This is done by aggregating experience and learning from it.
+See Fig. \ref{tbd}.
 
-In our case, the environment will be a computational model of the population dynamics of a fishery.
-The agent chooses how much to fish from a given species in the environment, thereby changing the populations in the environment's state.
+In our case, the environment will be a computational model of the population dynamics of a fishery, with the environment state being a vector of all the fish populations, $S=(V_1, V_2, H)$.
+The system evolves naturally according to \eqref{eq:3d model}.
+At each time step, the agent harvests one of the populations, say $A$. 
+Specifically, it chooses a quota $q$: the fraction of $A$ that will be fished.
+This changes the state as
+\begin{align*}
+  (V_1,\ V_2,\ H) \mapsto ((1-q)V_1,\ V_2,\ H)
+\end{align*}
+and secures a reward of $qV_1$ to the agent.
+Afterwards, the environment undergoes its natural dynamics.
 
+## Mathematical framework for RL
 
+Mathematically, RL may be formulated using a discrete time *partially observable Markov decision process (POMDP)*.
+This formalization is rather flexible and allows one, e.g., to account for situations where the agent may not fully observe the environment state, or where the only observations available to the agent are certain functions of the underlying state.
+For the sake of clarity, we will present here only the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (FMDPs for short).
+An FMDP may be defined by the following data:
 
-\begin{align}
-a^2+b^2=c^2
-\end{align} -->
+- $\mathcal{S}$: *state space*, the set of states of the environment,
+
+- $\mathcal{A}$: *action space*, the set of actions which the agent may choose from,
+
+- $T(s_{t+1}|s_t, a_t)$: *transition operator*, a conditional distribution which describes the dynamics of the system,
+
+- $r(s_t, a_t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $s_t$,
+
+- $d(s_0)$: *initial state distribution*, the initial state of the environment is sampled from this distribution,
+
+- $\gamma\in[0,1]$: *discount factor*.
+
+As the name implies, the agent observes the full state of the environment of an FMDP, and chooses its next action based on this observation according to a *policy function* $\pi(a_t | s_t)$.
+In return, the agent receives a discounted reward $\gamma^t r(a_t, s_t)$.
+The discount factor helps regularize the agent, helping the optimization algorithm find solutions which pay off within a timescale of $t \sim \log(\gamma^{-1})$.
+
 
 ## Acknowledgements
 
