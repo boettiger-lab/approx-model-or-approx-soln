@@ -117,6 +117,12 @@ $$
 That is, at the MSY biomass, the logistic growth of $F$ is cancelled exactly by the harvest.
 
 The MSY rule fixes the drawback in the escapement policy by having $h(F)>0$ for all $F>0$.
+It, however, has its own drawbacks.
+It is particularly sensitive to misestimates of the parameter $r$, as we will discuss in Sec. \ref{sec:tbd}.
+Due to this, similar but more conservative policies have been used.
+
+*Total allowable catch (TAC)* is one such policy.
+It consists on reducing the inclination of the line defined by $h(F)$, for example using $h(F) = 0.8\times r/2$.
 
 
 # Reinforcement learning {#sec:RL}
