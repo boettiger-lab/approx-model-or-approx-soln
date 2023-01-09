@@ -110,6 +110,24 @@ At a time $t$, the FMDP agent observes the full state $s_t$ of the environment a
 In return, it receives a discounted reward $\gamma^t r(a_t, s_t)$.
 The discount factor helps regularize the agent, helping the optimization algorithm find solutions which pay off within a timescale of $t \sim \log(\gamma^{-1})^{-1}$.
 
+With any fixed policy function, the agent will traverse a path 
+$\tau=(s_0,\ a_0,\ s_1,\ a_1\ \dots,\ s_{t_{\text{fin.}}})$ 
+sampled randomly from the distribution
+\begin{align*}
+  p_\pi(\tau) = 
+  d(s_0) \prod_{t=0}^{ t_{\text{fin.}}-1 }
+  \pi( a_t | s_t ) T( s_{t+1} | s_t, a_t ).
+\end{align*}
+Reinforcement learning seeks to optimize $\pi$ such that the expected rewards are maximal,
+$$  
+  \pi^* = \mathrm{argmax}\ \mathbb{E}_{\tau\sim p_\pi}[R(\tau)],
+$$
+where
+$$
+  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, s_t)
+$$
+is the cumulative reward of path $\tau$.
+The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *value function*.
 
 ## Acknowledgements
 
