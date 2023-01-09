@@ -122,7 +122,19 @@ It is particularly sensitive to misestimates of the parameter $r$, as we will di
 Due to this, similar but more conservative policies have been used.
 
 *Total allowable catch (TAC)* is one such policy.
-It consists on reducing the inclination of the line defined by $h(F)$, for example using $h(F) = 0.8\times r/2$.
+It consists on reducing the inclination of the line defined by $h(F)$ using a prefactor $\alpha$ in $h(F) = \alpha\times rF/2$. 
+Plausible examples are $\alpha = 0.8$ or $0.9$.
+Another common alternative is to have a prefactor $\alpha = \alpha(F)$ which decreases from one to zero as $F$ decreases below a threshold:
+$$
+  h(F) = \alpha(F)\times rF/2,
+$$
+where,
+$$
+  \alpha(F) = \begin{cases}
+  1, \qquad &\text{if } F > F_{\text{thresh.}},\\
+  F / F_{\text{thresh.}}, \qquad & \text{else}.
+  \end{cases}
+$$
 
 
 # Reinforcement learning {#sec:RL}
