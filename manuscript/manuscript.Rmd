@@ -142,7 +142,9 @@ Deep reinforcement learning uses this strategy, focusing on function families pa
 <!-- The figure should kinda explain how the parametrization arises, and how gradient ascent is used. Maybe namedrop backpropagataion for the sake of usefulness to the reader? -->
 
 Since our state and observation spaces are continuous, we will focus on deep reinforcement learning throughout this paper.
-Specifically, we parametrize $\pi$ using a XXXX neural network and use the *proximal policy optimization (PPO)* algorithm to optimize $\pi$.
+Specifically, we parametrize $\pi$ using a neural network with two hidden layers of 64 neurons.
+
+We use the *proximal policy optimization (PPO)* algorithm to optimize $\pi$.
 Within the RL literature there is a wealth of algorithms from which to choose from, each with its pros and cons.
 Here we have focused on a single one of these for the sake of particularity---to draw a clear comparison between the RL-based and the classical fishery management approaches.
 In practice, further improvements can be expected by a careful selection of the optimization algorithm.
