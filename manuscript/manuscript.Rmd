@@ -184,8 +184,7 @@ More generally, there are many situations in which the exact model of the system
 This is a standard situation in ecology: mathematical models capture the most prominent aspects of the ecosystem's dynamics, while ignoring or summarizing most of its complexity.
 In this case, it is clear, model-based controls run a grave danger of mismanaging the system.
 
-Reinforcement learning is, on the other hand, typically a model-free approach to control theory.
-\footnote{There are, however, approaches to perform model-based reinforcement learning. While we will not focus on these in this paper they are discussed in \cite{tbd1, tbd2}.}
+Reinforcement learning is, on the other hand, typically a model-free approach to control theory.\footnote{There are, however, approaches to perform model-based reinforcement learning. While we will not focus on these in this paper they are discussed in \cite{tbd1, tbd2}.}
 While the model is certainly used to generate training data, it is not directly used by the optimization algorithm.
 This provides more flexibility to use model-free RL in instances where the model of the system is not accurately known.
 In fact, it has been shown to generally be preferable to use model-free RL in such instances.
@@ -195,6 +194,8 @@ In fact, it has been shown to generally be preferable to use model-free RL in su
 This context provides a motivation for this paper. 
 Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
 This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
+
+# Results
 
 ## Acknowledgements
 
