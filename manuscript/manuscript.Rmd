@@ -129,6 +129,13 @@ $$
 is the cumulative reward of path $\tau$.
 The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *value function*.
 
+## Deep Reinforcement Learning
+
+The policy function $\pi$ often lives in a high- or infinite-dimensional space.
+This makes it unfeasible to directly optimize $\pi$.
+In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parametrized family of functions.
+Deep reinforcement learning uses this strategy, focusing on function families parametrized by neural networks. (See Fig. \ref{tbd}.)
+
 ## Acknowledgements
 
 The title of this piece references a mathematical biology workshop at NIMBioS
