@@ -135,6 +135,7 @@ $$
   F / F_{\text{thresh.}}, \qquad & \text{else}.
   \end{cases}
 $$
+We call this policy *variable total allowable catch (VTAC)*.
 
 
 # Reinforcement learning {#sec:RL}
