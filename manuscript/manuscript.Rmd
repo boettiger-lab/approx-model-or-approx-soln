@@ -81,12 +81,18 @@ Results figures:
 Here we review classical strategies for sustainable fishery management and we provide a birds-eye view of the alternative approach we propose.
 A summary of the contrast between the two strategies is given in Fig. \ref{tbd}.
 
-## Classical strategies: MSY, escapement, total allowable catch
+## Classical approaches to sustainable fisheries {#sec:classical}
 
+There are several strategies that have been used to manage fisheries: *escapement*, *maximum sustainable yield (MSY)*, *total allowable catch (TAC)*, among others.
+We collectively refere to these as *classical*, and will compare their performance to RL-based management strategies.
+As shown in Fig. \ref{fig:tbd}, classical strategies have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $F$). 
+A common example is using a logistic growth equation,
+$$
+  F_{t+1} - F_t = r F_t( 1 - F_t / K),
+$$
+where the interaction between $F$ and its environment is summarized to two parameters, the growth rate $r$, and the carrying capacity $K$.
 
-
-
-# Reinforcement learning {#sec:DRL}
+# Reinforcement learning {#sec:RL}
 
 Reinforcement learning (RL) is, in a nutshell, a way of approaching *control problems* through machine learning.
 An RL algorithm can be conceptually separated into two parts: an *agent*, and an *environment* which the agent can interact with.
@@ -166,6 +172,29 @@ Within the RL literature there is a wealth of algorithms from which to choose fr
 Here we have focused on a single one of these for the sake of particularity---to draw a clear comparison between the RL-based and the classical fishery management approaches.
 In practice, further improvements can be expected by a careful selection of the optimization algorithm.
 
+## Model-free reinforcement learning
+
+Within control theory, the usual setup is one where we use as much information from the model as possible in order to derive an optimal solution.
+**(Wax poetic a bit about Bellmann eq. approaches here?)**
+
+The classical sustainable fishery management approaches summarized in Sec. \ref{sec:classical} are model-based controls.
+As we saw in that section, these controls may run into trouble in the case where there are inaccuracies in the model parameter estimates.
+
+More generally, there are many situations in which the exact model of the system is not known or not tractable.
+This is a standard situation in ecology: mathematical models capture the most prominent aspects of the ecosystem's dynamics, while ignoring or summarizing most of its complexity.
+In this case, it is clear, model-based controls run a grave danger of mismanaging the system.
+
+Reinforcement learning is, on the other hand, typically a model-free approach to control theory.
+\footnote{There are, however, approaches to perform model-based reinforcement learning. While we will not focus on these in this paper they are discussed in \cite{tbd1, tbd2}.}
+While the model is certainly used to generate training data, it is not directly used by the optimization algorithm.
+This provides more flexibility to use model-free RL in instances where the model of the system is not accurately known.
+In fact, it has been shown to generally be preferable to use model-free RL in such instances.
+
+**Mention CL here? Where solutions to other related problems in the curriculum are used to build solutions to the target problem.**
+
+This context provides a motivation for this paper. 
+Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
+This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
 
 ## Acknowledgements
 
