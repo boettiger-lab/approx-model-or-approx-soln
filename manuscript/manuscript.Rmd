@@ -67,26 +67,25 @@ Results figures:
 
 # Reinforcement learning {#sec:DRL}
 
-Reinforcement learning (RL) is a way of approaching *control problems* through machine learning.
-An RL application can be conceptually separated into two parts: an *agent*, and an *environment*.
-The *environment* is commonly a computer simulation, although it sometimes can be a real world system.
-The *agent*, on the other hand, is a computer program which interacts with the environment.
-That is, the agent may act on the environment and change its state.
-This, moreover, gives the agent a *reward* which encodes the control goal.
+Reinforcement learning (RL) is, in a nutshell, a way of approaching *control problems* through machine learning.
+An RL algorithm can be conceptually separated into two parts: an *agent*, and an *environment* which the agent can interact with.
+That is, the agent may act on the environment and thus change its state, while the environment gives a *reward* to the agent in return (see Fig. \ref{tbd}).
+The rewards encode the agent's goal.
 The main part of an RL algorithm is then to progressively improve the agent's *policy*, in order to maximize the cumulative reward received. 
 This is done by aggregating experience and learning from it.
-See Fig. \ref{tbd}.
 
-In our case, the environment will be a computational model of the population dynamics of a fishery, with the environment state being a vector of all the fish populations, $S=(V_1, V_2, H)$.
-The system evolves naturally according to \eqref{eq:3d model}.
-At each time step, the agent harvests one of the populations, say $A$. 
-Specifically, it chooses a quota $q$: the fraction of $A$ that will be fished.
+<!-- The *environment* is commonly a computer simulation, although it sometimes can be a real world system.
+The *agent*, on the other hand, is a computer program which interacts with the environment. -->
+
+For our use case, the environment will be a computational model of the population dynamics of a fishery, with the environment state being a vector of all the fish populations, $S=(V_1, V_2, H)$.
+At each time step, the agent harvests one of the populations, $V_1$. 
 This changes the state as
 \begin{align*}
-  (V_1,\ V_2,\ H) \mapsto ((1-q)V_1,\ V_2,\ H)
+  (V_1,\ V_2,\ H) \mapsto ((1-q)V_1,\ V_2,\ H),
 \end{align*}
-and secures a reward of $qV_1$ to the agent.
-Afterwards, the environment undergoes its natural dynamics.
+where $q$ is a fishing *quota* set by the agent. 
+This secures a reward of $qV_1$.
+Afterwards, the environment undergoes a timestep under its natural dynamics given by \eqref{eq:3d model}.
 
 ## Mathematical framework for RL
 
@@ -107,9 +106,9 @@ An FMDP may be defined by the following data:
 
 - $\gamma\in[0,1]$: *discount factor*.
 
-As the name implies, the agent observes the full state of the environment of an FMDP, and chooses its next action based on this observation according to a *policy function* $\pi(a_t | s_t)$.
-In return, the agent receives a discounted reward $\gamma^t r(a_t, s_t)$.
-The discount factor helps regularize the agent, helping the optimization algorithm find solutions which pay off within a timescale of $t \sim \log(\gamma^{-1})$.
+At a time $t$, the FMDP agent observes the full state $s_t$ of the environment and chooses an action based on this observation according to a *policy function* $\pi(a_t | s_t)$.
+In return, it receives a discounted reward $\gamma^t r(a_t, s_t)$.
+The discount factor helps regularize the agent, helping the optimization algorithm find solutions which pay off within a timescale of $t \sim \log(\gamma^{-1})^{-1}$.
 
 
 ## Acknowledgements
