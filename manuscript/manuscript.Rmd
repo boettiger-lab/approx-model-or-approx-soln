@@ -88,9 +88,36 @@ We collectively refere to these as *classical*, and will compare their performan
 As shown in Fig. \ref{fig:tbd}, classical strategies have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $F$). 
 A common example is using a logistic growth equation,
 $$
-  F_{t+1} - F_t = r F_t( 1 - F_t / K),
+  F_{t+1} - F_t = r F_t( 1 - F_t / K) - h_t =: L(F_t) - h_t,
 $$
 where the interaction between $F$ and its environment is summarized to two parameters, the growth rate $r$, and the carrying capacity $K$.
+In the equation above, $h_t$ is the *harvest* at timestep $t$.
+The goal is to choose the harvest policy $h:F_t\mapsto h_t$ such that long-term profits are maximized.
+
+An advantage of one dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive.
+For example, in the logistic equation pointed out above, the maximal sustainable yield of the system is attained at $F = F_{MSY} := K/2$.
+The optimizer is an *escapement* policy:
+$$
+  h_t = \begin{cases}
+    F_t - K/2, \qquad &\text{if, } F_t > K/2\\
+    0, \qquad &\text{else.}
+  \end{cases}
+$$
+This corresponds to keeping the system at its optimal growth rate as much as possible.
+
+Escapement policies, or more generally *bang bang* policies, tend to be the optimal solution for these types of control problems.
+A drawback of these solutions, in the fishery context, is the presence of several timesteps with zero harvest which can arise.
+To mend this, certain suboptimal solutions have been constructed for fishery management.
+
+One ubiquitous solution is simply called maximum sustainable yield (MSY).
+It consists on letting $h(F) = rF/2$, so that
+$$
+  h(F_{MSY}) = L(F_{MSY}) = r K/4.
+$$
+That is, at the MSY biomass, the logistic growth of $F$ is cancelled exactly by the harvest.
+
+The MSY rule fixes the drawback in the escapement policy by having $h(F)>0$ for all $F>0$.
+
 
 # Reinforcement learning {#sec:RL}
 
