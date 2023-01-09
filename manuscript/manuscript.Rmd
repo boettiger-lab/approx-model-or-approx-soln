@@ -49,9 +49,19 @@ output: rticles::springer_article
 
 # Figures brainstorm
 
+Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
+
+<!-- Reality __
+  |        \
+  v         \
+1-D Model   More expressive model
+  |                  |
+  v                  v
+Optimal        Suboptimal, but
+solution   well-performing solution -->
+
 Figure 1: 1-D and 3-D model conceptual figure. something about the objective / decision
 Figure 2: Stability / multistability in the 1D and 3D models.  state space + time views
-
 Figure 3: The 1-D optimal management solution.  'constant escapement' intuition etc
 
 RL figures:
@@ -67,6 +77,13 @@ Results figures:
 # Fisheries: approximate models and approximate solutions
 
 <!-- Introduce the 1D and 3D models, and have Figure 1 already here. -->
+
+Here we review classical strategies for sustainable fishery management and we provide a birds-eye view of the alternative approach we propose.
+A summary of the contrast between the two strategies is given in Fig. \ref{tbd}.
+
+## Classical strategies: MSY, escapement, total allowable catch
+
+
 
 
 # Reinforcement learning {#sec:DRL}
