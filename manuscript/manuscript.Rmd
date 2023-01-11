@@ -74,7 +74,35 @@ Results figures:
 - visualization / encapsulation of the policy heatmaps, slices, policy vs position along ellipse 
 - reward plot over time (comparing methods)
 
-# Fisheries: approximate models and approximate solutions
+# Mathematical models of fisheries
+
+In this section we introduce some models describing the population dynamics of fisheries.
+In general, the class of models that appear in this context are *first order finite difference equations*.
+For $n$ species, these models have the general form
+\begin{align}
+  \label{eq:general model}
+  N_{t+1} - N_t = f(N_t) - h_t,
+\end{align}
+where $N(t) = (A_t,\ B_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
+
+Most commonly, fisheries use 1-dimensional models, $n=1$.
+One such model appearing in a variety of ecological contexts is *logistic growth*, for which
+$$
+  f(N_t) = r N_t\big(1 - N_t / K \big) =: L(N_t).
+$$
+More relevant to our current work, is the following single-species model studied in \cite{may77},
+\begin{align}
+  \label{eq:may}
+  N_{t+1} - N_t
+  = L(N_t) - \frac{\beta H N_t^2}{c^2 + N_t^2}.
+\end{align}
+The model has five parameters: a constant population $H$ of a species which preys on $N$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
+
+Part of what makes eq. \eqref{eq:may} an interesting study case is the presence of a *tipping point*.
+
+
+
+# Fishery management approaches
 
 <!-- Introduce the 1D and 3D models, and have Figure 1 already here. -->
 
@@ -243,6 +271,8 @@ This context provides a motivation for this paper.
 Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
 This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
 
+  
+  
 # Results
 
 ## Acknowledgements
