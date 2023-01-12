@@ -61,7 +61,7 @@ df2 = (df
        .melt(id_vars=["t", "action", "reward", "rep"])
        .groupby(['t', "variable"], as_index=False)
        .agg({'reward': 'mean',
-             'value': 'mean',,
+             'value': 'mean',
              'action': 'mean'})) 
 
 
