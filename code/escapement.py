@@ -16,8 +16,8 @@ effort = (pop - escapement)/pop
 actions = np.linspace(0,1,101)
 for escapement in actions:
   episode_reward = 0
-  observation = env.reset()
   for rep in range(10):
+    observation = env.reset()
     for t in range(200):
       df.append(np.append([t, rep, action, episode_reward], observation))
       effort = np.min(1 - escapement / observation[0], 0)

@@ -42,9 +42,10 @@ env = agent.env_creator(agent.evaluation_config.env_config)
 import pandas as pd
 import numpy as np
 df = []
-episode_reward = 0
-observation = env.reset()
+
 for rep in range(10):
+  episode_reward = 0
+  observation = env.reset()
   for t in range(200):
     action = agent.compute_single_action(observation)
     df.append(np.append([t, rep, action[0], episode_reward], observation))
@@ -54,8 +55,6 @@ for rep in range(10):
 cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
 df = pd.DataFrame(df, columns = cols)
 df.to_csv("PPO.csv")
-
-
 
 from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
 df2 = (df
