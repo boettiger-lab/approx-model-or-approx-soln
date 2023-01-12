@@ -85,6 +85,8 @@ For $n$ species, these models have the general form
 \end{align}
 where $N(t) = (A_t,\ B_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
 
+## Single species models
+
 Most commonly, fisheries use 1-dimensional models, $n=1$.
 One such model appearing in a variety of ecological contexts is *logistic growth*, for which
 $$
@@ -98,7 +100,17 @@ More relevant to our current work, is the following single-species model studied
 \end{align}
 The model has five parameters: a constant population $H$ of a species which preys on $N$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
 
-Part of what makes eq. \eqref{eq:may} an interesting study case is the presence of a *tipping point*.
+Part of what makes eq. \eqref{eq:may} an interesting study case is the presence of a *tipping point* (see Fig. \ref{tbd}).
+Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $V_1$ of the system, these two attractors separated by an unstable fixed point.
+At a certain threshold value of $H$, however, the top stable fixed point collides with the unstable fixed point and both are annihilated.
+For this value of $H$, and for higher values, only the lower fixed point remains.
+
+This structure implies two things.
+First, that a drift in $H$ could lead to catastrophic consequences, with the population $V_1$ plummeting to the lower fixed stable point.
+Second, that if the evolution of $V_1$ is *stochastic*, then, even at values of $H$ below the threshold point, the system runs a sizeable danger of tipping over towards the lower stable point.
+
+## A three species model
+
 
 
 
