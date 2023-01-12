@@ -4,9 +4,8 @@ import pandas as pd
 import numpy as np
 
 env = gym.make("threeFishing-v2")
-
-df = []
 actions = np.linspace(0,.1,101)
+df = []
 for action in actions:
   for rep in range(10):
     episode_reward = 0
@@ -18,10 +17,13 @@ for action in actions:
 
 cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
 df = pd.DataFrame(df, columns = cols)
-df.to_csv("msy.csv")
+df.to_csv("data/msy.csv", index=False)
 
 
 
+
+
+# ignore me, we'll transform and plot in R
 # identify action at associated with highest cumulative mean reward by last timestep
 df2 = ( df
         .groupby(['t','action'], as_index=False)

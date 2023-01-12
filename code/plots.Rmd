@@ -1,0 +1,19 @@
+---
+---
+
+```{r setup}
+library(tidyverse)
+```
+
+```{r}
+## reticulate::source_python("msy.py")
+```
+
+```{r}
+escapement <- read_csv("../data/escapement.csv")
+escapement |> 
+  filter(t == max(t)) |> 
+  group_by(action) |> summarise(reward = mean(reward)) |> 
+  filter(reward == max(reward))
+```
+
