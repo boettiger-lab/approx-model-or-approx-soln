@@ -32,7 +32,16 @@ MSC:
 - MSC code 2
 
 abstract: |
-  The text of your abstract.  150 -- 250 words.
+  Existing methods for optimal control methods struggle to deal with the complexity commonly encountered in real-world systems, including dimensionality, process error, model bias and heterogeneity. 
+  Instead of tackling these complexities directly, researchers have typically sought to find exact optimal solutions to simplified models of the processes in question. 
+  When is the optimal solution to a very approximate, stylized model better than an approximate solution to a more accurate model? 
+  This question has largely gone unanswered owing to the difficulty of finding even approximate solutions in the case of complex models.  
+  Our approach draws on recent algorithmic and computational advances in deep reinforcement learning. 
+  These methods have hitherto focused on problems in games or robotic mechanics, which operate under precisely known rules. 
+  We demonstrate the ability for novel algorithms using deep neural networks to successfully approximate such solutions (the "policy function" or control rule) without knowing or ever attempting to infer a model for the process itself. 
+  This powerful new technique lets us finally begin to answer the question.
+  We show that in many but not all cases, the optimal policy for a carefully chosen over-simplified model can still out-perform these novel algorithms trained to find approximate solutions to simulations of a realistically complex system. 
+  This illustrates the promise of combining complex, realistic simulations with emerging machine-learning techniques to improve our understanding and management of ecological systems.
 
 bibliography: bibliography.bib
 biblio-style: spphys
@@ -42,9 +51,20 @@ output: rticles::springer_article
 
 ---
 
+
+<!--
+ Special Issue Description:
+
+This special issue highlights the development of novel data-driven methods, including statistics, machine learning, parameter estimation, and uncertainty quantification, and combinations thereof, towards modeling biological systems. These newly developed methods will tackle challenges that are commonly encountered when modeling real-world experimental, field, pre-clinical, or clinical data. Examples of such challenges include high dimensionality, computational complexity, observation or process error, model bias, and intra- or inter-individual heterogeneity. Contributions to this special issue require validation of new methods with real-world data or simulated data sets that contain features of real-world data that exemplify an outlined modeling challenge. Papers should include a discussion justifying why the developed method is novel and not an application of previously developed methods, as well as how the method may be broadly applicable across different areas of biology, including medical, ecological, genetics, and epidemiological applications.
+-->
+
 # Introduction {#intro}
 
-<!-- Your text comes here. Separate text sections with \cite{Mislevy06Cog}. -->
+Despite the complexity inherent in natural ecosystems, analytically tractable models have long played an essential role in their understanding and management.
+Ecological management may be understood as an optimal control problem - a manager must determine a sequence of actions (a "policy") to optimize some desired objective or combination of objectives (conservation goals, natural resource extraction, economic and social constraints.)
+
+
+
 
 
 # Figures brainstorm
