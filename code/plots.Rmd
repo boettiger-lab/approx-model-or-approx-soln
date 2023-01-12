@@ -6,14 +6,57 @@ library(tidyverse)
 ```
 
 ```{r}
-## reticulate::source_python("msy.py")
+ppo <- read_csv("../data/PPO.csv")
 ```
 
 ```{r}
-escapement <- read_csv("../data/escapement.csv")
-escapement |> 
+ppo |> 
+  mutate(pop = (sp1+1)/2, 
+         escapement = pop - action * pop) |> 
+  ggplot(aes(t, escapement, group=rep)) + geom_line() + ylim(0,1)
+```
+
+
+```{r}
+msy <- read_csv("../data/msy.csv")
+best <- msy |> 
   filter(t == max(t)) |> 
   group_by(action) |> summarise(reward = mean(reward)) |> 
   filter(reward == max(reward))
+best
+```
+```{r}
+msy_sim <- msy |>
+  filter(action == best$action) |> 
+  pivot_longer(c("sp1", "sp2", "sp3"), names_to = "species", values_to = "abundance")
+
+msy_sim |>
+  ggplot(aes(t, abundance, group = interaction(species, rep), col=species)) + 
+    geom_line(alpha=0.5)
+
 ```
 
+
+
+```{r}
+escapement <- read_csv("../data/escapement.csv.gz")
+best_e <- escapement |> 
+  filter(t == max(t)) |> 
+  group_by(action) |> summarise(reward = mean(reward)) |> 
+  filter(reward == max(reward))
+best_e
+```
+
+```{r}
+esc_sims <- escapement |>
+  filter(action == best_e$action) |> 
+  mutate(effort = pmax(1 - action / sp1, 0)) |>
+  pivot_longer(c("sp1", "sp2", "sp3"), names_to = "species", values_to = "abundance")
+
+esc_sims |>
+  ggplot(aes(t, abundance, group = interaction(species, rep), col=species)) + geom_line(alpha=0.2)
+
+esc_sims |> ggplot(aes(t,action, group=rep)) + geom_line(alpha=.2)
+
+esc_sims |> ggplot(aes(t,effort, group=rep)) + geom_line(alpha=.2)
+```

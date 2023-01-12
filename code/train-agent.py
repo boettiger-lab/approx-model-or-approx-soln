@@ -54,7 +54,7 @@ for rep in range(10):
 
 cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
 df = pd.DataFrame(df, columns = cols)
-df.to_csv("data/PPO.csv")
+df.to_csv("data/PPO.csv", index = False)
 
 from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
 df2 = (df
