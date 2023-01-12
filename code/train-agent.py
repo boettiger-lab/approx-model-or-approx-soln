@@ -2,6 +2,8 @@ from gym_fishing.envs import forageVVHcont
 from ray.rllib.agents.ppo import PPOTrainer
 from ray.tune import register_env
 import os
+import pandas as pd
+import numpy as np
 
 ## We could call env directly without this if only  our envs took a env_config dict argument
 register_env("fish-3sp", lambda config: forageVVHcont())
@@ -29,7 +31,6 @@ if not os.path.exists(checkpoint): # train only if no trained agent saved
       agent.train()
   checkpoint = agent.save("cache")
 
-
 # Restore saved agent:
 agent = PPOTrainer(config=config)
 agent.restore(checkpoint)
@@ -39,10 +40,7 @@ agent.restore(checkpoint)
 # Initialize saved copy of eval environment:
 env = agent.env_creator(agent.evaluation_config.env_config)
 
-import pandas as pd
-import numpy as np
 df = []
-
 for rep in range(10):
   episode_reward = 0
   observation = env.reset()
@@ -54,26 +52,4 @@ for rep in range(10):
 
 cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
 df = pd.DataFrame(df, columns = cols)
-df.to_csv("data/PPO.csv", index = False)
-
-from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
-df2 = (df
-       .melt(id_vars=["t", "action", "reward", "rep"])
-       .groupby(['t', "variable"], as_index=False)
-       .agg({'reward': 'mean',
-             'value': 'mean',
-             'action': 'mean'})) 
-
-
-(ggplot(df2, aes("t", "value", color="variable")) +
- geom_line())
-(ggplot(df2, aes("t", "action", color="variable")) + geom_line())
-(ggplot(df2, aes("t", "reward", color="variable")) + geom_line())
-
-(ggplot(df, aes("sp2", "sp3", color="action", size="sp1")) + geom_point())
-(ggplot(df, aes("sp1", "sp2", color="action", size="sp3")) + geom_point())
-(ggplot(df, aes("sp1", "sp3", color="action", size="sp2")) + geom_point())
-
-
-
-
+df.to_csv("data/PPO.csv.gz", index = False)

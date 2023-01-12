@@ -6,7 +6,7 @@ library(tidyverse)
 ```
 
 ```{r}
-ppo <- read_csv("../data/PPO.csv")
+ppo <- read_csv("../data/PPO.csv.gz")
 ```
 
 ```{r}
@@ -18,7 +18,7 @@ ppo |>
 
 
 ```{r}
-msy <- read_csv("../data/msy.csv")
+msy <- read_csv("../data/msy.csv.gz")
 best <- msy |> 
   filter(t == max(t)) |> 
   group_by(action) |> summarise(reward = mean(reward)) |> 

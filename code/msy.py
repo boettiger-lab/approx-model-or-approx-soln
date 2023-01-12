@@ -17,7 +17,7 @@ for action in actions:
 
 cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
 df = pd.DataFrame(df, columns = cols)
-df.to_csv("data/msy.csv", index=False)
+df.to_csv("data/msy.csv.gz", index=False)
 
 
 
