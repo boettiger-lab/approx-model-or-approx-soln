@@ -11,6 +11,7 @@ for action in actions:
   episode_reward = 0
   observation = env.reset()
   for rep in range(10):
+    _ = env.reset()
     for t in range(200):
       df.append(np.append([t, rep, action, episode_reward], observation))
       observation, reward, terminated, info = env.step(action)
