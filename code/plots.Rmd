@@ -1,21 +1,16 @@
 ---
+output: github_document
 ---
+
+This notebook generates plots from the `.csv` results produced by the corresponding python scripts.  We compare policies across constant effort (MSY-like policies), constant escapement, and the RL agent (PPO).
+
 
 ```{r setup}
 library(tidyverse)
 ```
 
-```{r}
-ppo <- read_csv("../data/PPO.csv.gz")
-```
 
-```{r}
-ppo |> 
-  mutate(pop = (sp1+1)/2, 
-         escapement = pop - action * pop) |> 
-  ggplot(aes(t, escapement, group=rep)) + geom_line() + ylim(0,1)
-```
-
+# Constant Effort
 
 ```{r}
 msy <- read_csv("../data/msy.csv.gz")
@@ -36,7 +31,7 @@ msy_sim |>
 
 ```
 
-
+# Constant Escapement
 
 ```{r}
 escapement <- read_csv("../data/escapement.csv.gz")
@@ -60,3 +55,40 @@ esc_sims |> ggplot(aes(t,action, group=rep)) + geom_line(alpha=.2)
 
 esc_sims |> ggplot(aes(t,effort, group=rep)) + geom_line(alpha=.2)
 ```
+
+
+# PPO Agent
+
+
+```{r}
+ppo <- read_csv("../data/PPO-long.csv.gz")
+```
+
+```{r}
+ppo |> ggplot(aes(t, sp1, group=rep)) + geom_line() 
+
+
+ppo |> ggplot(aes(t, reward, group=rep)) + geom_line() 
+
+ppo |> 
+  mutate(pop = (sp1+1), 
+         escapement = pop - action * pop) |> 
+  ggplot(aes(t, escapement, group=rep)) + geom_line() + ylim(0,1)
+
+ppo |> 
+  mutate(effort = pmax(1 - action / sp1, 0)) |>
+  pivot_longer(c("sp1", "sp2", "sp3"), names_to = "species", values_to = "abundance") |>
+  ggplot(aes(t, abundance, group = interaction(species, rep), col=species)) +
+  geom_line(alpha=0.8)
+
+```
+
+
+
+```{r}
+ppo |> filter(t == max(t)) |> pull(reward) |> mean()
+ppo |> filter(t == max(t)) |> pull(reward) |> sd()
+
+```
+
+

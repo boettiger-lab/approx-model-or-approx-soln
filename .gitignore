@@ -134,6 +134,6 @@ dmypy.json
 
 # cache
 venv/
-cache
+cache/
 *.gz
 
