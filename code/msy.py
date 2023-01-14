@@ -10,7 +10,7 @@ for action in actions:
   for rep in range(10):
     episode_reward = 0
     observation = env.reset()
-    for t in range(200):
+    for t in range(env.Tmax):
       df.append(np.append([t, rep, action, episode_reward], observation))
       observation, reward, terminated, info = env.step(action)
       episode_reward += reward

@@ -16,9 +16,9 @@ for action in actions:
   for rep in range(10):
     episode_reward = 0
     observation = env.reset()
-    for t in range(200):
+    for t in range(env.Tmax):
       df.append(np.append([t, rep, action, episode_reward], observation))
-      sp1_pop = (observation[0] + 1 ) / 2 # natural state-space
+      sp1_pop = (observation[0] + 1 ) # natural state-space
       effort = np.max([1 - action / sp1_pop, 0])
       observation, reward, terminated, info = env.step(effort)
       if terminated:
@@ -31,4 +31,12 @@ df.to_csv("data/escapement.csv.gz", index=False)
 
 
 
+## spot check max reward
+df2 = (df
+       .melt(id_vars=["t", "action", "reward", "rep"])
+       .groupby(['action', 't', "variable"], as_index=False)
+       .agg({'reward': 'mean',
+             'value': 'mean',
+             'action': 'mean'}))
+df2[df2.reward == np.max(df2.reward)]
 
