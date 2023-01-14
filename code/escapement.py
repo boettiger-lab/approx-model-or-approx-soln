@@ -30,13 +30,3 @@ df = pd.DataFrame(df, columns = cols)
 df.to_csv("data/escapement.csv.gz", index=False)
 
 
-
-## spot check max reward
-df2 = (df
-       .melt(id_vars=["t", "action", "reward", "rep"])
-       .groupby(['action', 't', "variable"], as_index=False)
-       .agg({'reward': 'mean',
-             'value': 'mean',
-             'action': 'mean'}))
-df2[df2.reward == np.max(df2.reward)]
-

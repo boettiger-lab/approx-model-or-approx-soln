@@ -39,7 +39,7 @@ msy_sim |>
 ```{r}
 escapement <- read_csv("../data/escapement.csv.gz")
 
-escapement |> 
+best_e <- escapement |> 
   group_by(action, rep) |>
   filter(t == max(t)) |> 
   group_by(action) |>
@@ -48,7 +48,7 @@ escapement |>
 
 
 esc_sims <- escapement |> 
-  filter(action == 0.58) |>
+  filter(action == best_e$action) |>
   rename(escapement = action) |>
   mutate(effort = pmax(1 - escapement / (sp1+1), 0))
 
