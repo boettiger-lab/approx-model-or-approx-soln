@@ -23,7 +23,7 @@ config = {
 }
 
 agent = PPOTrainer(config=config)
-iterations = 100
+iterations = 250
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
@@ -35,7 +35,7 @@ if not os.path.exists(checkpoint): # train only if no trained agent saved
 agent = PPOTrainer(config=config)
 agent.restore(checkpoint)
 
-# agent.evaluate() # built-in method to evaluate agent on eval env
+stats = agent.evaluate() # built-in method to evaluate agent on eval env
 
 # Initialize saved copy of eval environment:
 env = agent.env_creator(agent.evaluation_config.env_config)
@@ -50,7 +50,6 @@ for rep in range(10):
     observation, reward, terminated, info = env.step(action)
     episode_reward += reward
     
-episode_reward
 cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
 df = pd.DataFrame(df, columns = cols)
 df.to_csv("data/PPO" + str(iterations) + ".csv.gz", index = False)
@@ -58,33 +57,52 @@ df.to_csv("data/PPO" + str(iterations) + ".csv.gz", index = False)
 
 
 
-## Plots exploring agent action submanifolds
+## Plots ## 
 from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
+
+## Timeseries
+df2 = (df
+       .melt(id_vars=["t", "action", "reward", "rep"])
+       .groupby(['t', "variable"], as_index=False)
+       .agg({'reward': 'mean',
+             'value': 'mean',
+             'action': 'mean'})) 
+(ggplot(df2, aes("t", "value", color="variable")) +
+ geom_line())
+
+# overall average state of each sp across reps and time
+aves = (df
+       .melt(id_vars=["t", "action", "reward", "rep"])
+       .groupby(["variable"], as_index=False)
+       .agg({'reward': 'mean',
+             'value': 'mean',
+             'action': 'mean'})) 
+init = aves.value.values
 
 ## agent action vs H
 dd = []
-for p in np.linspace(-1, 1, 101):
-  observation = np.append(observation[range(2)], p)
-  dd.append(np.append(p, agent.compute_single_action(observation) ))
+for p in np.linspace(-1, 0, 101):
+  observation = [init[0]+.1, init[1], p]
+  action = agent.compute_single_action(observation)
+  dd.append([p, action[0]])
 
 df2 = pd.DataFrame(dd, columns = ['H', 'action'])
 (ggplot(df2, aes("H", "action")) +geom_line())
 
-
 dd = []
-observation = env.reset()
 for p in np.linspace(-1, 1, 101):
-  observation = np.array([observation[0], p, observation[2]])
-  dd.append(np.append(p, agent.compute_single_action(observation) ))
+  observation = [init[0]+.1, p, init[2]]
+  action = agent.compute_single_action(observation)
+  dd.append([p, action[0]])
 
 df2 = pd.DataFrame(dd, columns = ['V2', 'action'])
 (ggplot(df2, aes("V2", "action")) +geom_line())
 
 dd = []
-observation = env.reset()
 for p in np.linspace(-1, 1, 101):
-  observation = np.array([p, observation[1], observation[2]])
-  dd.append(np.append(p, agent.compute_single_action(observation) ))
+  observation = [p, init[1], init[2]]
+  action = agent.compute_single_action(observation)
+  dd.append([p, action[0]])
 
 df2 = pd.DataFrame(dd, columns = ['V1', 'action'])
 (ggplot(df2, aes("V1", "action")) +geom_line())
