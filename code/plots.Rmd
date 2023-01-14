@@ -15,11 +15,14 @@ library(tidyverse)
 ```{r}
 msy <- read_csv("../data/msy.csv.gz")
 best <- msy |> 
+  group_by(action, rep) |>
   filter(t == max(t)) |> 
-  group_by(action) |> summarise(reward = mean(reward)) |> 
+  group_by(action) |>
+  summarise(reward = mean(reward)) |> 
   filter(reward == max(reward))
 best
 ```
+
 ```{r}
 msy_sim <- msy |>
   filter(action == best$action) |> 
@@ -35,25 +38,50 @@ msy_sim |>
 
 ```{r}
 escapement <- read_csv("../data/escapement.csv.gz")
-best_e <- escapement |> 
+
+escapement |> 
+  group_by(action, rep) |>
   filter(t == max(t)) |> 
-  group_by(action) |> summarise(reward = mean(reward)) |> 
+  group_by(action) |>
+  summarise(reward = mean(reward)) |> 
   filter(reward == max(reward))
-best_e
+
+
+esc_sims <- escapement |> 
+  filter(action == 0.58) |>
+  rename(escapement = action) |>
+  mutate(effort = pmax(1 - escapement / (sp1+1), 0))
+
+esc_sims |> group_by(rep) |> filter(t == max(t)) |> pull(reward) |> mean()
 ```
 
 ```{r}
-esc_sims <- escapement |>
-  filter(action == best_e$action) |> 
-  mutate(effort = pmax(1 - action / sp1, 0)) |>
-  pivot_longer(c("sp1", "sp2", "sp3"), names_to = "species", values_to = "abundance")
+esc_sims |>
+  pivot_longer(c("sp1", "sp2", "sp3"),
+               names_to = "species", values_to = "abundance") |>
+    filter(rep < 3) |>
+  ggplot(aes(t, abundance, group = interaction(species, rep), col=species)) +
+  geom_line(alpha=0.5) + facet_wrap(~rep, ncol=1)
+```
+
+
+```{r}
+ppo |> 
+  mutate(escapement = (sp1+1) - action * (sp1+1) -1,
+         harvest = action - 1) |>
+  pivot_longer(c("sp1", "sp2", "sp3", "escapement", "harvest"),
+               names_to = "species", values_to = "abundance") |>
+  ggplot(aes(t, abundance, col=species, group=interaction(rep, species))) +
+  geom_line(alpha=0.6) + facet_wrap(~rep, ncol=1)
+
+
+
 
 esc_sims |>
-  ggplot(aes(t, abundance, group = interaction(species, rep), col=species)) + geom_line(alpha=0.2)
 
-esc_sims |> ggplot(aes(t,action, group=rep)) + geom_line(alpha=.2)
+esc_sims |> ggplot(aes(t,action, group=rep)) + geom_line(alpha=.6)
 
-esc_sims |> ggplot(aes(t,effort, group=rep)) + geom_line(alpha=.2)
+esc_sims |> ggplot(aes(t,effort, group=rep)) + geom_line(alpha=.6)
 ```
 
 
@@ -61,11 +89,12 @@ esc_sims |> ggplot(aes(t,effort, group=rep)) + geom_line(alpha=.2)
 
 
 ```{r}
-ppo <- read_csv("../data/PPO-long.csv.gz")
+ppo <- read_csv("../data/PPO250.csv.gz")
+
 ```
 
 ```{r}
-ppo |> ggplot(aes(t, sp1, group=rep)) + geom_line() 
+#ppo |> ggplot(aes(t, sp1, group=rep)) + geom_line() 
 
 
 ppo |> ggplot(aes(t, reward, group=rep)) + geom_line() 
@@ -73,20 +102,39 @@ ppo |> ggplot(aes(t, reward, group=rep)) + geom_line()
 ppo |> 
   mutate(pop = (sp1+1), 
          escapement = pop - action * pop) |> 
-  ggplot(aes(t, escapement, group=rep)) + geom_line() + ylim(0,1)
-
+  ggplot(aes(t)) +
+  #geom_line(aes(t, pop, group=rep), col="black",alpha=0.1) +
+  geom_line(aes(t, escapement, group=rep),  col="black",alpha=0.2)
+ 
 ppo |> 
-  mutate(effort = pmax(1 - action / sp1, 0)) |>
-  pivot_longer(c("sp1", "sp2", "sp3"), names_to = "species", values_to = "abundance") |>
-  ggplot(aes(t, abundance, group = interaction(species, rep), col=species)) +
-  geom_line(alpha=0.8)
+  mutate(escapement = (sp1+1) - action * (sp1+1) -1,
+         harvest = action - 1) |>
+  pivot_longer(c("sp1", "sp2", "sp3", "escapement", "harvest"),
+               names_to = "species", values_to = "abundance") |>
+  group_by(t,species) |>
+  summarise(abundance = mean(abundance)+1) |>
+  ggplot(aes(t, abundance, col=species)) +
+  geom_line(alpha=0.6)
 
+```
+
+
+```{r}
+ppo |> 
+  mutate(escapement = (sp1+1) - action * (sp1+1) -1,
+         harvest = action - 1) |>
+  pivot_longer(c("sp1", "sp2", "sp3", "escapement", "harvest"),
+               names_to = "species", values_to = "abundance") |>
+  filter(rep < 3) |>
+  ggplot(aes(t, abundance, col=species, group=interaction(rep, species))) +
+  geom_line(alpha=0.6) + facet_wrap(~rep, ncol=1)
 ```
 
 
 
 ```{r}
 ppo |> filter(t == max(t)) |> pull(reward) |> mean()
+
 ppo |> filter(t == max(t)) |> pull(reward) |> sd()
 
 ```
