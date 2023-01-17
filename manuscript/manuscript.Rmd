@@ -101,24 +101,106 @@ In general, the class of models that appear in this context are *first order fin
 For $n$ species, these models have the general form
 \begin{align}
   \label{eq:general model}
-  N_{t+1} - N_t = f(N_t) - h_t,
+  N_{t+1} - N_t = f(N_t) - h_t := \Delta N_t,
 \end{align}
-where $N(t) = (A_t,\ B_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
+where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
+
+## A single species model
 
 Most commonly, fisheries use 1-dimensional models, $n=1$.
 One such model appearing in a variety of ecological contexts is *logistic growth*, for which
 $$
-  f(N_t) = r N_t\big(1 - N_t / K \big) =: L(N_t).
+  f(X_t) = r X_t\big(1 - X_t / K \big) =: L(X_t;\ r, K).
 $$
 More relevant to our current work, is the following single-species model studied in \cite{may77},
 \begin{align}
   \label{eq:may}
-  N_{t+1} - N_t
-  = L(N_t) - \frac{\beta H N_t^2}{c^2 + N_t^2}.
+  \Delta X_t
+  = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t,
 \end{align}
-The model has five parameters: a constant population $H$ of a species which preys on $N$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
+where,
+\begin{align*}
+  F(X,H;\ \beta,c) := \frac{\beta H X^2}{c^2 + X^2}.
+\end{align*}
+The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
 
-Part of what makes eq. \eqref{eq:may} an interesting study case is the presence of a *tipping point*.
+Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (see Fig. \ref{tbd}).
+Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $V_1$ of the system, these two attractors separated by an unstable fixed point.
+At a certain threshold value of $H$, however, the top stable fixed point collides with the unstable fixed point and both are annihilated.
+For this value of $H$, and for higher values, only the lower fixed point remains.
+
+This structure implies two things.
+First, that a drift in $H$ could lead to catastrophic consequences, with the population $V_1$ plummeting to the lower fixed stable point.
+Second, that if the evolution of $V_1$ is *stochastic*, then, even at values of $H$ below the threshold point, the system runs a sizeable danger of tipping over towards the lower stable point.
+
+## A three species model
+
+Consider the following three species *generalization* of eq. \eqref{eq:may}:
+\begin{align}
+\label{eq:3d model}
+\begin{split}
+  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t,\\
+  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t,\\
+  \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
+\end{split}
+\end{align}
+The model is conceptualized in Fig. \ref{fig:tbd}.
+It contains three populations, the state at time $t$ is $(X_t, Y_t, Z_t)$. 
+Species $Z$ preys on both $X$ and $Y$, while the latter two compete for resources.
+There are ten parameters in this model: 
+The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and $Y$.
+A parameter $c_{XY}$ mediating a Lotka-Volterra competition between $X$ and $Y$.
+A maximum hunting intensity $\beta$ and half-maximum $c$ specifying how $Z$ forages on $X$ and $Y$.
+A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
+Finally, a death rate $d_Z$ and a parameter $f$ related to the birth rate of $Z$.
+
+This model generalizes eq. \eqref{eq:may} in the following sense:
+If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} becomes
+\begin{align*}
+  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, H;\ \beta, c) - h_t,\\
+  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, H;\ \beta, c),\\
+  Z_t &= H.
+\end{align*}
+The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving according to \eqref{eq:may}.
+
+As can be expected, the dynamics of eq. \eqref{eq:3d model} are significantly more complex than those of eq. \eqref{eq:may}.
+There are a variety of fixed points for the equations---around 7 or 8 for wide ranges of parameter values.
+Fig. \ref{fig:tbd} provides a rough idea of the fixed point structure by plotting the bifurcation diagram obtained from varying $D$ and fixing the other parameters.
+
+Throughout most of this paper we will fix the parameters of the model according to Table \ref{tab:tbd}.
+At these values, the fixed points of the model are:
+\begin{align*}
+  TBD
+\end{align*}
+The classification of fixed points for multi-dimensional systems is generally more complicated than in one dimension.
+A fixed point might be stable against perturbations in one direction, but unstable against perturbations along another.
+While a detailed classification of these fixed points is beyond the scope of this work, we point out that the point $(TBD)$ is stable against perturbations in all directions.
+We will thus use it as a starting point for our simulations.
+
+## Stochastic dynamics
+
+\textbf{Probably just merge on previous sections.}
+We consider a stochastic contribution to the system's dynamics.
+This way, eq. \eqref{eq:may} becomes
+\begin{align}
+  \label{eq:may stoch}
+  \Delta X_t
+  = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t + \eta_t,
+\end{align}
+where $\{\eta_t\}_t$ are independent Gaussian variables with zero mean.
+The variance $\sigma^2$ of $\eta_t$ is an additional parameter of the model.
+
+Similarly, eq. \eqref{eq:3d model} becomes
+\begin{align*}
+  \label{eq:3d model stoch}
+  \begin{split}
+    \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t + \eta_{X,t},\\
+    \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{Y,t},\\
+    \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
+\end{split}
+\end{align*}
+
+
 
 
 
@@ -294,6 +376,15 @@ This way, it is plausible that model-free RL controls outperform currently used 
   
   
 # Results
+
+We trained a DRL agent to obtain a candidate policy
+\begin{align*}
+  \pi: (X_t,Y_t,Z_t) \mapsto h_t
+\end{align*}
+for eq. \eqref{eq:3d model}.
+The agent could fully and precisely observe the state of the system at each time step and decide on its harvest based on this information. 
+
+
 
 ## Acknowledgements
 
