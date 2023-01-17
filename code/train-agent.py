@@ -17,7 +17,7 @@ agent = config.build(env="threeFishing-v2")
 
 
 iterations = 250
-checkpoint = ("cache/checkpoint_000{}".format(iterations))
+checkpoint = ("ppo/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
   for _ in range(iterations):
@@ -42,6 +42,8 @@ for rep in range(30):
     df.append(np.append([t, rep, action[0], episode_reward], observation))
     observation, reward, terminated, info = env.step(action)
     episode_reward += reward
+    if terminated:
+      break
     
 cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
 df = pd.DataFrame(df, columns = cols)
