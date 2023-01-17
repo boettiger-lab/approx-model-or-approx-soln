@@ -101,7 +101,7 @@ In general, the class of models that appear in this context are *first order fin
 For $n$ species, these models have the general form
 \begin{align}
   \label{eq:general model}
-  N_{t+1} - N_t = f(N_t) - h_t := N_t,
+  N_{t+1} - N_t = f(N_t) - h_t := \Delta N_t,
 \end{align}
 where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
 
@@ -115,7 +115,7 @@ $$
 More relevant to our current work, is the following single-species model studied in \cite{may77},
 \begin{align}
   \label{eq:may}
-  X_{t+1} - X_t
+  \Delta X_t
   = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t,
 \end{align}
 where,
@@ -176,6 +176,32 @@ The classification of fixed points for multi-dimensional systems is generally mo
 A fixed point might be stable against perturbations in one direction, but unstable against perturbations along another.
 While a detailed classification of these fixed points is beyond the scope of this work, we point out that the point $(TBD)$ is stable against perturbations in all directions.
 We will thus use it as a starting point for our simulations.
+
+## Stochastic dynamics
+
+\textbf{Probably just merge on previous sections.}
+We consider a stochastic contribution to the system's dynamics.
+This way, eq. \eqref{eq:may} becomes
+\begin{align}
+  \label{eq:may stoch}
+  \Delta X_t
+  = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t + \eta_t,
+\end{align}
+where $\{\eta_t\}_t$ are independent Gaussian variables with zero mean.
+The variance $\sigma^2$ of $\eta_t$ is an additional parameter of the model.
+
+Similarly, eq. \eqref{eq:3d model} becomes
+\begin{align*}
+  \label{eq:3d model stoch}
+  \begin{split}
+    \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t + \eta_{X,t},\\
+    \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{Y,t},\\
+    \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
+\end{split}
+\end{align*}
+
+
+
 
 
 # Fishery management approaches
@@ -350,6 +376,15 @@ This way, it is plausible that model-free RL controls outperform currently used 
   
   
 # Results
+
+We trained a DRL agent to obtain a candidate policy
+\begin{align*}
+  \pi: (X_t,Y_t,Z_t) \mapsto h_t
+\end{align*}
+for eq. \eqref{eq:3d model}.
+The agent could fully and precisely observe the state of the system at each time step and decide on its harvest based on this information. 
+
+
 
 ## Acknowledgements
 
