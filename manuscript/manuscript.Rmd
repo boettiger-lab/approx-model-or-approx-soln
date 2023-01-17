@@ -81,31 +81,32 @@ In general, the class of models that appear in this context are *first order fin
 For $n$ species, these models have the general form
 \begin{align}
   \label{eq:general model}
-  N_{t+1} - N_t = f(N_t) - h_t,
+  N_{t+1} - N_t = f(N_t) - h_t := N_t,
 \end{align}
-where $N(t) = (A_t,\ B_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
+where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
 
 ## A single species model
 
 Most commonly, fisheries use 1-dimensional models, $n=1$.
 One such model appearing in a variety of ecological contexts is *logistic growth*, for which
 $$
-  f(N_t) = r N_t\big(1 - N_t / K \big) =: L(N_t).
+  f(N_t) = r N_t\big(1 - N_t / K \big) =: L(N_t;\ r, K).
 $$
 More relevant to our current work, is the following single-species model studied in \cite{may77},
 \begin{align}
   \label{eq:may}
   N_{t+1} - N_t
-  = L(N_t) - \frac{\beta H N_t^2}{c^2 + N_t^2}.
+  = L(N_t) - F(N_t, H; \beta,c),
 \end{align}
-The model has five parameters: a constant population $H$ of a species which preys on $N$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
-When making statements oblivious to the values of $\beta$ and $c$, or when these values are clear from context, we will denote
+where,
 \begin{align*}
-  F(N,H) := \frac{\beta H N^2}{c^2 + N^2}.
+  F(N,H;\ \beta,c) := \frac{\beta H N^2}{c^2 + N^2}.
 \end{align*}
+The model has five parameters: a constant population $H$ of a species which preys on $N$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
 
 
-Part of what makes eq. \eqref{eq:may} an interesting study case is the presence of a *tipping point* (see Fig. \ref{tbd}).
+
+Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (see Fig. \ref{tbd}).
 Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $V_1$ of the system, these two attractors separated by an unstable fixed point.
 At a certain threshold value of $H$, however, the top stable fixed point collides with the unstable fixed point and both are annihilated.
 For this value of $H$, and for higher values, only the lower fixed point remains.
@@ -119,7 +120,7 @@ Second, that if the evolution of $V_1$ is *stochastic*, then, even at values of 
 Consider the following three species *generalization* of eq. \eqref{eq:may}:
 \begin{align}
   \label{eq:may 3d}
-  tbd
+  \Delta X_t = L(X_t; r_X, K_X)
 \end{align}
 
 
