@@ -119,8 +119,11 @@ Second, that if the evolution of $V_1$ is *stochastic*, then, even at values of 
 
 Consider the following three species *generalization* of eq. \eqref{eq:may}:
 \begin{align}
-  \label{eq:may 3d}
-  \Delta X_t = L(X_t; r_X, K_X)
+\begin{split}
+  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, H_t;\ \beta, c) - c_{XY}X_tY_t - h_t,\\
+  \Delta Y_t &= L(Y_t;\ r_X, K_X) - D F(Y_t, H_t;\ \beta, c) - c_{XY}X_tY_t,\\
+  \Delta Z_t &= (fX_t + fDY_t - d_Z)Z_t
+\end{split}
 \end{align}
 
 
