@@ -144,7 +144,18 @@ If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} become
 The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving according to \eqref{eq:may}.
 
 As can be expected, the dynamics of eq. \eqref{eq:3d model} are significantly more complex than those of eq. \eqref{eq:may}.
+There are a variety of fixed points for the equations---around 7 or 8 for wide ranges of parameter values.
+Fig. \ref{fig:tbd} provides a rough idea of the fixed point structure by plotting the bifurcation diagram obtained from varying $D$ and fixing the other parameters.
 
+Throughout most of this paper we will fix the parameters of the model according to Table \ref{tab:tbd}.
+At these values, the fixed points of the model are:
+\begin{align*}
+  TBD
+\end{align*}
+The classification of fixed points for multi-dimensional systems is generally more complicated than in one dimension.
+A fixed point might be stable against perturbations in one direction, but unstable against perturbations along another.
+While a detailed classification of these fixed points is beyond the scope of this work, we point out that the point $(TBD)$ is stable against perturbations in all directions.
+We will thus use it as a starting point for our simulations.
 
 
 # Fishery management approaches
