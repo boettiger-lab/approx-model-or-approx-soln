@@ -13,8 +13,8 @@ best_reward <- function(df) {
   group_by(action, rep) |>
   filter(t == max(t)) |> 
   group_by(action) |>
-  summarise(reward = mean(reward)) |> 
-  filter(reward == max(reward))
+  summarise(mean_reward = mean(reward), sd = sd(reward)) |> 
+  filter(mean_reward == max(mean_reward))
 }
 ```
 
@@ -102,6 +102,24 @@ ppo <- read_csv("../data/PPO250.csv.gz")
 ```
 
 ```{r}
+overall_ppo <- 
+ppo |> 
+  group_by(rep) |>
+  filter(t==max(t)) |> ungroup() |>
+  filter(reward > 0) |>
+  summarise(reward = mean(reward),
+            t = mean(t),
+            effort = mean(action)) |>
+  mutate(policy="ppo")
+overall_ppo
+
+ppo |> 
+  group_by(rep) |>
+  filter(t==max(t)) |> 
+  ggplot(aes(rep, reward)) + geom_col()
+```
+
+```{r}
 ppo_sims <- ppo |> 
   mutate(escapement = (sp1+1) - action * (sp1+1),
          effort = action) |>
@@ -110,7 +128,7 @@ ppo_sims <- ppo |>
   mutate(abundance = abundance + 1)
 
 ppo_sims |>
-  filter(rep < 4) |>
+  filter(rep > 20, rep < 25) |>
   ggplot(aes(t, abundance, col=species)) +
   geom_line(alpha=0.6) + facet_wrap(~rep)
 ```
