@@ -90,21 +90,19 @@ where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of population
 Most commonly, fisheries use 1-dimensional models, $n=1$.
 One such model appearing in a variety of ecological contexts is *logistic growth*, for which
 $$
-  f(N_t) = r N_t\big(1 - N_t / K \big) =: L(N_t;\ r, K).
+  f(X_t) = r X_t\big(1 - X_t / K \big) =: L(X_t;\ r, K).
 $$
 More relevant to our current work, is the following single-species model studied in \cite{may77},
 \begin{align}
   \label{eq:may}
-  N_{t+1} - N_t
-  = L(N_t) - F(N_t, H; \beta,c),
+  X_{t+1} - X_t
+  = L(X_t;\ r, K) - F(X_t, H; \beta,c),
 \end{align}
 where,
 \begin{align*}
-  F(N,H;\ \beta,c) := \frac{\beta H N^2}{c^2 + N^2}.
+  F(X,H;\ \beta,c) := \frac{\beta H X^2}{c^2 + X^2}.
 \end{align*}
-The model has five parameters: a constant population $H$ of a species which preys on $N$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
-
-
+The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
 
 Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (see Fig. \ref{tbd}).
 Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $V_1$ of the system, these two attractors separated by an unstable fixed point.
@@ -119,12 +117,32 @@ Second, that if the evolution of $V_1$ is *stochastic*, then, even at values of 
 
 Consider the following three species *generalization* of eq. \eqref{eq:may}:
 \begin{align}
+\label{eq:3d model}
 \begin{split}
-  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, H_t;\ \beta, c) - c_{XY}X_tY_t - h_t,\\
-  \Delta Y_t &= L(Y_t;\ r_X, K_X) - D F(Y_t, H_t;\ \beta, c) - c_{XY}X_tY_t,\\
-  \Delta Z_t &= (fX_t + fDY_t - d_Z)Z_t
+  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t,\\
+  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t,\\
+  \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
 \end{split}
 \end{align}
+The model is conceptualized in Fig. \ref{fig:tbd}.
+It contains three populations, the state at time $t$ is $(X_t, Y_t, Z_t)$. 
+Species $Z$ preys on both $X$ and $Y$, while the latter two compete for resources.
+There are ten parameters in this model: 
+The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and $Y$.
+A parameter $c_{XY}$ mediating a Lotka-Volterra competition between $X$ and $Y$.
+A maximum hunting intensity $\beta$ and half-maximum $c$ specifying how $Z$ forages on $X$ and $Y$.
+A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
+Finally, a death rate $d_Z$ and a parameter $f$ related to the birth rate of $Z$.
+
+This model generalizes eq. \eqref{eq:may} in the following sense:
+If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} becomes
+\begin{align*}
+  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, H;\ \beta, c) - h_t,\\
+  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, H;\ \beta, c),\\
+  Z_t &= H.
+\end{align*}
+The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving according to \eqref{eq:may}.
+
 
 
 
