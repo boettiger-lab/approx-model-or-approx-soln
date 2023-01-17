@@ -1,5 +1,5 @@
 from gym_fishing.envs import forageVVHcont
-from ray.rllib.agents.ppo import PPOTrainer
+from ray.rllib.algorithms import ppo
 from ray.tune import register_env
 import os
 import pandas as pd
@@ -8,31 +8,24 @@ import numpy as np
 ## We could call env directly without this if only  our envs took a env_config dict argument
 register_env("threeFishing-v2", lambda config: forageVVHcont())
 
-# Configure the algorithm.
-config = {
-    "env": "threeFishing-v2",
-    "num_workers": 1,
-    "num_envs_per_worker": 20,
-    "resources": {
-      "num_cpus_per_worker": 12,
-    },
-    "framework": "torch",
-    "num_gpus": 1,
-    "log_level": "ERROR",
-    "create_env_on_local_worker": True  # needed to restore env from checkpoint
-}
+config = ppo.PPOConfig()
+config.num_envs_per_worker=20
+config = config.resources(num_gpus=1)
+config.framework_str="torch"
+config.create_env_on_local_worker = True
+agent = config.build(env="threeFishing-v2")
 
-agent = PPOTrainer(config=config)
+
 iterations = 250
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
   for _ in range(iterations):
       agent.train()
-  checkpoint = agent.save("cache")
+  checkpoint = agent.save("ppo")
 
-# Restore saved agent:
-agent = PPOTrainer(config=config)
+#agent_restored = config.build(env="threeFishing-v2")
+#agent_restored.evaluate()
 agent.restore(checkpoint)
 
 stats = agent.evaluate() # built-in method to evaluate agent on eval env
@@ -41,10 +34,10 @@ stats = agent.evaluate() # built-in method to evaluate agent on eval env
 env = agent.env_creator(agent.evaluation_config.env_config)
 
 df = []
-for rep in range(10):
+for rep in range(30):
   episode_reward = 0
   observation = env.reset()
-  for t in range(200):
+  for t in range(env.Tmax):
     action = agent.compute_single_action(observation)
     df.append(np.append([t, rep, action[0], episode_reward], observation))
     observation, reward, terminated, info = env.step(action)
