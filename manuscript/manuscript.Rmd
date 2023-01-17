@@ -96,7 +96,7 @@ More relevant to our current work, is the following single-species model studied
 \begin{align}
   \label{eq:may}
   X_{t+1} - X_t
-  = L(X_t;\ r, K) - F(X_t, H; \beta,c),
+  = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t,
 \end{align}
 where,
 \begin{align*}
@@ -143,6 +143,7 @@ If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} become
 \end{align*}
 The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving according to \eqref{eq:may}.
 
+As can be expected, the dynamics of eq. \eqref{eq:3d model} are significantly more complex than those of eq. \eqref{eq:may}.
 
 
 
