@@ -24,7 +24,7 @@ google-pasta==0.2.0
 GPUtil==1.4.0
 grpcio==1.51.1
 gym==0.26.2
--e git+https://github.com/boettiger-lab/gym_fishing@53288efb928b99010d92f89f63e3a1e39e2261fd#egg=gym_fishing
+-e git+https://github.com/boettiger-lab/gym_fishing@b1f1fadbe450fd77765328a133f543adfce7ad2e#egg=gym_fishing
 gym-notices==0.0.8
 gymnasium==0.27.0
 gymnasium-notices==0.0.1
@@ -39,7 +39,7 @@ libclang==14.0.6
 lz4==4.3.2
 Markdown==3.4.1
 MarkupSafe==2.1.1
-matplotlib==3.6.2
+matplotlib==3.6.3
 mizani==0.8.1
 msgpack==1.0.4
 networkx==2.8.8

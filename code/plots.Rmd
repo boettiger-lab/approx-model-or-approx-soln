@@ -7,6 +7,15 @@ This notebook generates plots from the `.csv` results produced by the correspond
 
 ```{r setup}
 library(tidyverse)
+
+best_reward <- function(df) {
+  df |> 
+  group_by(action, rep) |>
+  filter(t == max(t)) |> 
+  group_by(action) |>
+  summarise(reward = mean(reward)) |> 
+  filter(reward == max(reward))
+}
 ```
 
 
@@ -14,76 +23,75 @@ library(tidyverse)
 
 ```{r}
 msy <- read_csv("../data/msy.csv.gz")
-best <- msy |> 
-  group_by(action, rep) |>
-  filter(t == max(t)) |> 
-  group_by(action) |>
-  summarise(reward = mean(reward)) |> 
-  filter(reward == max(reward))
+best <- best_reward(msy)
 best
 ```
 
 ```{r}
-msy_sim <- msy |>
-  filter(action == best$action) |> 
-  pivot_longer(c("sp1", "sp2", "sp3"), names_to = "species", values_to = "abundance")
-
-msy_sim |>
-  ggplot(aes(t, abundance, group = interaction(species, rep), col=species)) + 
-    geom_line(alpha=0.5)
-
-```
-
-# Constant Escapement
-
-```{r}
-escapement <- read_csv("../data/escapement.csv.gz")
-
-best_e <- escapement |> 
+rewards <- msy |>
   group_by(action, rep) |>
   filter(t == max(t)) |> 
   group_by(action) |>
-  summarise(reward = mean(reward)) |> 
-  filter(reward == max(reward))
+  summarise(mean_reward = mean(reward),
+            sd = sd(reward)) 
 
-
-esc_sims <- escapement |> 
-  filter(action == best_e$action) |>
-  rename(escapement = action) |>
-  mutate(effort = pmax(1 - escapement / (sp1+1), 0))
-
-esc_sims |> group_by(rep) |> filter(t == max(t)) |> pull(reward) |> mean()
+rewards |>
+  filter(action < 0.1) |>
+  ggplot(aes(action, mean_reward, 
+             ymin = mean_reward - 2*sd,
+             ymax=mean_reward+2*sd)) +
+  geom_point() + geom_ribbon(alpha=0.4)
 ```
 
+
 ```{r}
-esc_sims |>
+msy_sim <- msy |>
+  filter(action == best$action) |> 
   pivot_longer(c("sp1", "sp2", "sp3"),
                names_to = "species", values_to = "abundance") |>
-    filter(rep < 3) |>
-  ggplot(aes(t, abundance, group = interaction(species, rep), col=species)) +
-  geom_line(alpha=0.5) + facet_wrap(~rep, ncol=1)
-```
+  mutate(abundance = abundance + 1) # natural units
 
+msy_sim |>
+  filter(rep < 4) |>
+  ggplot(aes(t, abundance,  col=species)) + 
+    geom_line() + facet_wrap(~rep)
+
+msy_sim |> 
+  filter(rep < 30, species == "sp1") |>
+  ggplot(aes(t, abundance, group = interaction(rep,species),  col=species)) + 
+    geom_line(alpha=0.5) 
+
+
+```
+```{r}
+msy_sim |> 
+  group_by(rep) |>
+  filter(t==max(t), species=="sp1") |>
+  ggplot(aes(rep, reward)) + geom_col()
+```
+# TAC
+
+80% of  MSY
 
 ```{r}
-ppo |> 
-  mutate(escapement = (sp1+1) - action * (sp1+1) -1,
-         harvest = action - 1) |>
-  pivot_longer(c("sp1", "sp2", "sp3", "escapement", "harvest"),
-               names_to = "species", values_to = "abundance") |>
-  ggplot(aes(t, abundance, col=species, group=interaction(rep, species))) +
-  geom_line(alpha=0.6) + facet_wrap(~rep, ncol=1)
+actions <- unique(msy$action)
+i <- which.min(abs(actions - best$action* 0.8))
+tac_sim <- msy |> 
+  filter(action == actions[[i]]) |>
+  pivot_longer(c("sp1", "sp2", "sp3"),
+               names_to = "species", values_to = "abundance")
+tac_sim |>
+  filter(rep < 4) |>
+  ggplot(aes(t, abundance,  col=species)) + 
+    geom_line() + facet_wrap(~rep)
 
-
-
-
-esc_sims |>
-
-esc_sims |> ggplot(aes(t,action, group=rep)) + geom_line(alpha=.6)
-
-esc_sims |> ggplot(aes(t,effort, group=rep)) + geom_line(alpha=.6)
 ```
-
+```{r}
+tac_sim |> 
+  group_by(rep) |>
+  filter(t==max(t), species=="sp1") |>
+  ggplot(aes(rep, reward)) + geom_col()
+```
 
 # PPO Agent
 
@@ -94,49 +102,74 @@ ppo <- read_csv("../data/PPO250.csv.gz")
 ```
 
 ```{r}
-#ppo |> ggplot(aes(t, sp1, group=rep)) + geom_line() 
-
-
-ppo |> ggplot(aes(t, reward, group=rep)) + geom_line() 
-
-ppo |> 
-  mutate(pop = (sp1+1), 
-         escapement = pop - action * pop) |> 
-  ggplot(aes(t)) +
-  #geom_line(aes(t, pop, group=rep), col="black",alpha=0.1) +
-  geom_line(aes(t, escapement, group=rep),  col="black",alpha=0.2)
- 
-ppo |> 
-  mutate(escapement = (sp1+1) - action * (sp1+1) -1,
-         harvest = action - 1) |>
-  pivot_longer(c("sp1", "sp2", "sp3", "escapement", "harvest"),
+ppo_sims <- ppo |> 
+  mutate(escapement = (sp1+1) - action * (sp1+1),
+         effort = action) |>
+  pivot_longer(c("sp1", "sp2", "sp3"),
                names_to = "species", values_to = "abundance") |>
-  group_by(t,species) |>
-  summarise(abundance = mean(abundance)+1) |>
+  mutate(abundance = abundance + 1)
+
+ppo_sims |>
+  filter(rep < 4) |>
   ggplot(aes(t, abundance, col=species)) +
-  geom_line(alpha=0.6)
-
+  geom_line(alpha=0.6) + facet_wrap(~rep)
 ```
 
 
 ```{r}
-ppo |> 
-  mutate(escapement = (sp1+1) - action * (sp1+1) -1,
-         harvest = action - 1) |>
-  pivot_longer(c("sp1", "sp2", "sp3", "escapement", "harvest"),
+ppo_sims |>
+  filter(species == "sp1") |>
+  group_by(t) |>
+  summarise(abundance = mean(abundance), 
+            effort = mean(effort),
+            escapement = mean(escapement)) |> 
+  pivot_longer(-t, names_to = "metric", values_to = "population") |>
+  ggplot(aes(t, population, col=metric)) + geom_line()
+```
+
+
+
+
+
+
+# Constant Escapement
+
+```{r}
+escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
+
+## Determine which level of constant escapement gives highest net reward
+best_e <- best_reward(escapement)
+best_e
+```
+
+```{r}
+esc_sims <- escapement |> 
+  filter(action == best_e$action) |>
+  pivot_longer(c("sp1", "sp2", "sp3"),
                names_to = "species", values_to = "abundance") |>
-  filter(rep < 3) |>
-  ggplot(aes(t, abundance, col=species, group=interaction(rep, species))) +
-  geom_line(alpha=0.6) + facet_wrap(~rep, ncol=1)
-```
+  mutate(abundance = abundance + 1) |>
+  rename(escapement = action)
 
+esc_sims |>
+  filter(rep < 4) |>
+  ggplot(aes(t, abundance, col=species)) + geom_line() +
+  geom_line(aes(t, escapement), col="grey50") +
+  facet_wrap(~rep)
+```
 
 
 ```{r}
-ppo |> filter(t == max(t)) |> pull(reward) |> mean()
+rewards <- escapement |>
+  group_by(action, rep) |>
+  filter(t == max(t)) |> 
+  group_by(action) |>
+  summarise(mean_reward = mean(reward),
+            sd = sd(reward)) 
 
-ppo |> filter(t == max(t)) |> pull(reward) |> sd()
-
+rewards |>
+  ggplot(aes(action, mean_reward, 
+             ymin = mean_reward - 2*sd,
+             ymax=mean_reward+2*sd)) +
+  geom_point() + geom_ribbon(alpha=0.4)
 ```
-
 

@@ -3,12 +3,11 @@ import gym
 import pandas as pd
 import numpy as np
 import ray
-from timebudget import timebudget
 
 @ray.remote
 def simulate(env, action):
   df = []
-  for rep in range(10):
+  for rep in range(50):
     episode_reward = 0
     observation = env.reset()
     for t in range(env.Tmax):
@@ -21,17 +20,12 @@ def simulate(env, action):
         break
   return(df)
 
-
-# parallelize over actions
-@timebudget
-def parallel(operation, env, input):
-  df = ray.get([operation.remote(env, i) for i in input])
-  return(df)
-
-
 env = gym.make("threeFishing-v2")
 actions = np.linspace(0,1,101)
-df = parallel(simulate, env, actions)
+
+# define parllel loop and execute
+parallel = [simulate.remote(env, i) for i in actions]
+df = ray.get(parallel)
 
 cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
 df2 = pd.DataFrame(np.vstack(df), columns = cols)
