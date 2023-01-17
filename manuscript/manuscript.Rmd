@@ -383,6 +383,9 @@ We trained a DRL agent to obtain a candidate policy
 \end{align*}
 for eq. \eqref{eq:3d model}.
 The agent could fully and precisely observe the state of the system at each time step and decide on its harvest based on this information. 
+The agent was trained using the PPO algorithm, using a neural network with two hidden layers of 64 neurons to express $\pi$.
+Details of the training process may be found in App. \ref{app:tbd}.
+Our code is available at TBD.
 
 
 
