@@ -411,6 +411,12 @@ The agent was trained using the PPO algorithm, using a neural network with two h
 Details of the training process may be found in App. \ref{app:tbd}.
 Our code is available at TBD.
 
+Rewards were defined to be a compound of two contributions.
+The first is economical: if at time $t$ a harvest of $h_t$ is secured, then the agents total reward is increased by $h_t$.
+The second regards sustainability: if an extinction happens at time step $t$, then a penalty of $-50/t$ is incurred by the agent.
+The choice of the constant $50$ in this rule was rather arbitrary: we set it to be a fourth of the maximal episode length ($200$ time steps), so as to encourage the agent to find policies that do not lead to extinctions below the time scale of around 100 time steps.
+\textbf{Too long of a ‘‘sorry’’ message?}
+
 We compare the performance of this agent to the performance of MSY and of an 80% TAC. 
 
 Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than both MSY and TAC.
@@ -421,7 +427,9 @@ Figure \ref{fig:tbd} exemplifies this point by comparing the harvest effort and 
 
 It is well known that following MSY policies can lead to over-fishing.
 Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
-Figure TBD-A shows the mean episode length for 
+Figure TBD-A summarizes episode length distribution for MSY, TAC and DRL.
+While the DRL-derived policy does not lead to extinctions, both MSY and TAC do so, and thus their episode mean length is lower than the maximal episode length (in our case set at 200 years).
+This difference is reflected on the profits earned by the agent, as shown in Fig. TBD-B.
 
 
 ## Acknowledgements
