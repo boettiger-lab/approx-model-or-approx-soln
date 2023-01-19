@@ -12,9 +12,11 @@ authors:
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
 - name: Melissa Chapman
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
+- name: Abigail Keller
+  address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
 - name: Carl Boettiger
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
-  email: cboettig@berkele.edu 
+  email: cboettig@berkeley.edu 
 
 
 keywords:
@@ -32,7 +34,7 @@ MSC:
 - MSC code 2
 
 abstract: |
-  Write
+  Write something here
   
 bibliography: bibliography.bib
 #biblio-style: spphys
@@ -83,38 +85,41 @@ This illustrates the promise of combining complex, realistic simulations with em
 
 Ecological management may be understood as an optimal control problem - a manager must determine a sequence of actions (a "policy") to optimize some desired objective(s) and constraints (e.g. conservation goals, natural resource extraction, economic and social constraints.)
 Despite the complexity inherent in natural ecosystems, analytically tractable models have long played an essential role in their understanding and management.
+...
+
 
 <!-- Why fisheries-focused examples -->
-Global fisheries management has long been a crucible for both the development of theory and best practices in actual management for many reasons. Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to overfishing [cite, cite]. 
+Global fisheries management has long been a crucible for both the development of theory and best practices in actual management for many reasons. Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to overfishing [@Worm2006, @Costello2016]. 
 Because of this importance, fisheries also represent some of the longest and best studied timeseries of population dynamics available to ecologists, as well as a correspondingly rich area for the development of theory and practice.
-Methods developed in the study and management of fisheries are frequently applied to other areas of ecological management, from concepts such as maximum sustainable yield [], optimal control under observation uncertainty [], to adaptive management [], management strategy evaluation [], to the studies of conservation policy and international negotiations [].
+Methods developed in the study and management of fisheries are frequently applied to other areas of ecological management, from concepts such as maximum sustainable yield [], optimal control under observation uncertainty [@Memarzadeh2019], to adaptive management [@Walters], management strategy evaluation [@Punt], to the studies of conservation policy and international negotiations [@].
 
-<!-- Real-world application-->
+<!-- A sweeping summary of fisheries decision theory, don't bite me-->
 To understand the importance of a potential application of novel data-driven methods to the real world, it is most instructive to have a clearer picture of how models are currently used to inform ecological management in fisheries.
 In any issue as large and contentious as fisheries management, it may be far more difficult to provide a generalization  about how things actually work than to make sweeping recommendations about how it ought to.
 All the same, it is our firm belief that any researcher seeking to do the latter should first attempt to understand the former, so we beg the forbearance of any specialists in the practice as we seek to provide a concise overview of fisheries management today.
 Here, we focus specifically on practices in data rich, 'well-managed' fisheries, which, despite some issues, may be among the best examples of ecological management at continental scale that is largely driven by scientific processes, models and data. 
 
-
-Despite such rich development, fundamental concepts and approaches widely considered best practices remain rooted in the analysis of analytically tractable one-dimensional models.
+<!-- Fisheries population models are rich but decisions aren't, mostly constant mortality -->
+While fisheries stock assessment models are quite rich, the choice of possible strategies remains motivated by intution from much simpler, analytically tractable one-dimensional models.
 This fact is not always obvious at cursory inspection, and can be met with cynicism even among professional fisheries managers -- after all, typical stock assessment models have over 100 parameters (e.g. see the stock assessments referenced from in @RAMLegacy) and best practices such as management strategy evaluation (MSE) evaluate and select potential policies by comparing across large and diverse simulations [e.g. @Punt2016].
 However, the space of policies considered under such approaches is necessarily far smaller than the set of all possible action sequences.
 Instead, fisheries management approaches such as MSE rely on theory based on more tractable models to restrict the search space of possible policies.  
-Specifically, most fisheries policies are framed in terms of a *constant mortality* policy, (sometimes a simple piece-wise linear function, i.e. a single linear segment, is introduced as a precaution a very low stock sizes), where fishing 'mortality' is defined as the ratio of harvest (catch) to stock size.
-(This definition sidesteps much complexity -- fisheries regulation is typically implemented in terms of catch quotas -- i.e. limit to metric tons of a given species that can be harvested in a given season. Thus to determine the quota, fisheries scientists must fist estimate the current biomass, and then multiply by this dimensionless ratio to determine the corresponding harvest quota, $H = F x_t$.  Thus the process of measuring the stock size, a 'stock assessment', gives rise to the harvest quota).
+Specifically, most fisheries policies are framed in terms of a *constant mortality* policy, (sometimes a simple piece-wise linear function, i.e. a single linear segment, is introduced as a precaution a very low stock sizes), where fishing 'mortality' is defined as the ratio of harvest (catch) to stock size, $F = H_t/x_t$.
+
+The intuition for a constant mortality strategy is simple and well established 
+
 Constant mortality policies have a strong basis in theory as well as practical justifications.
 
-The best known such policy is that of "Maximum Sustainable Yield" (MSY), i.e. the largest possible constant mortality that can be sustained indefinitely without depleting the stock.
-MSY remains the basis of much fisheries management, including international treaties such as the 1982 UN Law of the Sea [@UNCLOS1982].
-MSY in 1D models [@Schaefer1954]
-critique and actual practice, ABC and TAC, (but go lighter on acronyms)
 
+<!-- In contrast to constant mortality, the possible decision space is huge-->
 The management of any ecological system can be framed in terms of a Sequential Decision Process - 
 the manager observes the ecosystem state ($x_t$) and decides on action ($a_t$) to take (including potentially no action), potentially receiving any costs or benefits associated with that action and and state (reward $r_t$  $r_t = U(x_t,a_t)$),
 while the system evolves into a new state in response $x_{t+1} = f(x_t, a_t)$. When the probability of the future state can be determined by the current state and action, we say the system is Markovian and the process a Markov Decision Process (MDP).
 As in a game of chess, the space of possible sequences of actions a manager might choose over any realization of the Markov process is enormous.
-When the action and state space are discrete and sufficiently small, computational approaches such as dynamic programming may be used to exhaustively search
+When the action and state space are discrete and sufficiently small, computational approaches such as dynamic programming may be used to guarantee an exhaustive search for a single optimal policy.
+Dynamic programming scales very poorly to larger state and action spaces.
 
+Deep reinforcement learning has opened up increasingly compelling alternative 
 
 Effort $Q = E X_t$  
 
