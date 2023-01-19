@@ -95,6 +95,10 @@ Ecological management may be understood as an optimal control problem - a manage
 
 Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
 
+```{r conceptual, echo = FALSE, message=FALSE, fig.align='center', fig.cap='(A) Classical management strategies often have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $V1$). where the interaction between $V1$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. (B) RL allows us to solve for quantitative decision strategies considering more complex ecosystem dynamics. For example, in this paper, we find harvest strategies for a three-species model using a model-free RL algorithm, PPO. (C) We show how the RL-based solution that considers all three species finds harvest policies with higher average reward and with (D) lower probability of harvest species collapse than the classical approaches, only considering the dynamics of V1.', out.width='1\\linewidth', fig.pos='H'}
+knitr::include_graphics("figures/conceptual-figure.png")
+```
+
 <!-- Reality __
   |        \
   v         \
