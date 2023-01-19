@@ -12,7 +12,7 @@ authors:
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
 - name: Melissa Chapman
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
-- name: Abigail Keller
+- name: Abigail G. Keller
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
 - name: Carl Boettiger
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
@@ -447,7 +447,29 @@ We trained a DRL agent to obtain a candidate policy
 \end{align*}
 for eq. \eqref{eq:3d model}.
 The agent could fully and precisely observe the state of the system at each time step and decide on its harvest based on this information. 
+The agent was trained using the PPO algorithm, using a neural network with two hidden layers of 64 neurons to express $\pi$.
+Details of the training process may be found in App. \ref{app:tbd}.
+Our code is available at TBD.
 
+Rewards were defined to be a compound of two contributions.
+The first is economical: if at time $t$ a harvest of $h_t$ is secured, then the agents total reward is increased by $h_t$.
+The second regards sustainability: if an extinction happens at time step $t$, then a penalty of $-50/t$ is incurred by the agent.
+The choice of the constant $50$ in this rule was rather arbitrary: we set it to be a fourth of the maximal episode length ($200$ time steps), so as to encourage the agent to find policies that do not lead to extinctions below the time scale of around 100 time steps.
+\textbf{Too long of a ‘‘sorry’’ message?}
+
+We compare the performance of this agent to the performance of MSY and of an 80% TAC. 
+
+Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than both MSY and TAC.
+Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
+These periods effectively allow the system to, in a sense, ‘‘reset’’ itself.
+They lead to a distinctive oscillating behavior of the system state over time, with periods of relative depletion followed by periods of growth. 
+Figure \ref{fig:tbd} exemplifies this point by comparing the harvest effort and state times series obtained from these policies.
+
+It is well known that following MSY policies can lead to over-fishing.
+Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
+Figure TBD-A summarizes episode length distribution for MSY, TAC and DRL.
+While the DRL-derived policy does not lead to extinctions, both MSY and TAC do so, and thus their episode mean length is lower than the maximal episode length (in our case set at 200 years).
+This difference is reflected on the profits earned by the agent, as shown in Fig. TBD-B.
 
 
 ## Acknowledgements
