@@ -128,7 +128,7 @@ ppo_sims <- ppo |>
   mutate(abundance = abundance + 1)
 
 ppo_sims |>
-  filter(rep > 20, rep < 25) |>
+  filter(rep < 4) |>
   ggplot(aes(t, abundance, col=species)) +
   geom_line(alpha=0.6) + facet_wrap(~rep)
 ```

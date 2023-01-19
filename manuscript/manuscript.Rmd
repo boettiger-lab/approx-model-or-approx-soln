@@ -455,13 +455,13 @@ Rewards were defined to be a compound of two contributions.
 The first is economical: if at time $t$ a harvest of $h_t$ is secured, then the agents total reward is increased by $h_t$.
 The second regards sustainability: if an extinction happens at time step $t$, then a penalty of $-50/t$ is incurred by the agent.
 The choice of the constant $50$ in this rule was rather arbitrary: we set it to be a fourth of the maximal episode length ($200$ time steps), so as to encourage the agent to find policies that do not lead to extinctions below the time scale of around 100 time steps.
-\textbf{Too long of a ‘‘sorry’’ message?}
+\textbf{Too long of a "sorry" message?}
 
 We compare the performance of this agent to the performance of MSY and of an 80% TAC. 
 
 Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than both MSY and TAC.
 Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
-These periods effectively allow the system to, in a sense, ‘‘reset’’ itself.
+These periods effectively allow the system to, in a sense, "reset" itself.
 They lead to a distinctive oscillating behavior of the system state over time, with periods of relative depletion followed by periods of growth. 
 Figure \ref{fig:tbd} exemplifies this point by comparing the harvest effort and state times series obtained from these policies.
 
@@ -476,7 +476,7 @@ This difference is reflected on the profits earned by the agent, as shown in Fig
 
 The title of this piece references a mathematical biology workshop at NIMBioS
 organized by Paul Armsworth, Alan Hastings, Megan Donahue, and Carl Towes in
-2011 that first posed the question addressed here.
+2011 seeking to pivot control from 'optimal' to 'pretty darn good'.
 
 # References
 
