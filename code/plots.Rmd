@@ -19,7 +19,7 @@ best_reward <- function(df) {
 ```
 
 
-# Constant Effort
+# Constant Mortality
 
 ```{r}
 msy <- read_csv("../data/msy.csv.gz")

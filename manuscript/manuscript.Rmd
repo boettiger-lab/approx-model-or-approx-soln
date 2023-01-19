@@ -161,45 +161,64 @@ Results figures:
 # Mathematical models of fisheries
 
 In this section we introduce some models describing the population dynamics of fisheries.
-In general, the class of models that appear in this context are *first order finite difference equations*.
+In general, the class of models that appear in this context are *first order finite difference equations* (potentially stochastic difference equations).
 For $n$ species, these models have the general form
+
 \begin{align}
   \label{eq:general model}
-  N_{t+1} - N_t = f(N_t) - h_t := \Delta N_t,
+  N_{t+1} - N_t = f(N_t) - F N_t := \Delta N_t,
 \end{align}
-where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
+where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, where the product of the mortality and the stock size, $F N_t$ is the harvest size at timestep $t$. 
 
 ## A single species model
 
-Most commonly, fisheries use 1-dimensional models, $n=1$.
-One such model appearing in a variety of ecological contexts is *logistic growth*, for which
+Optimal control policies for fisheries are frequently based on 1-dimensional models, $n=1$.
+The most familiar model of $f(X)$ is that of *logistic growth*, for which
+
 $$
   f(X_t) = r X_t\big(1 - X_t / K \big) =: L(X_t;\ r, K).
 $$
-More relevant to our current work, is the following single-species model studied in \cite{may77},
+Which combined with the harvest term from \eqref(eq:general model) is known as the Gordon-Schaefer model, after foundational work which first developed the concept of maximum sustainable yield, MSY, [@Gordon1954; @Schaefer1954], which remains a central concept in fisheries management.  
+In this model, note that the maximum growth rate occurs at population size of $N = K/2$, which is approached asymptotically from any positive initial state $N_0 \in (0,K)$ under a constant mortality of $F = r/2$, which thus produces a harvest of $rK/4$ at equilibrium -- the maximum yield sustainable indefinitely. 
+
+
+
+
+Real world ecological systems are obviously far more complicated than this simple model suggests.  
+One particularly important aspect that has garnered much attention is the potential for the kind of highly non-linear functions that can support dynamics such as alternative stable states and hysteresis.
+A seminal example of such dynamics was introduced in \cite{may77}, using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
+
 \begin{align}
   \label{eq:may}
-  \Delta X_t
-  = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t,
+  f(X_t)
+  = L(X_t;\ r, K) - F(X_t, H; \beta,c),
 \end{align}
 where,
 \begin{align*}
-  F(X,H;\ \beta,c) := \frac{\beta H X^2}{c^2 + X^2}.
+  F(X_t,H;\ \beta,c) := \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align*}
+
 The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
 
-Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (see Fig. \ref{tbd}).
-Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $V_1$ of the system, these two attractors separated by an unstable fixed point.
+Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{tbd}).
+Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $\hat X_t$ of the system, these two attractors separated by an unstable fixed point.
 At a certain threshold value of $H$, however, the top stable fixed point collides with the unstable fixed point and both are annihilated.
 For this value of $H$, and for higher values, only the lower fixed point remains.
+This also creates the phenomenon of *hysteresis*, where returning $H$ to its original value is not sufficient to restore $\hat X_t$ to the original stable state. 
 
 This structure implies two things.
-First, that a drift in $H$ could lead to catastrophic consequences, with the population $V_1$ plummeting to the lower fixed stable point.
-Second, that if the evolution of $V_1$ is *stochastic*, then, even at values of $H$ below the threshold point, the system runs a sizeable danger of tipping over towards the lower stable point.
+First, that a drift in $H$ could lead to catastrophic consequences, with the population $X_t$ plummeting to the lower fixed stable point.
+Second, that if the evolution of $X_t$ is *stochastic*, then, even at values of $H$ below the threshold point, the system runs a sizeable danger of tipping over towards the lower stable point.
+
+
+<!-- Discuss control solutions of this model(?) -->
+<!-- Briefly motivate reason to consider 3d model, adding competition and predation processes -->
+
 
 ## A three species model
 
 Consider the following three species *generalization* of eq. \eqref{eq:may}:
+
 \begin{align}
 \label{eq:3d model}
 \begin{split}
@@ -476,7 +495,9 @@ This difference is reflected on the profits earned by the agent, as shown in Fig
 
 The title of this piece references a mathematical biology workshop at NIMBioS
 organized by Paul Armsworth, Alan Hastings, Megan Donahue, and Carl Towes in
-2011 seeking to pivot control from 'optimal' to 'pretty darn good'.
+2011 which first sought to emphasize 'pretty darn good' control solutions to
+more realistic problems over optimal control to idealized ones. 
+This material is based upon work supported by the National Science Foundation under Grant No. DBI-1942280.
 
 # References
 
