@@ -19,7 +19,7 @@ best_reward <- function(df) {
 ```
 
 
-# Constant Effort
+# Constant Mortality
 
 ```{r}
 msy <- read_csv("../data/msy.csv.gz")
@@ -139,6 +139,7 @@ ppo_sim <- ppo |>
   mutate(abundance = abundance)
 
 ppo_sim
+
 
 ppo_sim |>
   filter(rep < 4) |>
