@@ -24,6 +24,8 @@ best_reward <- function(df) {
 ```{r}
 msy <- read_csv("../data/msy.csv.gz")
 best <- best_reward(msy)
+colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
+msy
 best
 ```
 
@@ -45,28 +47,35 @@ rewards |>
 
 
 ```{r}
+colnames(msy)
 msy_sim <- msy |>
-  filter(action == best$action) |> 
-  pivot_longer(c("sp1", "sp2", "sp3"),
-               names_to = "species", values_to = "abundance") |>
-  mutate(abundance = abundance + 1) # natural units
+    filter(action == best$action) |> 
+    group_by(rep) |>
+    pivot_longer(c("X", "Y", "Z"),
+                names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1) # natural units
+
+msy_sim
 
 msy_sim |>
-  filter(rep < 4) |>
-  ggplot(aes(t, abundance,  col=species)) + 
-    geom_line() + facet_wrap(~rep)
+    filter(rep < 5) |> # filter(rep > 8) |>
+    # group_by(rep) |>
+    ggplot(aes(t, abundance,  col=species, group =interaction(rep,species)))+ 
+        geom_line() + facet_wrap(~rep)
 
 msy_sim |> 
-  filter(rep < 30, species == "sp1") |>
+  filter(rep < 4, species == "X") |>
   ggplot(aes(t, abundance, group = interaction(rep,species),  col=species)) + 
     geom_line(alpha=0.5) 
 
 
 ```
+
+
 ```{r}
 msy_sim |> 
   group_by(rep) |>
-  filter(t==max(t), species=="sp1") |>
+  filter(t==max(t), species=="X") |>
   ggplot(aes(rep, reward)) + geom_col()
 ```
 # TAC
@@ -78,10 +87,10 @@ actions <- unique(msy$action)
 i <- which.min(abs(actions - best$action* 0.8))
 tac_sim <- msy |> 
   filter(action == actions[[i]]) |>
-  pivot_longer(c("sp1", "sp2", "sp3"),
+  pivot_longer(c("X", "Y", "Z"),
                names_to = "species", values_to = "abundance")
 tac_sim |>
-  filter(rep < 4) |>
+  filter(rep < 20) |>
   ggplot(aes(t, abundance,  col=species)) + 
     geom_line() + facet_wrap(~rep)
 
@@ -89,7 +98,7 @@ tac_sim |>
 ```{r}
 tac_sim |> 
   group_by(rep) |>
-  filter(t==max(t), species=="sp1") |>
+  filter(t==max(t), species=="X") |>
   ggplot(aes(rep, reward)) + geom_col()
 ```
 
@@ -97,8 +106,9 @@ tac_sim |>
 
 
 ```{r}
-ppo <- read_csv("../data/PPO250.csv.gz")
-
+ppo <- read_csv("../data/ppo-200.csv")
+colnames(ppo) <- c("1", "t", "X", "Y", "Z", "action", "reward", "rep")
+head(ppo)
 ```
 
 ```{r}
@@ -113,21 +123,25 @@ ppo |>
   mutate(policy="ppo")
 overall_ppo
 
-ppo |> 
-  group_by(rep) |>
+ppo_cumulative <- ppo |> group_by(rep) |> mutate(cumulative_reward = cumsum(reward))
+
+ppo_cumulative |> 
   filter(t==max(t)) |> 
-  ggplot(aes(rep, reward)) + geom_col()
+  ggplot(aes(rep, cumulative_reward)) + geom_col()
 ```
 
 ```{r}
-ppo_sims <- ppo |> 
-  mutate(escapement = (sp1+1) - action * (sp1+1),
+ppo_sim <- ppo |> 
+  mutate(escapement = (X+1) - action * (X+1),
          effort = action) |>
-  pivot_longer(c("sp1", "sp2", "sp3"),
+  pivot_longer(c("X", "Y", "Z"),
                names_to = "species", values_to = "abundance") |>
-  mutate(abundance = abundance + 1)
+  mutate(abundance = abundance)
 
-ppo_sims |>
+ppo_sim
+
+
+ppo_sim |>
   filter(rep < 4) |>
   ggplot(aes(t, abundance, col=species)) +
   geom_line(alpha=0.6) + facet_wrap(~rep)
@@ -135,7 +149,7 @@ ppo_sims |>
 
 
 ```{r}
-ppo_sims |>
+ppo_sim |>
   filter(species == "sp1") |>
   group_by(t) |>
   summarise(abundance = mean(abundance), 
@@ -154,6 +168,8 @@ ppo_sims |>
 
 ```{r}
 escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
+colnames(escapement) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
+escapement
 
 ## Determine which level of constant escapement gives highest net reward
 best_e <- best_reward(escapement)
@@ -163,7 +179,7 @@ best_e
 ```{r}
 esc_sims <- escapement |> 
   filter(action == best_e$action) |>
-  pivot_longer(c("sp1", "sp2", "sp3"),
+  pivot_longer(c("X", "Y", "Z"),
                names_to = "species", values_to = "abundance") |>
   mutate(abundance = abundance + 1) |>
   rename(escapement = action)
@@ -190,4 +206,112 @@ rewards |>
              ymax=mean_reward+2*sd)) +
   geom_point() + geom_ribbon(alpha=0.4)
 ```
+
+
+# Millie's suggestion for plots:
+
+```{r}
+msy_sim <- msy_sim |> mutate(type = "Opt const mortality", cumulative_reward = reward)
+tac_sim <- tac_sim |>
+    mutate(abundance = abundance + 1) |>
+    mutate(type = "80% opt const mortality", cumulative_reward = reward)
+ppo_sim <- ppo_sim |> mutate(type = "DRL")
+ppo_sim <- within(ppo_sim, rm("1", "effort", "escapement"))
+ppo_sim <- ppo_sim |>
+    group_by(rep, species) |>
+    mutate(cumulative_reward = cumsum(reward))
+```
+
+```{r}
+ppo_sim
+```
+
+```{r}
+ppo_sim <- within(ppo_sim, rm("reward"))
+msy_sim <- within(msy_sim, rm("reward"))
+tac_sim <- within(tac_sim, rm("reward"))
+all_sim <- bind_rows(msy_sim, tac_sim, ppo_sim)
+ppo_sim
+msy_sim
+tac_sim
+all_sim
+```
+
+```{r}
+all_sim |> #filter(rep < 10, species == "X") |> 
+    group_by(rep) |>
+    filter(t==max(t), rep < 10, species == "X") |>
+    ggplot(aes(rep, cumulative_reward)) + geom_col() +
+    facet_wrap(~type)
+
+msy_sim |> 
+  group_by(rep) |>
+  filter(t==max(t), species=="X", rep < 10) |>
+  ggplot(aes(rep, cumulative_reward)) + geom_col()
+
+tac_sim |> 
+  group_by(rep) |>
+  filter(t==max(t), species=="X", rep < 10) |>
+  ggplot(aes(rep, cumulative_reward)) + geom_col()
+
+all_sim |> 
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(t==max(t), species=="X", rep < 10) |>
+    ggplot(aes(rep, cumulative_reward)) + 
+        geom_col()  + 
+        facet_wrap(~type) + 
+        labs(y = "reward", x = "repetition")
+
+
+```
+
+```{r}
+all_sim |> 
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(rep == 0) |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        facet_wrap(~type) + 
+        labs(y = "reward", x = "repetition")
+all_sim |>
+    group_by(rep,type) |>
+    filter(rep<10) |>
+    ggplot(aes(t, action)) + 
+    geom_line()  + 
+    facet_wrap(~type) + 
+    labs(y = "action", x = "repetition")
+    
+
+
+
+
+#all_sim |> group_by(rep) |> filter(t==max(t), species == "X") |> group_by(t)
+```
+
+
+
+```{r}
+all_sim |> 
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(t==max(t), species=="X", rep < 10) |>
+    ggplot(aes(rep,t)) + 
+        geom_col()  + 
+        facet_wrap(~type) + 
+        labs(y = "episode length", x = "repetition") +
+        theme(axis.text.x = element_blank())
+```
+
+
+
+
+
+
+
+
 
