@@ -496,6 +496,7 @@ escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
 # rename some columns for figure purposes:
 colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
 colnames(ppo) <- c('1', 't', 'X', 'Y', 'Z', 'action', 'reward', 'rep')
+colnames(escapement) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z') 
 
 # ppo dataset uses step rewards rather than cumulative rewards, which is what is useful here.
 # so, switch stuff around:
@@ -516,7 +517,7 @@ msy_sim <- msy |>
                 names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1, policy = "msy") # natural units, policy name
 
-i <- which.min(abs(actions - best$action* 0.8))
+i <- which.min(abs(actions - best_action* 0.8))
 tac_sim <- msy |> 
     filter(action == actions[[i]]) |>
     pivot_longer(c("X", "Y", "Z"),
@@ -524,10 +525,9 @@ tac_sim <- msy |>
     mutate(abundance = abundance + 1, policy = "tac")
 
 ppo_sim <- ppo |> 
-    mutate(escapement = (X+1) - action * (X+1),
-        effort = action) |>
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
+    within(rm("1")) |>
     mutate(policy = "ppo") # already in natural units
 
 best_e <- 0.62 # optimal constant escapement, computed from ../data/escapement.csv.gz
@@ -537,6 +537,10 @@ esc_sim <- escapement |>
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1)
+
+msy_tac_ppo <- bind_rows(msy_sim, tac_sim, ppo_sim)
+#head(msy_tac_ppo)
+#head(ppo_sim)
 ```
 
 Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than both MSY and TAC.

@@ -18,6 +18,10 @@ best_reward <- function(df) {
 }
 ```
 
+```{r}
+best_reward(msy)
+```
+
 
 # Constant Mortality
 
@@ -84,7 +88,7 @@ msy_sim |>
 
 ```{r}
 actions <- unique(msy$action)
-i <- which.min(abs(actions - best$action* 0.8))
+
 tac_sim <- msy |> 
   filter(action == actions[[i]]) |>
   pivot_longer(c("X", "Y", "Z"),
@@ -224,6 +228,8 @@ ppo_sim <- ppo_sim |>
 
 ```{r}
 ppo_sim
+ppo_sim |> within(rm("reward"))
+ppo_sim
 ```
 
 ```{r}
@@ -276,7 +282,8 @@ all_sim |>
     ggplot(aes(t, abundance, col = species)) + 
         geom_line()  + 
         facet_wrap(~type) + 
-        labs(y = "reward", x = "repetition")
+        labs(y = "reward", x = "repetition") +
+        theme(aspect.ratio = 2/5)
 all_sim |>
     group_by(rep,type) |>
     filter(rep<10) |>
