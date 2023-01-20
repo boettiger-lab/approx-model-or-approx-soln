@@ -293,7 +293,18 @@ all_sim |>
 
 
 
-
+```{r}
+all_sim |> 
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(t==max(t), species=="X", rep < 10) |>
+    ggplot(aes(rep,t)) + 
+        geom_col()  + 
+        facet_wrap(~type) + 
+        labs(y = "episode length", x = "repetition") +
+        theme(axis.text.x = element_blank())
+```
 
 
 

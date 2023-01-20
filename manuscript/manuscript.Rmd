@@ -47,6 +47,8 @@ header-includes:
   - \usepackage{bookmark}
   - \usepackage{float}
   - \usepackage{graphicx}
+  - \usepackage{caption}
+  - \usepackage{subcaption}
   - \linenumbers
   - \doublespacing
 
@@ -426,14 +428,71 @@ The choice of the constant $50$ in this rule was rather arbitrary: we set it to 
 
 We compare the performance of this agent to the performance of MSY and of an 80% TAC. 
 
+```{r}
+library(tidyverse)
+msy <- read_csv("../data/msy.csv.gz")
+ppo <- read_csv("../data/ppo-200.csv")
+escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
+
+# rename some columns for figure purposes:
+colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
+colnames(ppo) <- c('1', 't', 'X', 'Y', 'Z', 'action', 'reward', 'rep')
+
+# ppo dataset uses step rewards rather than cumulative rewards, which is what is useful here.
+# so, switch stuff around:
+ppo |> 
+    group_by(rep) |> 
+    mutate(cumulative_reward = cumsum(reward)) |>
+    within(rm("reward", "1")) |>
+    rename(reward = cumulative_reward)
+
+# set up for plots:
+
+# best constant effort based on the data on ../data/msy.csv.gz
+best_action <- 0.0465
+msy_sim <- msy |>
+    filter(action == best_action) |> 
+    group_by(rep) |>
+    pivot_longer(c("X", "Y", "Z"),
+                names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "msy") # natural units, policy name
+
+i <- which.min(abs(actions - best$action* 0.8))
+tac_sim <- msy |> 
+    filter(action == actions[[i]]) |>
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "tac")
+
+ppo_sim <- ppo |> 
+    mutate(escapement = (X+1) - action * (X+1),
+        effort = action) |>
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(policy = "ppo") # already in natural units
+
+best_e <- 0.62 # optimal constant escapement, computed from ../data/escapement.csv.gz
+esc_sim <- escapement |> 
+    rename(escapement = action) |>
+    filter(escapement == best_e) |> # data had a naming problem
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1)
+```
+
 Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than both MSY and TAC.
 Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
 These periods effectively allow the system to, in a sense, ‘‘reset’’ itself.
 They lead to a distinctive oscillating behavior of the system state over time, with periods of relative depletion followed by periods of growth. 
 Figure \ref{fig:tbd} exemplifies this point by comparing one times series of the system state obtained using each of these policies.
 
+
+```{r fig.cap="TBD."}
+
+```
+
 \begin{figure}
-	\includegraphics[width=\linewidth]{Figures/timeseries.png}
+	\includegraphics[width=\linewidth, height = 0.2\textheight]{Figures/timeseries.png}
 \caption{
 \label{fig:one timeseries}
 tbd
@@ -445,6 +504,22 @@ Our results reproduce this behavior and, furthermore, warn that using a TAC poli
 Figure TBD-A summarizes episode length distribution for MSY, TAC and DRL.
 While the DRL-derived policy does not lead to extinctions, both MSY and TAC do so, and thus their episode mean length is lower than the maximal episode length (in our case set at 200 years).
 This difference is reflected on the profits earned by the agent, as shown in Fig. TBD-B.
+
+\begin{figure}
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\linewidth]{Figures/ep_length.png}
+        \caption{Episode lengths}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\linewidth]{Figures/rewards.png}
+        \caption{Episode rewards}
+    \end{subfigure}
+    \caption{
+        TBD
+    }
+    \label{fig:lengths and rewards}
+\end{figure}
 
 
 ## Acknowledgements
