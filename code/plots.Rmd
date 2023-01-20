@@ -254,24 +254,28 @@ tac_sim |>
   ggplot(aes(rep, cumulative_reward)) + geom_col()
 
 all_sim |> 
-  group_by(rep, type) |>
-  filter(t==max(t), species=="X", rep < 10) |>
-  ggplot(aes(rep, cumulative_reward)) + 
-    geom_col()  + 
-    facet_wrap(~type) + 
-    labs(y = "reward", x = "repetition")
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(t==max(t), species=="X", rep < 10) |>
+    ggplot(aes(rep, cumulative_reward)) + 
+        geom_col()  + 
+        facet_wrap(~type) + 
+        labs(y = "reward", x = "repetition")
 
 
 ```
 
 ```{r}
 all_sim |> 
-  group_by(rep, type) |>
-  filter(rep == 0) |>
-  ggplot(aes(t, abundance, col = species)) + 
-    geom_line()  + 
-    facet_wrap(~type) + 
-    labs(y = "reward", x = "repetition")
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(rep == 0) |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        facet_wrap(~type) + 
+        labs(y = "reward", x = "repetition")
 all_sim |>
     group_by(rep,type) |>
     filter(rep<10) |>
