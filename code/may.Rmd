@@ -1,0 +1,121 @@
+---
+  output: github_document
+---
+  
+  ```{r}
+knitr::opts_chunk$set(fig.width = 7)
+```
+
+
+```{r message=FALSE}
+#library(MDPtoolbox)
+library(tidyverse) # for plotting
+```
+
+
+
+```{r}
+states <- seq(0,2, length=100)
+actions <- seq(0,1, length.out = 10)
+observations <- states
+sigma_g <- 0.2
+sigma_m <- 0.0
+
+Q <- 2
+V <- 15
+C <- 10
+reward_fn <- function(x,h) h
+discount <- 0.999
+
+r <- 0.8
+K <- 1.53
+q <- 2
+b <- .2
+# a <- 0.27 # only one (high) stable state, but creates nonlinear policy
+a <-   0.28 # .27 #0.29
+
+f <- function(x, h){ # May
+  # h is conservation effort
+  
+  x + x * r * (1 - x / K) -  a * x ^ q / (x ^ q + b ^ q) - h * x
+}
+```
+
+
+```{r}
+# B_MSY - biomass max growth rate
+X <- seq(0,1.2, length.out=200)
+V <- map_dbl(X, \(x) f(x,0) - x)
+
+tibble(X, V) |> ggplot(aes(X, V)) + geom_point()
+
+i <- which.max(V)
+B_MSY <- X[i]
+
+F_MSY <- (f(X[i],0) - X[i]) / X[i]
+
+
+```
+
+```{r}
+
+df <- map_dfr(seq(0, 1, length.out = 31),
+function(init) {
+  df <- tibble(init, time = 1:50, x = init)
+  for(t in 1:max(df$time)) {
+    df[t+1,] = tibble(init, time = t+1, x = f(df$x[t], F_MSY)) 
+  }
+  df
+})
+df2 <- df |> mutate(h = F_MSY * x)
+df2 |> ggplot(aes(time,x, col=init, group=init)) +
+  geom_line() + ylim(0,1) + 
+  geom_hline(aes(yintercept=X[i]))
+```
+```{r}
+  
+  df <- map_dfr(seq(0, 1, length.out = 31),
+  function(init) {
+    df <- tibble(init, time = 1:50, x = init)
+    for(t in 1:max(df$time)) {
+      effort = pmax( (df$x[t] - B_MSY) /  df$x[t], 0)
+      df[t+1,] = tibble(init, time = t+1, x = f(df$x[t], effort)) 
+    }
+    df
+  })
+  df |> ggplot(aes(time,x, col=init, group=init)) +
+    geom_line() + ylim(0,1)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+df <- 
+bind_rows(
+  tibble(policy="const mortality", x = seq(0,1.2, length.out=100), delta = f(x,F_MSY) - x),
+  tibble(policy="const escapement", x = seq(0,1.2, length.out=100), delta = f(x,0) - x),
+  )
+df %>% 
+  ggplot(aes(x, delta, col=policy, group=policy)) + 
+  geom_line() + geom_hline(aes(yintercept=0))
+```
+
+
+
+

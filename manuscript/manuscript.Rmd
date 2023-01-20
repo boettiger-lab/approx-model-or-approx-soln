@@ -16,7 +16,7 @@ authors:
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
 - name: Carl Boettiger
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
-  email: cboettig@berkele.edu 
+  email: cboettig@berkeley.edu 
 
 
 keywords:
@@ -34,7 +34,7 @@ MSC:
 - MSC code 2
 
 abstract: |
-  Write
+  Write something here
   
 bibliography: bibliography.bib
 #biblio-style: spphys
@@ -87,10 +87,50 @@ We show that in many but not all cases, the optimal policy for a carefully chose
 This illustrates the promise of combining complex, realistic simulations with emerging machine-learning techniques to improve our understanding and management of ecological systems.
 -->
 
-Despite the complexity inherent in natural ecosystems, analytically tractable models have long played an essential role in their understanding and management.
 Ecological management may be understood as an optimal control problem - a manager must determine a sequence of actions (a "policy") to optimize some desired objective(s) and constraints (e.g. conservation goals, natural resource extraction, economic and social constraints.)
+Despite the complexity inherent in natural ecosystems, analytically tractable models have long played an essential role in their understanding and management.
+...
 
 
+<!-- Why fisheries-focused examples -->
+Global fisheries management has long been a crucible for both the development of theory and best practices in actual management for many reasons. Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to overfishing [@Worm2006, @Costello2016]. 
+Because of this importance, fisheries also represent some of the longest and best studied timeseries of population dynamics available to ecologists, as well as a correspondingly rich area for the development of theory and practice.
+Methods developed in the study and management of fisheries are frequently applied to other areas of ecological management, from concepts such as maximum sustainable yield [], optimal control under observation uncertainty [@Memarzadeh2019], to adaptive management [@Walters], management strategy evaluation [@Punt], to the studies of conservation policy and international negotiations [@].
+
+<!-- A sweeping summary of fisheries decision theory, don't bite me-->
+To understand the importance of a potential application of novel data-driven methods to the real world, it is most instructive to have a clearer picture of how models are currently used to inform ecological management in fisheries.
+In any issue as large and contentious as fisheries management, it may be far more difficult to provide a generalization  about how things actually work than to make sweeping recommendations about how it ought to.
+All the same, it is our firm belief that any researcher seeking to do the latter should first attempt to understand the former, so we beg the forbearance of any specialists in the practice as we seek to provide a concise overview of fisheries management today.
+Here, we focus specifically on practices in data rich, 'well-managed' fisheries, which, despite some issues, may be among the best examples of ecological management at continental scale that is largely driven by scientific processes, models and data. 
+
+<!-- Fisheries population models are rich but decisions aren't, mostly constant mortality -->
+While fisheries stock assessment models are quite rich, the choice of possible strategies remains motivated by intution from much simpler, analytically tractable one-dimensional models.
+This fact is not always obvious at cursory inspection, and can be met with cynicism even among professional fisheries managers -- after all, typical stock assessment models have over 100 parameters (e.g. see the stock assessments referenced from in @RAMLegacy) and best practices such as management strategy evaluation (MSE) evaluate and select potential policies by comparing across large and diverse simulations [e.g. @Punt2016].
+However, the space of policies considered under such approaches is necessarily far smaller than the set of all possible action sequences.
+Instead, fisheries management approaches such as MSE rely on theory based on more tractable models to restrict the search space of possible policies.  
+Specifically, most fisheries policies are framed in terms of a *constant mortality* policy, (sometimes a simple piece-wise linear function, i.e. a single linear segment, is introduced as a precaution a very low stock sizes), where fishing 'mortality' is defined as the ratio of harvest (catch) to stock size, $F = H_t/x_t$.
+
+The intuition for a constant mortality strategy is simple and well established 
+
+Constant mortality policies have a strong basis in theory as well as practical justifications.
+
+
+<!-- In contrast to constant mortality, the possible decision space is huge-->
+The management of any ecological system can be framed in terms of a Sequential Decision Process - 
+the manager observes the ecosystem state ($x_t$) and decides on action ($a_t$) to take (including potentially no action), potentially receiving any costs or benefits associated with that action and and state (reward $r_t$  $r_t = U(x_t,a_t)$),
+while the system evolves into a new state in response $x_{t+1} = f(x_t, a_t)$. When the probability of the future state can be determined by the current state and action, we say the system is Markovian and the process a Markov Decision Process (MDP).
+As in a game of chess, the space of possible sequences of actions a manager might choose over any realization of the Markov process is enormous.
+When the action and state space are discrete and sufficiently small, computational approaches such as dynamic programming may be used to guarantee an exhaustive search for a single optimal policy.
+Dynamic programming scales very poorly to larger state and action spaces.
+
+Deep reinforcement learning has opened up increasingly compelling alternative 
+
+Effort $Q = E X_t$  
+
+Fisheries policies are typically implemented in terms of *catch quotas*, i.e. a limit to the number of metric tonnes of fish that can be caught during a given season. 
+
+
+and/or *effort controls*, restrictions on the fishing effort -- in numbers of boats, time of year, or days at sea
 
 
 
@@ -130,45 +170,64 @@ Results figures:
 # Mathematical models of fisheries
 
 In this section we introduce some models describing the population dynamics of fisheries.
-In general, the class of models that appear in this context are *first order finite difference equations*.
+In general, the class of models that appear in this context are *first order finite difference equations* (potentially stochastic difference equations).
 For $n$ species, these models have the general form
+
 \begin{align}
   \label{eq:general model}
-  N_{t+1} - N_t = f(N_t) - h_t := \Delta N_t,
+  N_{t+1} - N_t = f(N_t) - F N_t := \Delta N_t,
 \end{align}
-where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, and $h_t$ is the harvest size at timestep $t$. 
+where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, where the product of the mortality and the stock size, $F N_t$ is the harvest size at timestep $t$. 
 
 ## A single species model
 
-Most commonly, fisheries use 1-dimensional models, $n=1$.
-One such model appearing in a variety of ecological contexts is *logistic growth*, for which
+Optimal control policies for fisheries are frequently based on 1-dimensional models, $n=1$.
+The most familiar model of $f(X)$ is that of *logistic growth*, for which
+
 $$
   f(X_t) = r X_t\big(1 - X_t / K \big) =: L(X_t;\ r, K).
 $$
-More relevant to our current work, is the following single-species model studied in \cite{may77},
+Which combined with the harvest term from \eqref(eq:general model) is known as the Gordon-Schaefer model, after foundational work which first developed the concept of maximum sustainable yield, MSY, [@Gordon1954; @Schaefer1954], which remains a central concept in fisheries management.  
+In this model, note that the maximum growth rate occurs at population size of $N = K/2$, which is approached asymptotically from any positive initial state $N_0 \in (0,K)$ under a constant mortality of $F = r/2$, which thus produces a harvest of $rK/4$ at equilibrium -- the maximum yield sustainable indefinitely. 
+
+
+
+
+Real world ecological systems are obviously far more complicated than this simple model suggests.  
+One particularly important aspect that has garnered much attention is the potential for the kind of highly non-linear functions that can support dynamics such as alternative stable states and hysteresis.
+A seminal example of such dynamics was introduced in \cite{may77}, using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
+
 \begin{align}
   \label{eq:may}
-  \Delta X_t
-  = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t,
+  f(X_t)
+  = L(X_t;\ r, K) - F(X_t, H; \beta,c),
 \end{align}
 where,
 \begin{align*}
-  F(X,H;\ \beta,c) := \frac{\beta H X^2}{c^2 + X^2}.
+  F(X_t,H;\ \beta,c) := \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align*}
+
 The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
 
-Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (see Fig. \ref{tbd}).
-Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $V_1$ of the system, these two attractors separated by an unstable fixed point.
+Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{tbd}).
+Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $\hat X_t$ of the system, these two attractors separated by an unstable fixed point.
 At a certain threshold value of $H$, however, the top stable fixed point collides with the unstable fixed point and both are annihilated.
 For this value of $H$, and for higher values, only the lower fixed point remains.
+This also creates the phenomenon of *hysteresis*, where returning $H$ to its original value is not sufficient to restore $\hat X_t$ to the original stable state. 
 
 This structure implies two things.
-First, that a drift in $H$ could lead to catastrophic consequences, with the population $V_1$ plummeting to the lower fixed stable point.
-Second, that if the evolution of $V_1$ is *stochastic*, then, even at values of $H$ below the threshold point, the system runs a sizeable danger of tipping over towards the lower stable point.
+First, that a drift in $H$ could lead to catastrophic consequences, with the population $X_t$ plummeting to the lower fixed stable point.
+Second, that if the evolution of $X_t$ is *stochastic*, then, even at values of $H$ below the threshold point, the system runs a sizeable danger of tipping over towards the lower stable point.
+
+
+<!-- Discuss control solutions of this model(?) -->
+<!-- Briefly motivate reason to consider 3d model, adding competition and predation processes -->
+
 
 ## A three species model
 
 Consider the following three species *generalization* of eq. \eqref{eq:may}:
+
 \begin{align}
 \label{eq:3d model}
 \begin{split}
@@ -424,7 +483,7 @@ Rewards were defined to be a compound of two contributions.
 The first is economical: if at time $t$ a harvest of $h_t$ is secured, then the agents total reward is increased by $h_t$.
 The second regards sustainability: if an extinction happens at time step $t$, then a penalty of $-50/t$ is incurred by the agent.
 The choice of the constant $50$ in this rule was rather arbitrary: we set it to be a fourth of the maximal episode length ($200$ time steps), so as to encourage the agent to find policies that do not lead to extinctions below the time scale of around 100 time steps.
-\textbf{Too long of a ‘‘sorry’’ message?}
+\textbf{Too long of a "sorry" message?}
 
 We compare the performance of this agent to the performance of MSY and of an 80% TAC. 
 
@@ -486,7 +545,7 @@ msy_tac_ppo <- bind_rows(msy_sim, tac_sim, ppo_sim)
 
 Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than both MSY and TAC.
 Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
-These periods effectively allow the system to, in a sense, ‘‘reset’’ itself.
+These periods effectively allow the system to, in a sense, "reset" itself.
 They lead to a distinctive oscillating behavior of the system state over time, with periods of relative depletion followed by periods of growth. 
 Figure \ref{fig:tbd} exemplifies this point by comparing one times series of the system state obtained using each of these policies.
 
@@ -530,7 +589,9 @@ This difference is reflected on the profits earned by the agent, as shown in Fig
 
 The title of this piece references a mathematical biology workshop at NIMBioS
 organized by Paul Armsworth, Alan Hastings, Megan Donahue, and Carl Towes in
-2011 that first posed the question addressed here.
+2011 which first sought to emphasize 'pretty darn good' control solutions to
+more realistic problems over optimal control to idealized ones. 
+This material is based upon work supported by the National Science Foundation under Grant No. DBI-1942280.
 
 # References
 
