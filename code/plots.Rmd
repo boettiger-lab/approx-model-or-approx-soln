@@ -265,14 +265,21 @@ all_sim |>
 ```
 
 ```{r}
-p1 <- all_sim |> 
+all_sim |> 
   group_by(rep, type) |>
   filter(rep == 0) |>
   ggplot(aes(t, abundance, col = species)) + 
     geom_line()  + 
     facet_wrap(~type) + 
     labs(y = "reward", x = "repetition")
-
+all_sim |>
+    group_by(rep,type) |>
+    filter(rep<10) |>
+    ggplot(aes(t, action)) + 
+    geom_line()  + 
+    facet_wrap(~type) + 
+    labs(y = "action", x = "repetition")
+    
 
 
 

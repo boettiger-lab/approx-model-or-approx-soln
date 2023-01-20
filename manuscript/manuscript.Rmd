@@ -46,6 +46,7 @@ header-includes:
   - \usepackage{setspace}
   - \usepackage{bookmark}
   - \usepackage{float}
+  - \usepackage{graphicx}
   - \linenumbers
   - \doublespacing
 
@@ -429,7 +430,15 @@ Our results suggest that DRL can find solutions that are more sustainable *and* 
 Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
 These periods effectively allow the system to, in a sense, ‘‘reset’’ itself.
 They lead to a distinctive oscillating behavior of the system state over time, with periods of relative depletion followed by periods of growth. 
-Figure \ref{fig:tbd} exemplifies this point by comparing the harvest effort and state times series obtained from these policies.
+Figure \ref{fig:tbd} exemplifies this point by comparing one times series of the system state obtained using each of these policies.
+
+\begin{figure}
+	\includegraphics[width=\linewidth]{Figures/timeseries.png}
+\caption{
+\label{fig:one timeseries}
+tbd
+}
+\end{figure}
 
 It is well known that following MSY policies can lead to over-fishing.
 Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
