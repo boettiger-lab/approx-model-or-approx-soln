@@ -63,7 +63,7 @@ df <- map_dfr(seq(0, 1, length.out = 31),
 function(init) {
   df <- tibble(init, time = 1:50, x = init)
   for(t in 1:max(df$time)) {
-    df[t+1,] = tibble(init, time = t+1, x = f(df$x[t], F)) 
+    df[t+1,] = tibble(init, time = t+1, x = f(df$x[t], F_MSY)) 
   }
   df
 })
