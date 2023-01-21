@@ -65,6 +65,12 @@ editor_options:
 
 ---
 
+```{r}
+knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
+                      warning = FALSE, fig.height=5, fig.width=7.5)
+library(tidyverse)
+```
+
 
 <!--
  Special Issue Description:
@@ -488,23 +494,24 @@ The choice of the constant $50$ in this rule was rather arbitrary: we set it to 
 We compare the performance of this agent to the performance of MSY and of an 80% TAC. 
 
 ```{r}
-library(tidyverse)
+knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
+                      warning = FALSE, fig.height=5, fig.width=7.5)
 msy <- read_csv("../data/msy.csv.gz")
-ppo <- read_csv("../data/ppo-200.csv")
+ppo <- read_csv("../data/PPO250.csv.gz")
 escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
 
 # rename some columns for figure purposes:
 colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
-colnames(ppo) <- c('1', 't', 'X', 'Y', 'Z', 'action', 'reward', 'rep')
+colnames(ppo) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z') 
 colnames(escapement) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z') 
 
 # ppo dataset uses step rewards rather than cumulative rewards, which is what is useful here.
 # so, switch stuff around:
-ppo |> 
-    group_by(rep) |> 
-    mutate(cumulative_reward = cumsum(reward)) |>
-    within(rm("reward", "1")) |>
-    rename(reward = cumulative_reward)
+#ppo |> 
+#    group_by(rep) |> 
+#    mutate(cumulative_reward = cumsum(reward)) |>
+#    within(rm("reward", "1")) |>
+#    rename(reward = cumulative_reward)
 
 # set up for plots:
 
@@ -517,6 +524,7 @@ msy_sim <- msy |>
                 names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1, policy = "msy") # natural units, policy name
 
+actions <- unique(msy$action)
 i <- which.min(abs(actions - best_action* 0.8))
 tac_sim <- msy |> 
     filter(action == actions[[i]]) |>
@@ -527,23 +535,20 @@ tac_sim <- msy |>
 ppo_sim <- ppo |> 
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
-    within(rm("1")) |>
-    mutate(policy = "ppo") # already in natural units
+    mutate(abundance = abundance + 1, policy = "ppo")
 
 best_e <- 0.62 # optimal constant escapement, computed from ../data/escapement.csv.gz
 esc_sim <- escapement |> 
-    rename(escapement = action) |>
-    filter(escapement == best_e) |> # data had a naming problem
+    rename(escapement = action) |> # data had a naming problem
+    filter(escapement == best_e) |> 
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1)
 
 msy_tac_ppo <- bind_rows(msy_sim, tac_sim, ppo_sim)
-#head(msy_tac_ppo)
-#head(ppo_sim)
 ```
 
-Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than both MSY and TAC.
+Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than any constant mortality strategy.
 Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
 These periods effectively allow the system to, in a sense, "reset" itself.
 They lead to a distinctive oscillating behavior of the system state over time, with periods of relative depletion followed by periods of growth. 
@@ -551,7 +556,20 @@ Figure \ref{fig:tbd} exemplifies this point by comparing one times series of the
 
 
 ```{r fig.cap="TBD."}
-
+knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
+                      warning = FALSE, fig.height=5, fig.width=7.5)
+policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
+policy_labeller <- function(variable,value){
+  return(policy_labels[value])
+}
+msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(rep == 0) |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) + 
+        labs(y = "abundance", x = "time") +
+        theme(aspect.ratio = 2/5)
 ```
 
 \begin{figure}
