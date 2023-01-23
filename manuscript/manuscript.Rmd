@@ -199,7 +199,7 @@ and/or *effort controls*, restrictions on the fishing effort -- in numbers of bo
 Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
 
 ```{r conceptual, echo = FALSE, message=FALSE, fig.align='center', fig.cap='(A) Classical management strategies often have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $V1$). where the interaction between $V1$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. (B) RL allows us to solve for quantitative decision strategies considering more complex ecosystem dynamics. For example, in this paper, we find harvest strategies for a three-species model using a model-free RL algorithm, PPO. (C) We show how the RL-based solution that considers all three species finds harvest policies with higher average reward and with (D) lower probability of harvest species collapse than the classical approaches, only considering the dynamics of V1.', out.width='1\\linewidth', fig.pos='H'}
-knitr::include_graphics("Figures/conceptual-figure.png")
+knitr::include_graphics("Figures/conceptual-figure-old.png")
 ```
 
 
@@ -234,9 +234,11 @@ For $n$ species, these models have the general form
 
 \begin{align}
   \label{eq:general model}
-  N_{t+1} - N_t = f(N_t) - F N_t := \Delta N_t,
+  \Delta N_t := N_{t+1} - N_t = f(N_t) - F^T N_t,
 \end{align}
-where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, where the product of the mortality and the stock size, $F N_t$ is the harvest size at timestep $t$. 
+where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, where the product of the mortality and the stock size, $F^T N_t$ is the harvest size at timestep $t$. 
+Here, $F\in\mathbb{R}^n$ is a vector of fishing intensities, where $F_i$ is the intensity with which the $i$-th species is fished.
+We will focus on the case where only the first species is fished, $F= (F_1,\ 0,\ \dots,\ 0)$.
 
 ## A single species model
 
@@ -246,20 +248,22 @@ The most familiar model of $f(X)$ is that of *logistic growth*, for which
 $$
   f(X_t) = r X_t\big(1 - X_t / K \big) =: L(X_t;\ r, K).
 $$
-Which combined with the harvest term from \eqref(eq:general model) is known as the Gordon-Schaefer model, after foundational work which first developed the concept of maximum sustainable yield, MSY, [@Gordon1954; @Schaefer1954], which remains a central concept in fisheries management.  
-In this model, note that the maximum growth rate occurs at population size of $N = K/2$, which is approached asymptotically from any positive initial state $N_0 \in (0,K)$ under a constant mortality of $F = r/2$, which thus produces a harvest of $rK/4$ at equilibrium -- the maximum yield sustainable indefinitely. 
+The model this $f$ gives rise to is known as the Gordon-Schaefer model, after foundational work which first developed the concept of maximum sustainable yield, MSY, [@Gordon1954; @Schaefer1954], which remains a central concept in fisheries management.
+In this model, the maximum growth rate occurs at population size of $N = K/2$.
+This value is approached asymptotically, from any positive initial state $N_0 \in (0,K)$, under a constant mortality $F = r/2$ policy.
+At equilibrium this produces an asymptotic harvest of $rK/4$ per time step---the maximum yield sustainable indefinitely.
 
 
 
 
-Real world ecological systems are obviously far more complicated than this simple model suggests.  
+Real world ecological systems are obviously far more complicated than this simple model suggests.
 One particularly important aspect that has garnered much attention is the potential for the kind of highly non-linear functions that can support dynamics such as alternative stable states and hysteresis.
 A seminal example of such dynamics was introduced in \cite{may77}, using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
 
 \begin{align}
   \label{eq:may}
-  f(X_t)
-  = L(X_t;\ r, K) - F(X_t, H; \beta,c),
+  f_{\text{May}}(X_t)
+  := L(X_t;\ r, K) - F(X_t, H; \beta,c),
 \end{align}
 where,
 \begin{align*}
@@ -268,11 +272,22 @@ where,
 
 The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
 
-Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{tbd}).
+Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{fig:may stable}).
 Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $\hat X_t$ of the system, these two attractors separated by an unstable fixed point.
 At a certain threshold value of $H$, however, the top stable fixed point collides with the unstable fixed point and both are annihilated.
 For this value of $H$, and for higher values, only the lower fixed point remains.
 This also creates the phenomenon of *hysteresis*, where returning $H$ to its original value is not sufficient to restore $\hat X_t$ to the original stable state. 
+
+\begin{figure}
+  \centering
+  \includegraphics[width = 0.8\linewidth]{figures/MayStablePoints.pdf}
+  \caption{
+    \label{fig:may stable}
+    The fixed point diagram for the model \cite{may77} associated to $f_{\text{May}}$ as a function of varying the parameter $\beta H$.
+    That is, these are the zeroes of the function $f_{\text{May}}$. 
+    Stable fixed points (also known as *attractors*) are plotted using a solid line, while the unstable fixed point is shown as a dotted line.
+  }
+\end{figure}
 
 This structure implies two things.
 First, that a drift in $H$ could lead to catastrophic consequences, with the population $X_t$ plummeting to the lower fixed stable point.
