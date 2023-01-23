@@ -352,9 +352,7 @@ Similarly, eq. \eqref{eq:3d model} becomes
 \end{align*}
 
 
-# Fishery management figures
-
-```{r escapement_msy, fig.cap="TBD.", out.width = "6.5in"}
+```{r classical_tuning, fig.cap = "TBD. Red = MSY, Green = 80% TAC", out.width = "6.5in"}
 library(patchwork)
 msy_rewards <- msy |>
   group_by(action, rep) |>
@@ -376,7 +374,9 @@ rmsy <- msy_rewards |>
              ymax=mean_reward+2*sd)) +
   geom_point() + geom_ribbon(alpha=0.4) +
   labs(y = "episode reward", x = "constant mortality") +
-  theme(aspect.ratio = 1/1)
+  theme(aspect.ratio = 1/1) + 
+  geom_vline(aes(xintercept=0.0465), color="red") + 
+  geom_vline(aes(xintercept=0.0370), color="green") 
 
 resc <- esc_rewards |>
   ggplot(aes(esc_level, mean_reward, 
@@ -630,6 +630,7 @@ p2 <- msy_tac_ppo |>
 
 ```{r state-space, fig.cap="TBD.", out.width = "6.5in"}
 i_tac <- which.min(abs(actions - best_action * 0.8))
+actions[[i_tac]]
 
 # color pallette limits
 library(RColorBrewer)
