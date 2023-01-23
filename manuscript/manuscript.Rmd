@@ -597,33 +597,33 @@ p2 <- msy_tac_ppo |>
 (p1 / p2) + plot_annotation(tag_levels = 'A')
 ```
 
-```{r state-space}
+```{r state-space, fig.cap="TBD.", out.width = "6.5in"}
 i_tac <- which.min(abs(actions - best_action * 0.8))
 
 # color pallette limits
 library(RColorBrewer)
 myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")))
-sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0,1))
+sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0,0.25))
 
 pmsy <- msy |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
   filter(action == best_action) |>
   ggplot(aes(X, Z, color = harvest)) +
   geom_point() + sc +
-  theme(aspect.ratio = 1/1)
+  ggtitle("Opt. Const. Mortality")
 
 ptac <- msy |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
   filter(action == actions[[i_tac]]) |>
   ggplot(aes(X, Z, color = harvest)) +
   geom_point() + sc +
-  theme(aspect.ratio = 1/1)
+  ggtitle("80% Opt. Const. Mortality")
 
 pppo <- ppo |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
   ggplot(aes(X, Z, color = harvest)) +
   geom_point() + sc +
-  theme(aspect.ratio = 1/1)
+  ggtitle("DRL")
 
 pesc <- opt_escapement |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, 
@@ -633,7 +633,7 @@ pesc <- opt_escapement |>
          ) |> 
   ggplot(aes(X, Z, color = harvest)) +
   geom_point() + sc +
-  theme(aspect.ratio = 1/1)
+  ggtitle("Opt. Const. Escapement")
 
 (
   (pmsy | ptac) / (pppo | pesc) +
