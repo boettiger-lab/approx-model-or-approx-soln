@@ -629,7 +629,6 @@ p2 <- msy_tac_ppo |>
 
 ```{r state-space, fig.cap="TBD.", out.width = "6.5in"}
 i_tac <- which.min(abs(actions - best_action * 0.8))
-actions[[i_tac]]
 
 # color pallette limits
 library(RColorBrewer)
