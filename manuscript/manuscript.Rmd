@@ -597,6 +597,7 @@ p2 <- msy_tac_ppo |>
 (p1 / p2)
 ```
 
+**Probably more for the discussion**
 It is well known that following MSY policies can lead to over-fishing.
 Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
 Figure TBD-A summarizes episode length distribution for MSY, TAC and DRL.
