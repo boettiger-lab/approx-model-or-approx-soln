@@ -65,7 +65,7 @@ editor_options:
 
 ---
 
-```{r}
+```{r knit_global, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
                       warning = FALSE, fig.height=5, fig.width=7.5)
 library(tidyverse)
@@ -572,13 +572,7 @@ msy_tac_ppo |>
         theme(aspect.ratio = 2/5)
 ```
 
-\begin{figure}
-	\includegraphics[width=\linewidth, height = 0.2\textheight]{Figures/timeseries.png}
-\caption{
-\label{fig:one timeseries}
-tbd
-}
-\end{figure}
+
 
 It is well known that following MSY policies can lead to over-fishing.
 Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
@@ -586,21 +580,7 @@ Figure TBD-A summarizes episode length distribution for MSY, TAC and DRL.
 While the DRL-derived policy does not lead to extinctions, both MSY and TAC do so, and thus their episode mean length is lower than the maximal episode length (in our case set at 200 years).
 This difference is reflected on the profits earned by the agent, as shown in Fig. TBD-B.
 
-\begin{figure}
-    \begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=\linewidth]{Figures/ep_length.png}
-        \caption{Episode lengths}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=\linewidth]{Figures/rewards.png}
-        \caption{Episode rewards}
-    \end{subfigure}
-    \caption{
-        TBD
-    }
-    \label{fig:lengths and rewards}
-\end{figure}
+
 
 
 ## Acknowledgements
