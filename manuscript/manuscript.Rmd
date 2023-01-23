@@ -504,7 +504,9 @@ escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
 # rename some columns for figure purposes:
 colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
 colnames(ppo) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z') 
-colnames(escapement) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z') 
+colnames(escapement) <- c('t', 'rep', 'esc_level', 'reward', 'X', 'Y', 'Z') 
+opt_escapement <- escapement |> filter(esc_level == 0.62)
+head(opt_escapement)
 
 # ppo dataset uses step rewards rather than cumulative rewards, which is what is useful here.
 # so, switch stuff around:
@@ -540,8 +542,6 @@ ppo_sim <- ppo |>
 
 best_e <- 0.62 # optimal constant escapement, computed from ../data/escapement.csv.gz
 esc_sim <- escapement |> 
-    rename(escapement = action) |> # data had a naming problem
-    filter(escapement == best_e) |> 
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1)
@@ -553,10 +553,10 @@ Our results suggest that DRL can find solutions that are more sustainable *and* 
 Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
 These periods effectively allow the system to, in a sense, "reset" itself.
 They lead to a distinctive oscillating behavior of the system state over time, with periods of relative depletion followed by periods of growth. 
-Figure \ref{fig:tbd} exemplifies this point by comparing one times series of the system state obtained using each of these policies.
+Figure TBD exemplifies this point by comparing one times series of the system state obtained using each of these policies.
 
 
-```{r timeseries_fig, fig.cap="TBD.", out.width = "6.5in"}
+```{r timeseries, fig.cap="TBD.", out.width = "6.5in"}
 policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
 policy_labeller <- function(variable,value){
   return(policy_labels[value])
@@ -594,13 +594,59 @@ p2 <- msy_tac_ppo |>
       labs(y = "episode reward", x = "repetition") +
       theme(axis.text.x = element_blank())
 
-(p1 / p2)
+(p1 / p2) + plot_annotation(tag_levels = 'A')
 ```
+
+```{r state-space}
+i_tac <- which.min(abs(actions - best_action * 0.8))
+
+# color pallette limits
+library(RColorBrewer)
+myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")))
+sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0,1))
+
+pmsy <- msy |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
+  filter(action == best_action) |>
+  ggplot(aes(X, Z, color = harvest)) +
+  geom_point() + sc +
+  theme(aspect.ratio = 1/1)
+
+ptac <- msy |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
+  filter(action == actions[[i_tac]]) |>
+  ggplot(aes(X, Z, color = harvest)) +
+  geom_point() + sc +
+  theme(aspect.ratio = 1/1)
+
+pppo <- ppo |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
+  ggplot(aes(X, Z, color = harvest)) +
+  geom_point() + sc +
+  theme(aspect.ratio = 1/1)
+
+pesc <- opt_escapement |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, 
+        harvest = case_when(
+          X - esc_level > 0 ~ X - esc_level,
+          X - esc_level <= 0 ~  0)
+         ) |> 
+  ggplot(aes(X, Z, color = harvest)) +
+  geom_point() + sc +
+  theme(aspect.ratio = 1/1)
+
+(
+  (pmsy | ptac) / (pppo | pesc) +
+  plot_layout(guides = "collect") & theme(legend.position = 'right')
+) + 
+  plot_annotation(tag_levels = c('A'))
+```
+
 
 **Probably more for the discussion**
 It is well known that following MSY policies can lead to over-fishing.
 Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
-Figure TBD-A summarizes episode length distribution for MSY, TAC and DRL.
+Figure \ref{rew_len_fig}-A summarizes episode length distribution for MSY, TAC and DRL.
 While the DRL-derived policy does not lead to extinctions, both MSY and TAC do so, and thus their episode mean length is lower than the maximal episode length (in our case set at 200 years).
 This difference is reflected on the profits earned by the agent, as shown in Fig. TBD-B.
 
