@@ -69,6 +69,7 @@ editor_options:
 knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
                       warning = FALSE, fig.height=5, fig.width=7.5)
 library(tidyverse)
+library(patchwork)
 ```
 
 
@@ -555,9 +556,7 @@ They lead to a distinctive oscillating behavior of the system state over time, w
 Figure \ref{fig:tbd} exemplifies this point by comparing one times series of the system state obtained using each of these policies.
 
 
-```{r fig.cap="TBD."}
-knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
-                      warning = FALSE, fig.height=5, fig.width=7.5)
+```{r timeseries_fig, fig.cap="TBD.", out.width = "6.5in"}
 policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
 policy_labeller <- function(variable,value){
   return(policy_labels[value])
@@ -567,12 +566,36 @@ msy_tac_ppo |>
     filter(rep == 0) |>
     ggplot(aes(t, abundance, col = species)) + 
         geom_line()  + 
-        facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
         labs(y = "abundance", x = "time") +
-        theme(aspect.ratio = 2/5)
+        theme(aspect.ratio = 2/3)
 ```
 
 
+```{r rew_len_fig, fig.cap="TBD.", out.width = "6.5in"}
+library(patchwork)
+
+p1 <- msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), rep < 30) |>
+    ggplot(aes(rep, t)) + 
+      geom_col() +
+      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+      labs(y = "episode length", x = "repetition") +
+      theme(axis.text.x = element_blank())
+
+p2 <- msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), rep < 30) |>
+    ggplot(aes(rep, reward)) + 
+      geom_col() +
+      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+      labs(y = "episode reward", x = "repetition") +
+      theme(axis.text.x = element_blank())
+
+(p1 / p2)
+```
 
 It is well known that following MSY policies can lead to over-fishing.
 Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
