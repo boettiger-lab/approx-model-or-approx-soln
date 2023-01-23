@@ -72,6 +72,58 @@ library(tidyverse)
 library(patchwork)
 ```
 
+```{r}
+# Collect data (outsource to separate R script later TBD)
+msy <- read_csv("../data/msy.csv.gz")
+ppo <- read_csv("../data/PPO250.csv.gz")
+escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
+
+# rename some columns for figure purposes:
+colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
+colnames(ppo) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z') 
+colnames(escapement) <- c('t', 'rep', 'esc_level', 'reward', 'X', 'Y', 'Z') 
+opt_escapement <- escapement |> filter(esc_level == 0.62)
+
+# ppo dataset uses step rewards rather than cumulative rewards, which is what is useful here.
+# so, switch stuff around:
+#ppo |> 
+#    group_by(rep) |> 
+#    mutate(cumulative_reward = cumsum(reward)) |>
+#    within(rm("reward", "1")) |>
+#    rename(reward = cumulative_reward)
+
+# set up for plots:
+
+# best constant effort based on the data on ../data/msy.csv.gz
+best_action <- 0.0465
+msy_sim <- msy |>
+    filter(action == best_action) |> 
+    group_by(rep) |>
+    pivot_longer(c("X", "Y", "Z"),
+                names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "msy") # natural units, policy name
+
+actions <- unique(msy$action)
+i <- which.min(abs(actions - best_action* 0.8))
+tac_sim <- msy |> 
+    filter(action == actions[[i]]) |>
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "tac")
+
+ppo_sim <- ppo |> 
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "ppo")
+
+best_e <- 0.62 # optimal constant escapement, computed from ../data/escapement.csv.gz
+esc_sim <- escapement |> 
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1)
+
+msy_tac_ppo <- bind_rows(msy_sim, tac_sim, ppo_sim)
+```
 
 <!--
  Special Issue Description:
@@ -300,8 +352,42 @@ Similarly, eq. \eqref{eq:3d model} becomes
 \end{align*}
 
 
+# Fishery management figures
 
+```{r escapement_msy, fig.cap="TBD.", out.width = "6.5in"}
+library(patchwork)
+msy_rewards <- msy |>
+  group_by(action, rep) |>
+  filter(t == max(t)) |> 
+  group_by(action) |>
+  summarise(mean_reward = mean(reward),
+            sd = sd(reward)) 
 
+esc_rewards <- escapement |>
+  group_by(esc_level, rep) |>
+  filter(t == max(t)) |> 
+  group_by(esc_level) |>
+  summarise(mean_reward = mean(reward),
+            sd = sd(reward)) 
+
+rmsy <- msy_rewards |>
+  ggplot(aes(action, mean_reward, 
+             ymin = mean_reward - 2*sd,
+             ymax=mean_reward+2*sd)) +
+  geom_point() + geom_ribbon(alpha=0.4) +
+  labs(y = "episode reward", x = "constant mortality") +
+  theme(aspect.ratio = 1/1)
+
+resc <- esc_rewards |>
+  ggplot(aes(esc_level, mean_reward, 
+             ymin = mean_reward - 2*sd,
+             ymax=mean_reward+2*sd)) +
+  geom_point() + geom_ribbon(alpha=0.4) +
+  labs(y = "episode reward", x = "constant escapement") +
+  theme(aspect.ratio = 1/1)
+
+(rmsy | resc)
+```
 
 # Fishery management approaches
 
@@ -493,61 +579,6 @@ The choice of the constant $50$ in this rule was rather arbitrary: we set it to 
 \textbf{Too long of a "sorry" message?}
 
 We compare the performance of this agent to the performance of MSY and of an 80% TAC. 
-
-```{r}
-knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
-                      warning = FALSE, fig.height=5, fig.width=7.5)
-msy <- read_csv("../data/msy.csv.gz")
-ppo <- read_csv("../data/PPO250.csv.gz")
-escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
-
-# rename some columns for figure purposes:
-colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
-colnames(ppo) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z') 
-colnames(escapement) <- c('t', 'rep', 'esc_level', 'reward', 'X', 'Y', 'Z') 
-opt_escapement <- escapement |> filter(esc_level == 0.62)
-head(opt_escapement)
-
-# ppo dataset uses step rewards rather than cumulative rewards, which is what is useful here.
-# so, switch stuff around:
-#ppo |> 
-#    group_by(rep) |> 
-#    mutate(cumulative_reward = cumsum(reward)) |>
-#    within(rm("reward", "1")) |>
-#    rename(reward = cumulative_reward)
-
-# set up for plots:
-
-# best constant effort based on the data on ../data/msy.csv.gz
-best_action <- 0.0465
-msy_sim <- msy |>
-    filter(action == best_action) |> 
-    group_by(rep) |>
-    pivot_longer(c("X", "Y", "Z"),
-                names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "msy") # natural units, policy name
-
-actions <- unique(msy$action)
-i <- which.min(abs(actions - best_action* 0.8))
-tac_sim <- msy |> 
-    filter(action == actions[[i]]) |>
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "tac")
-
-ppo_sim <- ppo |> 
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "ppo")
-
-best_e <- 0.62 # optimal constant escapement, computed from ../data/escapement.csv.gz
-esc_sim <- escapement |> 
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1)
-
-msy_tac_ppo <- bind_rows(msy_sim, tac_sim, ppo_sim)
-```
 
 Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than any constant mortality strategy.
 Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
