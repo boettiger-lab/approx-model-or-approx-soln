@@ -352,8 +352,7 @@ Similarly, eq. \eqref{eq:3d model} becomes
 \end{align*}
 
 
-```{r classical_tuning, fig.cap = "TBD. Red = MSY, Green = 80% TAC", out.width = "6.5in"}
-library(patchwork)
+```{r classical_tuning, fig.cap = "TBD.  Red = MSY, Green = 0.8 TAC", out.width = "6.5in"}
 msy_rewards <- msy |>
   group_by(action, rep) |>
   filter(t == max(t)) |> 
