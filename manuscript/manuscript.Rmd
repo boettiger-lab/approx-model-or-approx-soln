@@ -49,6 +49,7 @@ header-includes:
   - \usepackage{graphicx}
   - \usepackage{caption}
   - \usepackage{subcaption}
+  - \usepackage{tikz-cd}
   - \linenumbers
   - \doublespacing
 
@@ -256,9 +257,11 @@ We will focus on the case where only the first species is fished, $F= (F_1,\ 0,\
 Optimal control policies for fisheries are frequently based on 1-dimensional models, $n=1$.
 The most familiar model of $f(X)$ is that of *logistic growth*, for which
 
-$$
+\begin{align}
+  \label{eq:logistic}
   f(X_t) = r X_t\big(1 - X_t / K \big) =: L(X_t;\ r, K).
-$$
+\end{align}
+
 The model this $f$ gives rise to is known as the Gordon-Schaefer model, after foundational work which first developed the concept of maximum sustainable yield, MSY, [@Gordon1954; @Schaefer1954], which remains a central concept in fisheries management.
 In this model, the maximum growth rate occurs at population size of $N = K/2$.
 This value is approached asymptotically, from any positive initial state $N_0 \in (0,K)$, under a constant mortality $F = r/2$ policy.
@@ -356,9 +359,9 @@ We will thus use it as a starting point for our simulations.
 
 ## Stochastic dynamics
 
-\textbf{Probably just merge on previous sections.}
-We consider a stochastic contribution to the system's dynamics.
-This way, eq. \eqref{eq:may} becomes
+We have, up to now, presented eqs. \eqref{eq:may} and \eqref{eq:3d model} as *deterministic* dynamical models for the sake of clarity.
+In practice, we will consider a stochastic contribution to these dynamics.
+This way, instead of eq. \eqref{eq:may}, we consider the following stochastic single-species system
 \begin{align}
   \label{eq:may stoch}
   \Delta X_t
@@ -367,7 +370,7 @@ This way, eq. \eqref{eq:may} becomes
 where $\{\eta_t\}_t$ are independent Gaussian variables with zero mean.
 The variance $\sigma^2$ of $\eta_t$ is an additional parameter of the model.
 
-Similarly, eq. \eqref{eq:3d model} becomes
+Similarly, we use the following dynamical model in place of eq. \eqref{eq:3d model}
 \begin{align*}
   \label{eq:3d model stoch}
   \begin{split}
@@ -376,6 +379,7 @@ Similarly, eq. \eqref{eq:3d model} becomes
     \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
 \end{split}
 \end{align*}
+Here, again, $\{\eta_{i,t}\}$ is a set of independent Gaussian variables centered at zero with variances, respectively, $\sigma_X^2$, $\sigma_Y^2$ and $\sigma_Z^2$.
 
 
 ```{r classical_tuning, fig.cap = "TBD.  Red = MSY, Green = 0.8 TAC", out.width = "6.5in"}
@@ -419,13 +423,30 @@ resc <- esc_rewards |>
 <!-- Introduce the 1D and 3D models, and have Figure 1 already here. -->
 
 Here we review classical strategies for sustainable fishery management and we provide a birds-eye view of the alternative approach we propose.
-A summary of the contrast between the two strategies is given in Fig. \ref{tbd}.
+A summary of the contrast between the two strategies is given in Fig. \ref{fig:decision approaches}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/DecisionApproaches.pdf}
+  \caption{
+  \label{fig:decision approaches}
+  TBD.
+  }
+\end{figure}
 
 ## Classical approaches to sustainable fisheries {#sec:classical}
 
 There are several strategies that have been used to manage fisheries: *escapement*, *maximum sustainable yield (MSY)*, *total allowable catch (TAC)*, among others.
 We collectively refere to these as *classical*, and will compare their performance to RL-based management strategies.
-As shown in Fig. \ref{fig:tbd}, classical strategies have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $F$). 
+Classical strategies derive an optimal harvest policy using a simple model for the system dynamics.
+While often complex models of the ecosystem are used to estimate the fish population of interest (i.e. $X_t$), the quota is set only taking into account the estimate $X_t$.
+The function determining this quota is derived from a simple dynamical model for the population (see text box 1).
+
+\textbf{Text box 1 (TBD formatting)}
+Let us consider a ubiquitous simple example: an MSY policy based on a logistic growth model for $X_t$ (see eqs. \eqref{eq:general model} and \eqref{eq:logistic}).
+
+
+Classical strategies have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $F$). 
 A common example is using a logistic growth equation,
 $$
   F_{t+1} - F_t = r F_t( 1 - F_t / K) - h_t =: L(F_t) - h_t,
