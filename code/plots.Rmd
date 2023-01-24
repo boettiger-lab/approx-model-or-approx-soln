@@ -182,7 +182,7 @@ best_e
 
 ```{r}
 esc_sims <- escapement |> 
-  filter(action == best_e$action) |>
+  filter(action == best_e) |>
   pivot_longer(c("X", "Y", "Z"),
                names_to = "species", values_to = "abundance") |>
   mutate(abundance = abundance + 1) |>
