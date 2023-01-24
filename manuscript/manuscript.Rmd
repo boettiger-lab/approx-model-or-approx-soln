@@ -720,6 +720,25 @@ pesc <- opt_escapement |>
 ```
 
 
+```{r escapement_timeseries, fig.cap = "TBD", out.width = "6.5in"}
+
+ppo_mod <- ppo |> 
+  mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X, time = t)
+
+avg_esc <- mean(ppo_mod$escapement)
+# = 0.6201131
+
+ppo_esc <- ppo_mod |>
+  filter(rep==0) |>
+  group_by(rep) |>
+  ggplot(aes(time, escapement), alpha = rep) +
+  geom_line() +
+  geom_hline(aes(yintercept=avg_esc), color="red")+
+  theme(aspect.ratio = 1/5)
+
+ppo_esc
+```
+
 **Probably more for the discussion**
 It is well known that following MSY policies can lead to over-fishing.
 Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
