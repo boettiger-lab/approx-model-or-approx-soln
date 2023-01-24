@@ -27,6 +27,6 @@ actions = np.linspace(0,1,101)
 parallel = [simulate.remote(env, i) for i in actions]
 df = ray.get(parallel)
 
-cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
+cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
 df2 = pd.DataFrame(np.vstack(df), columns = cols)
-df2.to_csv("data/escapement.csv.gz", index=False)
+df2.to_csv("data/escapement.csv.xz", index=False)

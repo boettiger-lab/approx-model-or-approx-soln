@@ -211,7 +211,8 @@ Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
 #| out.width: '1\\linewidth', 
 #| fig.pos: 'H'
  
-knitr::include_graphics("Figures/conceptual-figure.png")
+#knitr::include_graphics("Figures/conceptual-figure.png")
+
 ```
 
 
