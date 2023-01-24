@@ -595,9 +595,42 @@ This context provides a motivation for this paper.
 Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
 This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
 
+
+# Results
+
+\textbf{Training a DRL agent.}
+We trained a DRL agent parametrized by a neural network $\theta$ with two hidden, 64-neuron, layers.
+The state space used was a cube $[0,2]^{\times 3}$, while the policies explored mapped states $N_t$ to a single number, $h_t = \pi_\theta(N_t)$, the harvest quota on species $X$ at that timestep.
+Each episode in the training and in the evaluation stages was at most 600 time steps long.
+Episodes were ended early in case of a ‘‘near-extinction event,’’ a moment in which any of the populations dipped below a threshold value, i.e.,
+\begin{align}
+  \label{eq:thresh}
+  X_t \leq X_{\text{thresh.}},\quad
+  Y_t \leq Y_{\text{thresh.}},\quad
+  \text{or,}\quad
+  Z \leq Z_{\text{thresh.}}.
+\end{align}
+The reward function had two componenets:
+First, at each time step the harvest $h_t$ was received as a reward.
+Second, if the episode ended early (say, at time-step $t$) because of a near-extinction event, a negative reward of $-50/t$ was awarded.
+The constant 50 was chosen so as to select against highly extractive policies in the early stages of training, and thus guide the agent towards sustainable policies.
+
+We used the Ray framework [@ray_package] for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters (cf. [@repo] for the code used).
+The agent was trained for 250 iterations of the PPO optimization step.
+
+
+\textbf{Tuning the constant mortality strategy.}
+A grid of 200 mortality rates was laid in the interval $[0, 0.1]$.
+For each one of these rates, say $F$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
+At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $FX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
+The optimal mortality rate was the value $F^*$ for which the mean episode reward was maximal.
+
+
+
+\textbf{Parameter values used.}
+
   
-  
-# Methods and Results
+# Old Methods and Results
 
 ## Methods
 
