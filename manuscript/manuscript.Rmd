@@ -425,15 +425,6 @@ resc <- esc_rewards |>
 Here we review classical strategies for sustainable fishery management and we provide a birds-eye view of the alternative approach we propose.
 A summary of the contrast between the two strategies is given in Fig. \ref{fig:decision approaches}.
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\linewidth]{figures/DecisionApproaches.pdf}
-  \caption{
-  \label{fig:decision approaches}
-  TBD.
-  }
-\end{figure}
-
 ## Classical approaches to sustainable fisheries {#sec:classical}
 
 There are several strategies that have been used to manage fisheries: *escapement*, *maximum sustainable yield (MSY)*, *total allowable catch (TAC)*, among others.
@@ -606,8 +597,45 @@ This way, it is plausible that model-free RL controls outperform currently used 
 
   
   
-# Results
+# Methods and Results
 
+## Methods
+
+Model-based controls, such as MSY, are known to have serious deficiencies when the model used to find the optimal control does not match reality.
+As mentioned, for the particular case of fisheries this can lead to depletion of resources and affect severely the surrounding ecosystems.
+Because of this, we have opted to compare the performance of several data-based approaches to fishery control (see Fig. \ref{fig:decision approaches}).
+
+As shown in Fig. \ref{fig:decision approaches}, these data-based strategies rely on choosing a family of *approximating functions* for the policy, $\mathcal{P}:=\{\pi_\theta\}_\theta$, parametrized by some vector $\theta$.
+These functions are deterministic policies, i.e. they map states to actions, or, specifically,
+$$
+  \pi_\theta : \mathbb{R}^n \to \mathbb{R}_+,
+$$
+where, as before, $n$ is the number of species.
+The aim of the optimization process is to find a parameter choice $\theta^*$ for which $\pi_{\theta^*}$ is optimal within $\mathcal{P}$.
+
+Our focus here will be comparing two data-based approaches: *constant mortality* and *DRL*.
+Constant mortality is, as the name suggests, based on MSY.
+
+For the constant mortality approach, we choose a linear harvest $\pi_F(N_t)= F X_t$, where the parameter $F$ is scalar, and where $N_t = (X_t,\ \dots\ )\in \mathbb{R}^n$.
+This first control is intended to delineate how one might apply MSY to a real-world fishery.
+We will also compare a TAC-inspired rule of thumb which uses, instead, the parameter value $F_{\text{TAC}} = 0.8 F^*$.
+In App. \ref{app:tbd}, we discuss several other MSY-based approaches which yield similar results to the strategies just discussed.
+
+In the DRL approach, we instead parametrize $\mathcal{P}$ using a neural network with two hidden layers of 64 neurons.
+Our hypothesis is that the additional flexibility yielded by neural networks will allow the agent solutions that are better than MSY based approaches.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/DecisionApproaches.pdf}
+  \caption{
+  \label{fig:decision approaches}
+  TBD.
+  }
+\end{figure}
+
+## Results
+
+\textbf{Reword a bit.}
 We trained a DRL agent to obtain a candidate policy
 \begin{align*}
   \pi: (X_t,Y_t,Z_t) \mapsto h_t
