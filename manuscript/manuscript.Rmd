@@ -371,14 +371,14 @@ where $\{\eta_t\}_t$ are independent Gaussian variables with zero mean.
 The variance $\sigma^2$ of $\eta_t$ is an additional parameter of the model.
 
 Similarly, we use the following dynamical model in place of eq. \eqref{eq:3d model}
-\begin{align*}
+\begin{align}
   \label{eq:3d model stoch}
   \begin{split}
     \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t + \eta_{X,t},\\
     \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{Y,t},\\
     \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
 \end{split}
-\end{align*}
+\end{align}
 Here, again, $\{\eta_{i,t}\}$ is a set of independent Gaussian variables centered at zero with variances, respectively, $\sigma_X^2$, $\sigma_Y^2$ and $\sigma_Z^2$.
 
 
@@ -618,16 +618,28 @@ The constant 50 was chosen so as to select against highly extractive policies in
 We used the Ray framework [@ray_package] for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters (cf. [@repo] for the code used).
 The agent was trained for 250 iterations of the PPO optimization step.
 
-
 \textbf{Tuning the constant mortality strategy.}
 A grid of 200 mortality rates was laid in the interval $[0, 0.1]$.
 For each one of these rates, say $F$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
 At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $FX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
 The optimal mortality rate was the value $F^*$ for which the mean episode reward was maximal.
-
-
+We additionally evaluated a more conservative strategy where a mortality of $0.8 F^*$ instead is used.
 
 \textbf{Parameter values used.}
+The model's dynamic parameters were chosen as follows
+\begin{align*}
+  r_X = K_X = r_Y = K_Y = 1, \quad \beta = 0.3, \quad c = 0.1\\
+  c_{XY} = 0.5,\quad f = 0.15,\quad D = 1.1, \quad d_Z = 0.135.
+\end{align*}
+Moreover, the variances for the stochastic terms were chosen as
+$$
+  \sigma^2(\eta_{X,t}) = \sigma^2(\eta_{Y,t}) = \sigma^2(\eta_{Z,t}) = 0.05.
+$$
+The threshold values used to determine an early episode end were chosen as
+$$
+  X_{\text{thresh.}} = 0.08,\quad Y_{\text{thresh.}} = Z_{\text{thresh.}} = 10^{-4},
+$$
+where the higher value of $X_{\text{thresh.}}$ helped select for more sustainable fishing strategies (for both the DRL and constant mortality approaches).
 
   
 # Old Methods and Results
