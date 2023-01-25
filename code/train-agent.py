@@ -17,13 +17,14 @@ config.create_env_on_local_worker = True
 agent = config.build(env="threeFishing-v2")
 
 
-iterations = 250
-checkpoint = ("ppo/checkpoint_000{}".format(iterations))
+iterations = 200
+checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
   for _ in range(iterations):
-      agent.train()
-  checkpoint = agent.save("ppo")
+    print(f"iteration {_}", end = "\r")
+    agent.train()
+  checkpoint = agent.save("cache")
 
 #agent_restored = config.build(env="threeFishing-v2")
 #agent_restored.evaluate()

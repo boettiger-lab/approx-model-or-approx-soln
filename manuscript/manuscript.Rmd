@@ -67,7 +67,7 @@ editor_options:
 ---
 
 ```{r knit_global, include=FALSE}
-knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
+knitr::opts_chunk$set(cache = FALSE, echo = FALSE, message = FALSE, 
                       warning = FALSE, fig.height=5, fig.width=7.5)
 library(tidyverse)
 library(patchwork)
@@ -76,8 +76,9 @@ library(patchwork)
 ```{r}
 # Collect data (outsource to separate R script later TBD)
 msy <- read_csv("../data/msy.csv.gz")
-ppo <- read_csv("../data/PPO250.csv.gz")
+ppo <- read_csv("../data/PPO200.csv.gz")
 escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
+
 
 # rename some columns for figure purposes:
 colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
@@ -96,7 +97,7 @@ opt_escapement <- escapement |> filter(esc_level == 0.62)
 # set up for plots:
 
 # best constant effort based on the data on ../data/msy.csv.gz
-best_action <- 0.0465
+best_action <- 0.045
 msy_sim <- msy |>
     filter(action == best_action) |> 
     group_by(rep) |>
@@ -117,7 +118,7 @@ ppo_sim <- ppo |>
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1, policy = "ppo")
 
-best_e <- 0.62 # optimal constant escapement, computed from ../data/escapement.csv.gz
+best_e <- 0.61 # optimal constant escapement, computed from ../data/escapement.csv.gz
 esc_sim <- escapement |> 
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
@@ -212,7 +213,6 @@ Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
 #| fig.pos: 'H'
  
 #knitr::include_graphics("Figures/conceptual-figure.png")
-
 ```
 
 
@@ -372,18 +372,18 @@ where $\{\eta_t\}_t$ are independent Gaussian variables with zero mean.
 The variance $\sigma^2$ of $\eta_t$ is an additional parameter of the model.
 
 Similarly, we use the following dynamical model in place of eq. \eqref{eq:3d model}
-\begin{align*}
+\begin{align}
   \label{eq:3d model stoch}
   \begin{split}
     \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t + \eta_{X,t},\\
     \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{Y,t},\\
     \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
 \end{split}
-\end{align*}
+\end{align}
 Here, again, $\{\eta_{i,t}\}$ is a set of independent Gaussian variables centered at zero with variances, respectively, $\sigma_X^2$, $\sigma_Y^2$ and $\sigma_Z^2$.
 
 
-```{r classical_tuning, fig.cap = "TBD.  Red = MSY, Green = 0.8 TAC", out.width = "6.5in"}
+```{r}
 msy_rewards <- msy |>
   group_by(action, rep) |>
   filter(t == max(t)) |> 
@@ -405,8 +405,8 @@ rmsy <- msy_rewards |>
   geom_point() + geom_ribbon(alpha=0.4) +
   labs(y = "episode reward", x = "constant mortality") +
   theme(aspect.ratio = 1/1) + 
-  geom_vline(aes(xintercept=0.0465), color="red") + 
-  geom_vline(aes(xintercept=0.0370), color="green") 
+  geom_vline(aes(xintercept=0.0360), color="red") + 
+  geom_vline(aes(xintercept=0.0288), color="green") 
 
 resc <- esc_rewards |>
   ggplot(aes(esc_level, mean_reward, 
@@ -416,7 +416,7 @@ resc <- esc_rewards |>
   labs(y = "episode reward", x = "constant escapement") +
   theme(aspect.ratio = 1/1)
 
-(rmsy | resc)
+# (rmsy | resc)
 ```
 
 # Fishery management approaches
@@ -596,9 +596,134 @@ This context provides a motivation for this paper.
 Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
 This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
 
-  
-  
-# Methods and Results
+
+# Methods
+
+\textbf{Training a DRL agent.}
+We trained a DRL agent parametrized by a neural network $\theta$ with two hidden, 64-neuron, layers.
+The state space used was a cube $[0,2]^{\times 3}$, while the policies explored mapped states $N_t$ to a single number, $h_t = \pi_\theta(N_t)$, the harvest quota on species $X$ at that timestep.
+Each episode in the training and in the evaluation stages was at most 600 time steps long.
+Episodes were ended early in case of a ‘‘near-extinction event,’’ a moment in which any of the populations dipped below a threshold value, i.e.,
+\begin{align}
+  \label{eq:thresh}
+  X_t \leq X_{\text{thresh.}},\quad
+  Y_t \leq Y_{\text{thresh.}},\quad
+  \text{or,}\quad
+  Z \leq Z_{\text{thresh.}}.
+\end{align}
+The reward function had two componenets:
+First, at each time step the harvest $h_t$ was received as a reward.
+Second, if the episode ended early (say, at time-step $t$) because of a near-extinction event, a negative reward of $-50/t$ was awarded.
+The constant 50 was chosen so as to select against highly extractive policies in the early stages of training, and thus guide the agent towards sustainable policies.
+
+We used the Ray framework [@ray_package] for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters (cf. [@repo] for the code used).
+The agent was trained for 250 iterations of the PPO optimization step.
+
+\textbf{Tuning the constant mortality strategy.}
+A grid of 200 mortality rates was laid in the interval $[0, 0.1]$.
+For each one of these rates, say $F$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
+At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $FX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
+The optimal mortality rate was the value $F^*$ for which the mean episode reward was maximal.
+We additionally evaluated a more conservative strategy where a mortality of $0.8 F^*$ instead is used.
+
+The result of the tuning procedure is shown in Fig. \ref{fig:linear_tuning}. 
+There, we see that the optimal value $F^*$ lies in an area with high episode reward variance.
+We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this variance is the presence of episodes with early endings.
+Thus, the value $0.8 F^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
+
+```{r linear_tuning, fig.cap = "Result of the tuning procedure for the constant mortality strategy. (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $F^* = $ TBD (red) and $0.8 F^*=$ TBD (green). (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $F^*X$ shown in red, while $0.8F^*X$ shown in green.", out.width = "6.5in"}
+msy_rewards <- msy |>
+  group_by(action, rep) |>
+  filter(t == max(t)) |> 
+  group_by(action) |>
+  summarise(mean_reward = mean(reward),
+            sd = sd(reward)) 
+
+rmsy <- msy_rewards |>
+  ggplot(aes(action, mean_reward, 
+             ymin = mean_reward - 2*sd,
+             ymax=mean_reward+2*sd)) +
+  geom_point() + geom_ribbon(alpha=0.4) +
+  labs(y = "episode reward", x = "constant mortality") +
+  theme(aspect.ratio = 1/1) + 
+  geom_vline(aes(xintercept=best_action), color="red") + 
+  geom_vline(aes(xintercept=0.8*best_action), color="green") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+# linear function blueprint
+linear_f <- function(slope, x) slope*x
+# generates linear function with given slope
+linear_f_gen <- function(slope) (function(x) slope*x)
+
+# dummy data set to keep ggplot happy
+p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
+
+# p + stat_function(fun = linear_f_gen(0.5)) + xlim(0,2)
+lines <- p + stat_function(fun = linear_f_gen(0.01)) + 
+  stat_function(fun = linear_f_gen(0.02)) +
+  stat_function(fun = linear_f_gen(0.03)) +
+  stat_function(fun = linear_f_gen(0.8*best_action), col = "green") +
+  stat_function(fun = linear_f_gen(best_action), col = "red") +
+  stat_function(fun = linear_f_gen(0.055)) + 
+  stat_function(fun = linear_f_gen(0.065)) +
+  xlim(0,2) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+
+(rmsy | lines) + plot_annotation(tag_levels = c('A'))
+```
+
+\textbf{Parameter values used.}
+The model's dynamic parameters were chosen as follows
+\begin{align*}
+  r_X = K_X = r_Y = K_Y = 1, \quad \beta = 0.3, \quad c = 0.1\\
+  c_{XY} = 0.5,\quad f = 0.15,\quad D = 1.1, \quad d_Z = 0.135.
+\end{align*}
+Moreover, the variances for the stochastic terms were chosen as
+$$
+  \sigma^2(\eta_{X,t}) = \sigma^2(\eta_{Y,t}) = \sigma^2(\eta_{Z,t}) = 0.05.
+$$
+The threshold values used to determine an early episode end were chosen as
+$$
+  X_{\text{thresh.}} = 0.08,\quad Y_{\text{thresh.}} = Z_{\text{thresh.}} = 10^{-4},
+$$
+where the higher value of $X_{\text{thresh.}}$ helped select for more sustainable fishing strategies (for both the DRL and constant mortality approaches).
+
+# Results
+
+In Fig. \ref{fig:timeseries} we show one example time series for each of the three controls we analyzed: 
+the left panel uses an optimalconstant mortality control $F^*X$, the middle panel uses $0.8 F^* X$, while the right panel is controlled by the trained DRL agent.
+We see that that optimal constant mortality control leads to a near-extinction event at around $t=150$.
+The constant mortality policy at $0.8 F^*$ is already conservative enough to support a sustainable path.
+There, the population levels are maintained roughly in a stationary state.
+Finally, the DRL time series shows an oscillatory behavior, with a slight dephase between the $Y$ and $Z$ curves, while the $X$ oscillations are roughly anticorrelated with $Z$.
+
+```{r timeseries, fig.cap="TBD.", out.width = "6.5in"}
+policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
+policy_labeller <- function(variable,value){
+  return(policy_labels[value])
+}
+msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(rep == 5) |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+        labs(y = "abundance", x = "time") +
+        theme(aspect.ratio = 2/3)
+```
+
+This time series is representative of the patterns observed in the data (see App. \ref{app:tbd}).
+The episode reward and episode length statistics are shown in Fig. \ref{fig:rew_len_fig}.
+There, we highlight two things:
+First, that the tendency towards early episode ends is fixed by the conservative approach of fishing at 80% of the optimal mortality rate.
+In App. \ref{app:tbd} we discuss a warning about this approach, however: the arbitrarily chosen percentange itself lives on a ‘‘knife's edge.’’
+More concretely, choosing a higher percentage, say 90%, can switch the behaviour of the controlled system and give rise to the proliferation of early episode ends.
+Second, that while the conservative 80% approach has a stable behavior, it consistently produces smaller harvests than a DRL generated policy.
+
+
+# Old Methods and Results
 
 ## Methods
 
@@ -662,14 +787,14 @@ They lead to a distinctive oscillating behavior of the system state over time, w
 Figure TBD exemplifies this point by comparing one times series of the system state obtained using each of these policies.
 
 
-```{r timeseries, fig.cap="TBD.", out.width = "6.5in"}
+```{r timeseries_old, fig.cap="TBD.", out.width = "6.5in"}
 policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
 policy_labeller <- function(variable,value){
   return(policy_labels[value])
 }
 msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(rep == 0) |>
+    filter(rep == 5) |>
     ggplot(aes(t, abundance, col = species)) + 
         geom_line()  + 
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
@@ -684,7 +809,7 @@ library(patchwork)
 
 p1 <- msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(t==max(t), rep < 30) |>
+    filter(t==max(t), species == "X", rep < 30) |>
     ggplot(aes(rep, t)) + 
       geom_col() +
       facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
@@ -693,11 +818,11 @@ p1 <- msy_tac_ppo |>
 
 p2 <- msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(t==max(t), rep < 30) |>
+    filter(t==max(t), species == "X", rep < 30) |>
     ggplot(aes(rep, reward)) + 
       geom_col() +
       facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
-      labs(y = "episode reward", x = "repetition") +
+      labs(y = "episode harvest", x = "repetition") +
       theme(axis.text.x = element_blank())
 
 (p1 / p2) + plot_annotation(tag_levels = 'A')

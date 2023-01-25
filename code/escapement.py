@@ -21,6 +21,7 @@ def simulate(env, action):
   return(df)
 
 env = gym.make("threeFishing-v2")
+env.training = False
 actions = np.linspace(0,1,101)
 
 # define parllel loop and execute
