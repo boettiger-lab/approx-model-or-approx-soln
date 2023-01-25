@@ -21,7 +21,8 @@ checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
   for _ in range(iterations):
-      agent.train()
+    print(f"iteration {_}", end = "\r")
+    agent.train()
   checkpoint = agent.save("cache")
 
 #agent_restored = config.build(env="threeFishing-v2")
