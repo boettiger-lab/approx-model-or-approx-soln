@@ -824,7 +824,7 @@ p2 <- msy_tac_ppo |>
     ggplot(aes(rep, reward)) + 
       geom_col() +
       facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
-      labs(y = "episode reward", x = "repetition") +
+      labs(y = "episode harvest", x = "repetition") +
       theme(axis.text.x = element_blank())
 
 (p1 / p2) + plot_annotation(tag_levels = 'A')
