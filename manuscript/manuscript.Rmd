@@ -716,7 +716,15 @@ msy_tac_ppo |>
         theme(aspect.ratio = 2/3)
 ```
 
-  
+This time series is representative of the patterns observed in the data (see App. \ref{app:tbd}).
+The episode reward and episode length statistics are shown in Fig. \ref{fig:rew_len_fig}.
+There, we highlight two things:
+First, that the tendency towards early episode ends is fixed by the conservative approach of fishing at 80% of the optimal mortality rate.
+In App. \ref{app:tbd} we discuss a warning about this approach, however: the arbitrarily chosen percentange itself lives on a ‘‘knife's edge.’’
+More concretely, choosing a higher percentage, say 90%, can switch the behaviour of the controlled system and give rise to the proliferation of early episode ends.
+Second, that while the conservative 80% approach has a stable behavior, it consistently produces smaller harvests than a DRL generated policy.
+
+
 # Old Methods and Results
 
 ## Methods
