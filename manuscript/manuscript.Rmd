@@ -701,8 +701,6 @@ The constant mortality policy at $0.8 F^*$ is already conservative enough to sup
 There, the population levels are maintained roughly in a stationary state.
 Finally, the DRL time series shows an oscillatory behavior, with a slight dephase between the $Y$ and $Z$ curves, while the $X$ oscillations are roughly anticorrelated with $Z$.
 
-
-
 ```{r timeseries, fig.cap="TBD.", out.width = "6.5in"}
 policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
 policy_labeller <- function(variable,value){
