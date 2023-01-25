@@ -52,7 +52,7 @@ for rep in range(50):
     
 cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
 df = pd.DataFrame(df, columns = cols)
-df.to_csv("data/PPO" + str(iterations) + ".csv.gz", index = False)
+df.to_csv(f"data/PPO{iterations}.csv.xz", index = False)
 
 
 

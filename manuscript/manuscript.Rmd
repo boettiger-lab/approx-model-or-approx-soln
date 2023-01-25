@@ -74,31 +74,36 @@ library(patchwork)
 ```
 
 ```{r}
+# for best const mortality and best const escapement
+msy_optimizer <- function(df) {
+  df |> 
+  group_by(action, rep) |>
+  filter(t == max(t)) |> 
+  group_by(action) |>
+  summarise(mean_reward = mean(reward), sd = sd(reward)) |> 
+  filter(mean_reward == max(mean_reward))
+}
+escapement_optimizer <- function(df) {
+  df |> 
+  group_by(escapement, rep) |>
+  filter(t == max(t)) |> 
+  group_by(escapement) |>
+  summarise(mean_reward = mean(reward), sd = sd(reward)) |> 
+  filter(mean_reward == max(mean_reward))
+}
+
 # Collect data (outsource to separate R script later TBD)
-msy <- read_csv("../data/msy.csv.gz")
-ppo <- read_csv("../data/PPO200.csv.gz")
-escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
+msy_df <- read_csv("../data/msy.csv.xz")
+best_action <- msy_optimizer(msy_df)$action
+escapement_df <- read_csv("../data/escapement.csv.xz", show_col_types = FALSE)
+best_e <- escapement_optimizer(escapement_df)$escapement
+ppo_df <- read_csv("../data/PPO200.csv.xz")
 
-
-# rename some columns for figure purposes:
-colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
-colnames(ppo) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z') 
-colnames(escapement) <- c('t', 'rep', 'esc_level', 'reward', 'X', 'Y', 'Z') 
-opt_escapement <- escapement |> filter(esc_level == 0.62)
-
-# ppo dataset uses step rewards rather than cumulative rewards, which is what is useful here.
-# so, switch stuff around:
-#ppo |> 
-#    group_by(rep) |> 
-#    mutate(cumulative_reward = cumsum(reward)) |>
-#    within(rm("reward", "1")) |>
-#    rename(reward = cumulative_reward)
+opt_escapement <- escapement_df |> filter(escapement == best_e)
 
 # set up for plots:
 
-# best constant effort based on the data on ../data/msy.csv.gz
-best_action <- 0.045
-msy_sim <- msy |>
+msy_sim <- msy_df |>
     filter(action == best_action) |> 
     group_by(rep) |>
     pivot_longer(c("X", "Y", "Z"),
@@ -107,19 +112,19 @@ msy_sim <- msy |>
 
 actions <- unique(msy$action)
 i <- which.min(abs(actions - best_action* 0.8))
-tac_sim <- msy |> 
+tac_sim <- msy_df |> 
     filter(action == actions[[i]]) |>
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1, policy = "tac")
 
-ppo_sim <- ppo |> 
+ppo_sim <- ppo_df |> 
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1, policy = "ppo")
 
 best_e <- 0.61 # optimal constant escapement, computed from ../data/escapement.csv.gz
-esc_sim <- escapement |> 
+esc_sim_df <- escapement |> 
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1)
@@ -384,17 +389,17 @@ Here, again, $\{\eta_{i,t}\}$ is a set of independent Gaussian variables centere
 
 
 ```{r}
-msy_rewards <- msy |>
+msy_rewards <- msy_df |>
   group_by(action, rep) |>
   filter(t == max(t)) |> 
   group_by(action) |>
   summarise(mean_reward = mean(reward),
             sd = sd(reward)) 
 
-esc_rewards <- escapement |>
-  group_by(esc_level, rep) |>
+esc_rewards <- escapement_df |>
+  group_by(escapement, rep) |>
   filter(t == max(t)) |> 
-  group_by(esc_level) |>
+  group_by(escapement) |>
   summarise(mean_reward = mean(reward),
             sd = sd(reward)) 
 
@@ -699,7 +704,7 @@ There, the population levels are maintained roughly in a stationary state.
 Finally, the DRL time series shows an oscillatory behavior, with a slight dephase between the $Y$ and $Z$ curves, while the $X$ oscillations are roughly anticorrelated with $Z$.
 
 ```{r timeseries, fig.cap="TBD.", out.width = "6.5in"}
-policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
+policy_labels <- list("msy" = "MSY Const. Mortality", "tac"= "80% MSY Const. Mortality", "ppo"= "DRL")
 policy_labeller <- function(variable,value){
   return(policy_labels[value])
 }
@@ -788,7 +793,6 @@ Figure TBD exemplifies this point by comparing one times series of the system st
 
 
 ```{r timeseries_old, fig.cap="TBD.", out.width = "6.5in"}
-policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
 policy_labeller <- function(variable,value){
   return(policy_labels[value])
 }
@@ -859,8 +863,8 @@ pppo <- ppo |>
 pesc <- opt_escapement |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, 
         harvest = case_when(
-          X - esc_level > 0 ~ X - esc_level,
-          X - esc_level <= 0 ~  0)
+          X - escapement > 0 ~ X - escapement,
+          X - escapement <= 0 ~  0)
          ) |> 
   ggplot(aes(X, Z, color = harvest)) +
   geom_point() + sc +
@@ -876,7 +880,7 @@ pesc <- opt_escapement |>
 
 ```{r escapement_timeseries, fig.cap = "TBD", out.width = "6.5in"}
 
-ppo_mod <- ppo |> 
+ppo_mod <- ppo_df |> 
   mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X, time = t)
 
 avg_esc <- mean(ppo_mod$escapement)

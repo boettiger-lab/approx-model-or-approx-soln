@@ -24,6 +24,7 @@ best_reward <- function(df) {
 ```{r}
 msy <- read_csv("../data/msy.csv.xz")
 best <- best_reward(msy)
+best
 ```
 
 ```{r}
