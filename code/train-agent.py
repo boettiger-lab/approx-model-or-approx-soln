@@ -34,7 +34,7 @@ stats = agent.evaluate() # built-in method to evaluate agent on eval env
 
 # Initialize saved copy of eval environment:
 config = agent.evaluation_config.env_config
-config.update({'seed': 42})
+config.update({'seed': 41})
 env = agent.env_creator(config)
 
 env.training = False
