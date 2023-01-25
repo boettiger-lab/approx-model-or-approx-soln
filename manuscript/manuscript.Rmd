@@ -76,7 +76,7 @@ library(patchwork)
 ```{r}
 # Collect data (outsource to separate R script later TBD)
 msy <- read_csv("../data/msy.csv.gz")
-ppo <- read_csv("../data/PPO250.csv.gz")
+ppo <- read_csv("../data/PPO200.csv.gz")
 escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
 
 ppo |> filter(t==max(t))
@@ -708,7 +708,7 @@ policy_labeller <- function(variable,value){
 }
 msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(rep == 1) |>
+    filter(rep == 2) |>
     ggplot(aes(t, abundance, col = species)) + 
         geom_line()  + 
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
@@ -789,7 +789,7 @@ policy_labeller <- function(variable,value){
 }
 msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(rep == 1) |>
+    filter(rep == 2) |>
     ggplot(aes(t, abundance, col = species)) + 
         geom_line()  + 
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
