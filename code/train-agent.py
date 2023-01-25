@@ -17,12 +17,12 @@ agent = config.build(env="threeFishing-v2")
 
 
 iterations = 250
-checkpoint = ("ppo/checkpoint_000{}".format(iterations))
+checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
   for _ in range(iterations):
       agent.train()
-  checkpoint = agent.save("ppo")
+  checkpoint = agent.save("cache")
 
 #agent_restored = config.build(env="threeFishing-v2")
 #agent_restored.evaluate()
