@@ -21,16 +21,16 @@ def simulate(env, action):
 
 env = gym.make("threeFishing-v2")
 env.training = False
-actions = np.linspace(0,0.1,201)
+actions = np.linspace(0,0.1,101)
 
 # define parllel loop and execute
 parallel = [simulate.remote(env, i) for i in actions]
 df = ray.get(parallel)
 
 # convert to data.frame & write to csv
-cols = ["t", "rep", "action", "reward", "sp1", "sp2", "sp3"]
+cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
 df2 = pd.DataFrame(np.vstack(df), columns = cols)
-df2.to_csv("data/msy.csv.gz", index=False)
+df2.to_csv("data/msy.csv.xz", index=False)
 
 
 
