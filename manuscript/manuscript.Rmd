@@ -79,7 +79,6 @@ msy <- read_csv("../data/msy.csv.gz")
 ppo <- read_csv("../data/PPO200.csv.gz")
 escapement <- read_csv("../data/escapement.csv.gz", show_col_types = FALSE)
 
-ppo |> filter(t==max(t))
 
 # rename some columns for figure purposes:
 colnames(msy) <- c('t', 'rep', 'action', 'reward', 'X', 'Y', 'Z')
@@ -386,7 +385,7 @@ Similarly, we use the following dynamical model in place of eq. \eqref{eq:3d mod
 Here, again, $\{\eta_{i,t}\}$ is a set of independent Gaussian variables centered at zero with variances, respectively, $\sigma_X^2$, $\sigma_Y^2$ and $\sigma_Z^2$.
 
 
-```{r classical_tuning, fig.cap = "TBD.  Red = MSY, Green = 0.8 TAC", out.width = "6.5in"}
+```{r}
 msy_rewards <- msy |>
   group_by(action, rep) |>
   filter(t == max(t)) |> 
@@ -419,7 +418,7 @@ resc <- esc_rewards |>
   labs(y = "episode reward", x = "constant escapement") +
   theme(aspect.ratio = 1/1)
 
-(rmsy | resc)
+# (rmsy | resc)
 ```
 
 # Fishery management approaches
