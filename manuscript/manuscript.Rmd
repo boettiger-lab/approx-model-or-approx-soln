@@ -710,7 +710,7 @@ policy_labeller <- function(variable,value){
 }
 msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(rep == 6) |>
+    filter(rep == 49) |>
     ggplot(aes(t, abundance, col = species)) + 
         geom_line()  + 
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
@@ -813,7 +813,7 @@ library(patchwork)
 
 p1 <- msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(t==max(t), species == "X", rep < 30) |>
+    filter(t==max(t), species == "X", rep < 50) |>
     ggplot(aes(rep, t)) + 
       geom_col() +
       facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
@@ -822,7 +822,7 @@ p1 <- msy_tac_ppo |>
 
 p2 <- msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(t==max(t), species == "X", rep < 30) |>
+    filter(t==max(t), species == "X", rep < 50) |>
     ggplot(aes(rep, reward)) + 
       geom_col() +
       facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
