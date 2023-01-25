@@ -37,6 +37,7 @@ config = agent.evaluation_config.env_config
 config.update({'seed': 42})
 env = agent.env_creator(config)
 
+env.training = False
 df = []
 for rep in range(50):
   episode_reward = 0
