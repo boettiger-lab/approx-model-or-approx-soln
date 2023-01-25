@@ -633,7 +633,7 @@ There, we see that the optimal value $F^*$ lies in an area with high episode rew
 We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this variance is the presence of episodes with early endings.
 Thus, the value $0.8 F^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
 
-```{r linear_tuning, fig.cap = "Result of the tuning procedure for the constant mortality strategy. (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $F^* = 0.036$ (red) and $0.8 F^*=0.0288$ (green). (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $F^*X$ shown in red, while $0.8F^*X$ shown in green.", out.width = "6.5in"}
+```{r linear_tuning, fig.cap = "Result of the tuning procedure for the constant mortality strategy. (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $F^* = $ TBD (red) and $0.8 F^*=$ TBD (green). (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $F^*X$ shown in red, while $0.8F^*X$ shown in green.", out.width = "6.5in"}
 msy_rewards <- msy |>
   group_by(action, rep) |>
   filter(t == max(t)) |> 
