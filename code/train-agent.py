@@ -16,7 +16,7 @@ config.create_env_on_local_worker = True
 agent = config.build(env="threeFishing-v2")
 
 
-iterations = 250
+iterations = 200
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
