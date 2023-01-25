@@ -110,7 +110,7 @@ msy_sim <- msy_df |>
                 names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1, policy = "msy") # natural units, policy name
 
-actions <- unique(msy$action)
+actions <- unique(msy_df$action)
 i <- which.min(abs(actions - best_action* 0.8))
 tac_sim <- msy_df |> 
     filter(action == actions[[i]]) |>
@@ -124,7 +124,7 @@ ppo_sim <- ppo_df |>
     mutate(abundance = abundance + 1, policy = "ppo")
 
 best_e <- 0.61 # optimal constant escapement, computed from ../data/escapement.csv.gz
-esc_sim_df <- escapement |> 
+esc_sim_df <- escapement_df |> 
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1)
@@ -637,7 +637,7 @@ We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this varia
 Thus, the value $0.8 F^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
 
 ```{r linear_tuning, fig.cap = "Result of the tuning procedure for the constant mortality strategy. (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $F^* = $ TBD (red) and $0.8 F^*=$ TBD (green). (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $F^*X$ shown in red, while $0.8F^*X$ shown in green.", out.width = "6.5in"}
-msy_rewards <- msy |>
+msy_rewards <- msy_df |>
   group_by(action, rep) |>
   filter(t == max(t)) |> 
   group_by(action) |>
@@ -710,7 +710,7 @@ policy_labeller <- function(variable,value){
 }
 msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(rep == 5) |>
+    filter(rep == 6) |>
     ggplot(aes(t, abundance, col = species)) + 
         geom_line()  + 
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
@@ -798,7 +798,7 @@ policy_labeller <- function(variable,value){
 }
 msy_tac_ppo |> 
     group_by(rep, policy) |>
-    filter(rep == 5) |>
+    filter(rep == 6) |>
     ggplot(aes(t, abundance, col = species)) + 
         geom_line()  + 
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
@@ -840,21 +840,21 @@ library(RColorBrewer)
 myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")))
 sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0,0.25))
 
-pmsy <- msy |>
+pmsy <- msy_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
   filter(action == best_action) |>
   ggplot(aes(X, Z, color = harvest)) +
   geom_point() + sc +
   ggtitle("Opt. Const. Mortality")
 
-ptac <- msy |>
+ptac <- msy_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
   filter(action == actions[[i_tac]]) |>
   ggplot(aes(X, Z, color = harvest)) +
   geom_point() + sc +
   ggtitle("80% Opt. Const. Mortality")
 
-pppo <- ppo |>
+pppo <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
   ggplot(aes(X, Z, color = harvest)) +
   geom_point() + sc +
