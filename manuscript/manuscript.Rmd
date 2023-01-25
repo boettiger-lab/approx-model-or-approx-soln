@@ -98,7 +98,7 @@ opt_escapement <- escapement |> filter(esc_level == 0.62)
 # set up for plots:
 
 # best constant effort based on the data on ../data/msy.csv.gz
-best_action <- 0.036
+best_action <- 0.045
 msy_sim <- msy |>
     filter(action == best_action) |> 
     group_by(rep) |>
