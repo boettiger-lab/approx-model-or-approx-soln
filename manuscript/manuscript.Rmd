@@ -208,6 +208,8 @@ Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
   }
 \end{figure}
 
+
+
 <!--
 ```{r conceptual, echo = FALSE, message=FALSE, fig.align='center', fig.cap='(A) Classical management strategies often have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $V1$). where the interaction between $V1$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. (B) RL allows us to solve for quantitative decision strategies considering more complex ecosystem dynamics. For example, in this paper, we find harvest strategies for a three-species model using a model-free RL algorithm, PPO. (C) We show how the RL-based solution that considers all three species finds harvest policies with higher average reward and with (D) lower probability of harvest species collapse than the classical approaches, only considering the dynamics of V1.', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("Figures/conceptual-figure-old.png")
@@ -596,7 +598,7 @@ Indeed, models for ecosystem dynamics are only ever approximate and incomplete d
 This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
 
 
-# Results
+# Methods
 
 \textbf{Training a DRL agent.}
 We trained a DRL agent parametrized by a neural network $\theta$ with two hidden, 64-neuron, layers.
@@ -625,6 +627,53 @@ At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $FX_t$ 
 The optimal mortality rate was the value $F^*$ for which the mean episode reward was maximal.
 We additionally evaluated a more conservative strategy where a mortality of $0.8 F^*$ instead is used.
 
+The result of the tuning procedure is shown in Fig. \ref{fig:linear_tuning}. 
+There, we see that the optimal value $F^*$ lies in an area with high episode reward variance.
+We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this variance is the presence of episodes with early endings.
+Thus, the value $0.8 F^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
+
+```{r linear_tuning, fig.cap = "Result of the tuning procedure for the constant mortality strategy. (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, $2\times$ standard deviation around each scatter point shown as a grey shade. Vertical lines correspond to the optimal constant mortality rate $F^* = 0.465$ (red) and $0.8 F^*=0.0372$ (green). (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $F^*X$ shown in red, while $0.8F^*X$ shown in green.", out.width = "6.5in"}
+msy_rewards <- msy |>
+  group_by(action, rep) |>
+  filter(t == max(t)) |> 
+  group_by(action) |>
+  summarise(mean_reward = mean(reward),
+            sd = sd(reward)) 
+
+rmsy <- msy_rewards |>
+  ggplot(aes(action, mean_reward, 
+             ymin = mean_reward - 2*sd,
+             ymax=mean_reward+2*sd)) +
+  geom_point() + geom_ribbon(alpha=0.4) +
+  labs(y = "episode reward", x = "constant mortality") +
+  theme(aspect.ratio = 1/1) + 
+  geom_vline(aes(xintercept=0.0465), color="red") + 
+  geom_vline(aes(xintercept=0.0372), color="green") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+# linear function blueprint
+linear_f <- function(slope, x) slope*x
+# generates linear function with given slope
+linear_f_gen <- function(slope) (function(x) slope*x)
+
+# dummy data set to keep ggplot happy
+p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
+
+# p + stat_function(fun = linear_f_gen(0.5)) + xlim(0,2)
+lines <- p + stat_function(fun = linear_f_gen(0.01)) + 
+  stat_function(fun = linear_f_gen(0.02)) +
+  stat_function(fun = linear_f_gen(0.03)) +
+  stat_function(fun = linear_f_gen(0.8*best_action), col = "green") +
+  stat_function(fun = linear_f_gen(best_action), col = "red") +
+  stat_function(fun = linear_f_gen(0.055)) + 
+  stat_function(fun = linear_f_gen(0.065)) +
+  xlim(0,2) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+
+(rmsy | lines) + plot_annotation(tag_levels = c('A'))
+```
+
 \textbf{Parameter values used.}
 The model's dynamic parameters were chosen as follows
 \begin{align*}
@@ -640,6 +689,31 @@ $$
   X_{\text{thresh.}} = 0.08,\quad Y_{\text{thresh.}} = Z_{\text{thresh.}} = 10^{-4},
 $$
 where the higher value of $X_{\text{thresh.}}$ helped select for more sustainable fishing strategies (for both the DRL and constant mortality approaches).
+
+# Results
+
+In Fig. \ref{fig:timeseries} we show one example time series for each of the three controls we analyzed: 
+the left panel uses an optimalconstant mortality control $F^*X$, the middle panel uses $0.8 F^* X$, while the right panel is controlled by the trained DRL agent.
+We see that that optimal constant mortality control leads to a near-extinction event.
+The constant mortality policy at $0.8 F^*$ is already conservative enough to support a sustainable path.
+There, the population levels are maintained roughly in a stationary state.
+Finally, the DRL time series shows an oscillatory behavior, with a slight dephase between the $Y$ and $Z$ curves, while the $X$ oscillations are roughly anticorrelated with $Z$.
+
+```{r timeseries, fig.cap="TBD.", out.width = "6.5in"}
+policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
+policy_labeller <- function(variable,value){
+  return(policy_labels[value])
+}
+msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(rep == 0) |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+        labs(y = "abundance", x = "time") +
+        theme(aspect.ratio = 2/3)
+```
 
   
 # Old Methods and Results
@@ -706,7 +780,7 @@ They lead to a distinctive oscillating behavior of the system state over time, w
 Figure TBD exemplifies this point by comparing one times series of the system state obtained using each of these policies.
 
 
-```{r timeseries, fig.cap="TBD.", out.width = "6.5in"}
+```{r timeseries_old, fig.cap="TBD.", out.width = "6.5in"}
 policy_labels <- list("msy" = "Opt. Const. Mortality", "tac"= "80% Opt. Const. Mortality", "ppo"= "DRL")
 policy_labeller <- function(variable,value){
   return(policy_labels[value])
