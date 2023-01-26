@@ -620,6 +620,10 @@ The reward function had two componenets:
 First, at each time step the harvest $h_t$ was received as a reward.
 Second, if the episode ended early (say, at time-step $t$) because of a near-extinction event, a negative reward of $-50/t$ was awarded.
 The constant 50 was chosen so as to select against highly extractive policies in the early stages of training, and thus guide the agent towards sustainable policies.
+This technique, falling under the ‘‘umbrella’’ category of *reward shaping*, is commonly used -- alongside hyper-parameter tuning and state space normalization -- to improve the speed of training by avoiding badly-performing local optima in the gradient ascent algorithm.
+
+Thus, we normalized state space (to be contained in a cube of length 2) and engaged in reward shaping in order to optimize our agent's learning.
+We did not need to tune hyper-parameters for this goal, however.
 
 We used the Ray framework [@ray_package] for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters (cf. [@repo] for the code used).
 The agent was trained for 250 iterations of the PPO optimization step.
