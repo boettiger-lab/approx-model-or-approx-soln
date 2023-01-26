@@ -67,7 +67,7 @@ editor_options:
 ---
 
 ```{r knit_global, include=FALSE}
-knitr::opts_chunk$set(cache = FALSE, echo = FALSE, message = FALSE, 
+knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE, 
                       warning = FALSE, fig.height=5, fig.width=7.5)
 library(tidyverse)
 library(patchwork)
@@ -708,7 +708,10 @@ The constant mortality policy at $0.8 F^*$ is already conservative enough to sup
 There, the population levels are maintained roughly in a stationary state.
 Finally, the DRL time series shows an oscillatory behavior, with a slight dephase between the $Y$ and $Z$ curves, while the $X$ oscillations are roughly anticorrelated with $Z$.
 
-```{r timeseries, fig.cap="TBD.", out.width = "6.5in"}
+```{r} 
+#| label: timeseries 
+#| fig.cap: "A sample time series for the three fish populations, with the system being controlled, respectively, by the MSY optimal mortality, by $80$ percent of the MSY optimal mortality, and by DRL." 
+#| out.width: "6.5in"
 policy_labels <- list("msy" = "MSY Const. Mortality", "tac"= "80% MSY Const. Mortality", "ppo"= "DRL")
 policy_labeller <- function(variable,value){
   return(policy_labels[value])
