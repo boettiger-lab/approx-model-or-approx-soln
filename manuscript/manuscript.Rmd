@@ -287,14 +287,18 @@ Results figures:
 In this section we introduce some models describing the population dynamics of fisheries.
 In general, the class of models that appear in this context are *first order finite difference equations* (potentially stochastic difference equations).
 For $n$ species, these models have the general form
-
 \begin{align}
   \label{eq:general model}
-  \Delta N_t := N_{t+1} - N_t = f(N_t) - F^T N_t,
+  \begin{split}
+    \Delta X_t &:= X_{t+1} - X_t = f_X(N_t) - M_X X_t\\
+    \Delta Y_t &:= X_{t+1} - Y_t = f_Y(N_t) - M_Y Y_t\\
+    &\dots
+  \end{split}
 \end{align}
-where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $f:\mathbb{R}^{n}\to\mathbb{R}^{n}$ is an arbitrary function, where the product of the mortality and the stock size, $F^T N_t$ is the harvest size at timestep $t$. 
-Here, $F\in\mathbb{R}^n$ is a vector of fishing intensities, where $F_i$ is the intensity with which the $i$-th species is fished.
-We will focus on the case where only the first species is fished, $F= (F_1,\ 0,\ \dots,\ 0)$.
+where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations and $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions.
+Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting (sometimes referred to as *fishing effort*).
+Thus, the term $M_X X_t$ is the total $X$ harvest at time $t$.
+We will focus on systems where a single species, $X$ is harvested, i.e. $M_Y = M_Z = \dots = 0$.
 
 ## A single species model
 
