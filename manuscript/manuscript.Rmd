@@ -607,7 +607,7 @@ This way, it is plausible that model-free RL controls outperform currently used 
 \textbf{Training a DRL agent.}
 We trained a DRL agent parametrized by a neural network $\theta$ with two hidden, 64-neuron, layers.
 The state space used was a cube $[0,2]^{\times 3}$, while the policies explored mapped states $N_t$ to a single number, $h_t = \pi_\theta(N_t)$, the harvest quota on species $X$ at that timestep.
-Each episode in the training and in the evaluation stages was at most 600 time steps long.
+Each episode in the training and in the evaluation stages was at most 200 time steps long.
 Episodes were ended early in case of a ‘‘near-extinction event,’’ a moment in which any of the populations dipped below a threshold value, i.e.,
 \begin{align}
   \label{eq:thresh}
