@@ -705,8 +705,9 @@ where the higher value of $X_{\text{thresh.}}$ helped select for more sustainabl
 
 # Results
 
-In Fig. \ref{fig:timeseries} we show one example time series for each of the three controls we analyzed: 
-the left panel uses an optimalconstant mortality control $F^*X$, the middle panel uses $0.8 F^* X$, while the right panel is controlled by the trained DRL agent.
+We evaluated each of the three control approaches (MSY constant mortality, 80% MSY constant mortality and DRL) by running 50 episodes using the respective control rule.
+In Fig. \ref{fig:timeseries} we show the time series of one such repetition.
+The left panel uses an MSY constant mortality control $F^*X$, the middle panel uses $0.8 F^* X$, while the right panel is controlled by the trained DRL agent.
 We see that that optimal constant mortality control leads to a near-extinction event at around $t=150$.
 The constant mortality policy at $0.8 F^*$ is already conservative enough to support a sustainable path.
 There, the population levels are maintained roughly in a stationary state.
@@ -735,10 +736,46 @@ This time series is representative of the patterns observed in the data (see App
 The episode reward and episode length statistics are shown in Fig. \ref{fig:rew_len_fig}.
 There, we highlight two things:
 First, that the tendency towards early episode ends is fixed by the conservative approach of fishing at 80% of the optimal mortality rate.
-In App. \ref{app:tbd} we discuss a warning about this approach, however: the arbitrarily chosen percentange itself lives on a ‘‘knife's edge.’’
-More concretely, choosing a higher percentage, say 90%, can switch the behaviour of the controlled system and give rise to the proliferation of early episode ends.
+(In App. \ref{app:tbd} we discuss a warning about this approach, however: the arbitrarily chosen percentage itself lives on a ‘‘knife's edge.’’
+More concretely, choosing a higher percentage, say 90%, can switch the behaviour of the controlled system and give rise to the proliferation of early episode ends.)
 Second, that while the conservative 80% approach has a stable behavior, it consistently produces smaller harvests than a DRL generated policy.
 
+```{r} 
+#| label: rew_len_fig
+#| fig.cap: "Bar charts for the episode lengths (top panel) and episode total harvests (bottom panel) for 50 episodes." 
+#| out.width: "6.5in"
+p1 <- msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), species == "X", rep < 50) |>
+    ggplot(aes(rep, t)) + 
+      geom_col() +
+      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+      labs(y = "episode length", x = "repetition") +
+      theme(axis.text.x = element_blank())
+
+p2 <- msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), species == "X", rep < 50) |>
+    ggplot(aes(rep, reward)) + 
+      geom_col() +
+      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+      labs(y = "episode harvest", x = "repetition") +
+      theme(axis.text.x = element_blank())
+
+(p1 / p2) + plot_annotation(tag_levels = 'A')
+```
+
+To understand the DRL-derived policy, Fig. \ref{fig:action-X} depicts the harvest as a function of $X$.
+Specifically, for each point $(x,y,z)$ visited by one of the aforementioned 50 evaluation episodes, we evaluate the harvest collected by the DRL agent and we subsequently plot the scatter data as a function of the projection $x$ onto the $X$ axis.
+
+```{r}
+#| label: action-X
+#| fig.cap: "TBD"
+#| out.width: "6.5in"
+p <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X)
+  
+```
 
 # Old Methods and Results
 
@@ -820,7 +857,7 @@ msy_tac_ppo |>
 ```
 
 
-```{r rew_len_fig, fig.cap="TBD.", out.width = "6.5in"}
+```{r rew_len_fig_old, fig.cap="TBD.", out.width = "6.5in"}
 library(patchwork)
 
 p1 <- msy_tac_ppo |> 
