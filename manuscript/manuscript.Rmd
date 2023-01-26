@@ -178,41 +178,12 @@ However, the space of policies considered under such approaches is necessarily f
 Instead, fisheries management approaches such as MSE rely on theory based on more tractable models to restrict the search space of possible policies.  
 Specifically, most fisheries policies are framed in terms of a *constant mortality* policy, (sometimes a simple piece-wise linear function, i.e. a single linear segment, is introduced as a precaution a very low stock sizes), where fishing 'mortality' is defined as the ratio of harvest (catch) to stock size, $F = H_t/x_t$.
 
-\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=\large Classical approaches to sustainable fisheries]
-\scriptsize
+```{r}
+#| label: textbox
+#| out.width: "1\\linewidth"
 
-There are several existing approaches that have been used to manage fisheries, including \textbf{escapement}, control rules associated with \textbf{maximum sustainable yield (MSY)}, among others. We collectively refer to these as $classical$, and will compare their performance to RL-based management strategies. While often complex models of the ecosystem are used to estimate the size of fish population of interest, these classical strategies derive an optimal harvest policy using a simple model for the system dynamics. Across these strategies, setting the harvest quota has the shared aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population, $X$. 
-
-A common example is the surplus production model that assumes logistic population growth in the absence of exploitation [@Schaefer1954]:
-
-\begin{equation*}
-X_{t+1} - X_t = r X_t( 1 - X_t / K) - h_t = L(X_t) - h_t
-\end{equation*}
-
-The interaction between $X$ and its environment is summarized to two parameters, the maximum intrinsic growth rate $r$, and the carrying capacity $K$. In the equation above, $h_t$ is the $harvest$ at time step $t$. The goal is to choose the harvest policy $h:X_t\mapsto h_t$, such that long-term profits are maximized.
-
-An advantage of one dimensional approaches is that the optimal policy is intuitive and often known exactly. For example, in the logistic equation pointed out above, the biomass associated with maximum sustainable yield of the system is attained at $X = X_{MSY} = K/2$. The optimizer is an \textbf{escapement} policy, which corresponds to a harvest, $h_t$, that keeps the system at its optimal growth rate as much as possible:
-
-\begin{equation*}
-  h_t = \begin{cases}
-    X_t - K/2, \qquad &\text{if } X_t > K/2\\
-    0, \qquad &\text{else.}
-  \end{cases}
-\end{equation*}
-
-Escapement policies, or more generally $bang bang$ policies, tend to be the optimal solution for these types of control problems. A drawback of these solutions in the fishery context, is the possible presence of several time steps with zero harvest. To mend this, certain suboptimal solutions have been constructed for fishery management.
-
-One ubiquitous solution, often called \textbf{maximum sustainable yield (MSY)}, provides biological reference points that can be simply calculated from the surplus production model parameters. The solution consists of letting $h(X) = rX/2$, so that
-
-\begin{equation*}
-MSY = h(X_{MSY}) = rK/4.
-\end{equation*}
-
-That is, at the MSY biomass, $X_{MSY}$, the logistic growth of $X$ is cancelled exactly by the harvest. Additionally, the constant rate of fishing mortality, $F_{MSY}$, that results in $X_{MSY}$ is attained at $F_{MSY}=r/2$. This \textbf{MSY constant mortality} rule fixes the drawback in the escapement policy by having $h(X)>0$ for all $X>0$. It, however, has its own drawbacks, as it is particularly sensitive to misestimates of the parameter $r$.
-
-Due to this, similar but more conservative policies are often applied where the constant rate of fishing mortality is $< F_{MSY}$. This control rule consists on reducing the inclination of the line defined by $h(X)$ using a prefactor $\alpha$ in $h(X) = \alpha\cdot rX/2$. Plausible examples are $\alpha = 0.8$ or $0.9$; here we examine an \textbf{80\% MSY constant mortality} policy (ref. supplemental here?).
-
-\end{tcolorbox}
+knitr::include_graphics("figures/textbox.png")
+```
 
 The intuition for a constant mortality strategy is simple and well established 
 
@@ -844,7 +815,67 @@ pz <- ppo_df |>
 ```
 
 In Fig. \ref{fig:state-space}, we perform a back to back visualization of all the policies evaluated up to now---MSY constant mortality, 80% MSY constant mortality, DRL and escapement.
-This highlights the similarity between the policy found by the DRL agent and the optimal escapement policy.
+The policies are computed at each state along the paths they traverse in the 50 evaluation rounds, and the values are projected on the $X$-$Z$ plane for visualization.
+This figure highlights the similarity between the policy found by the DRL agent and the optimal escapement policy.
+
+Notice the anti-correlation between $X$ and $Y$ along the paths, this is especially prominent for the constant mortality plots.
+This anti-correlation is, furthermore, observed in the time series plots (see Fig. \ref{fig:timeseries} and App. \ref{app:tbd}).
+
+```{r}
+#| label: state-space
+#| fig.cap: "Policy heatmaps. Each policy, say, $\\pi$, was evaluated at points $(x,y,z)$ visited during any of the 50 evaluation rounds. We projected this data down to the $X$-$Y$ plane---i.e. we plotted the heatmap $\\pi(x,y,z)$ as a function of $x$ and $y$."
+#| out.width: "6.5in"
+i_tac <- which.min(abs(actions - best_action * 0.8))
+
+# color pallette limits
+library(RColorBrewer)
+myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")))
+sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0,0.25))
+
+pmsy <- msy_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
+  filter(action == best_action) |>
+  ggplot(aes(X, Y, color = harvest)) +
+  geom_point() + sc +
+  xlim(0,1) +
+  ylim(0,0.85) +
+  ggtitle("Opt. Const. Mortality")
+
+ptac <- msy_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
+  filter(action == actions[[i_tac]]) |>
+  ggplot(aes(X, Y, color = harvest)) +
+  geom_point() + sc +
+  xlim(0,1) +
+  ylim(0,0.85) +
+  ggtitle("80% Opt. Const. Mortality")
+
+pppo <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
+  ggplot(aes(X, Y, color = harvest)) +
+  geom_point() + sc +
+  xlim(0,1) +
+  ylim(0,0.85) +
+  ggtitle("DRL")
+
+pesc <- opt_escapement |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, 
+        harvest = case_when(
+          X - escapement > 0 ~ X - escapement,
+          X - escapement <= 0 ~  0)
+         ) |> 
+  ggplot(aes(X, Y, color = harvest)) +
+  geom_point() + sc +
+  xlim(0,1) +
+  ylim(0,0.85) +
+  ggtitle("Opt. Const. Escapement")
+
+(
+  (pmsy | ptac) / (pppo | pesc) +
+  plot_layout(guides = "collect") & theme(legend.position = 'right')
+) + 
+  plot_annotation(tag_levels = c('A'))
+```
 
 # Old Methods and Results
 
@@ -950,7 +981,7 @@ p2 <- msy_tac_ppo |>
 (p1 / p2) + plot_annotation(tag_levels = 'A')
 ```
 
-```{r state-space, fig.cap="TBD.", out.width = "6.5in"}
+```{r state-space_old, fig.cap="TBD.", out.width = "6.5in"}
 i_tac <- which.min(abs(actions - best_action * 0.8))
 
 # color pallette limits
