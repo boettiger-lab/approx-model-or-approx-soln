@@ -124,7 +124,7 @@ tac_sim |>
 
 
 ```{r}
-ppo <- read_csv("../data/PPO250.csv.gz")
+ppo <- read_csv("../data/PPO200.csv.xz")
 ```
 ```{r}
 ppo_sim <- ppo |> 
