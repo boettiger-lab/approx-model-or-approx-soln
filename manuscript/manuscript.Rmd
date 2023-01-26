@@ -767,15 +767,42 @@ p2 <- msy_tac_ppo |>
 
 To understand the DRL-derived policy, Fig. \ref{fig:action-X} depicts the harvest as a function of $X$.
 Specifically, for each point $(x,y,z)$ visited by one of the aforementioned 50 evaluation episodes, we evaluate the harvest collected by the DRL agent and we subsequently plot the scatter data as a function of the projection $x$ onto the $X$ axis.
+In panel A we have used color to add the a $Y$-dependence, while in panel B we did the same with $Z$-dependence.
+This shows that the $Z$ and $Y$ dependence of the policy is rather weak and in fact it has roughly the same shape as an escapement policy.
+
+Fig. \ref{action-X} additionally shows (as a red line) the optimal escapement policy.
+This policy was computed in a manner similar to how the MSY constant mortality was computed: for each escapement in a grid of 100 values between 0 and 1, 50 episodes were run using the corresponding escapement policy.
+The value with the best mean episode reward was chosen as the optimal escapement value.
+
 
 ```{r}
 #| label: action-X
 #| fig.cap: "TBD"
 #| out.width: "6.5in"
-p <- ppo_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X)
-  
+opt_escapement_harvest <- function(X) case_when(
+  X > best_e ~ X - best_e,
+  X <= best_e ~ 0
+)
+
+py <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
+  ggplot(aes(X, harvest, color = Y)) +
+  geom_point() +
+  theme(aspect.ratio = 1/1) +
+  stat_function(fun = opt_escapement_harvest, col = 'red')
+
+pz <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
+  ggplot(aes(X, harvest, color = Z)) +
+  geom_point() +
+  theme(aspect.ratio = 1/1) +
+  stat_function(fun = opt_escapement_harvest, col = 'red')
+
+(py | pz) + plot_annotation(tag_levels = c('A'))
 ```
+
+In Fig. \ref{fig:state-space}, we perform a back to back visualization of all the policies evaluated up to now---MSY constant mortality, 80% MSY constant mortality, DRL and escapement.
+This highlights the similarity between the policy found by the DRL agent and the optimal escapement policy.
 
 # Old Methods and Results
 
