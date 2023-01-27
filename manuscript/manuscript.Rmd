@@ -29,9 +29,9 @@ keywords:
 #- PAC1
 #- superPAC
     
-MSC:
-- MSC code 1
-- MSC code 2
+#MSC:
+#- MSC code 1
+#- MSC code 2
 
 abstract: |
   Write something here
@@ -155,15 +155,28 @@ We show that in many but not all cases, the optimal policy for a carefully chose
 This illustrates the promise of combining complex, realistic simulations with emerging machine-learning techniques to improve our understanding and management of ecological systems.
 -->
 
-Ecological management may be understood as an optimal control problem - a manager must determine a sequence of actions (a "policy") to optimize some desired objective(s) and constraints (e.g. conservation goals, natural resource extraction, economic and social constraints.)
-Despite the complexity inherent in natural ecosystems, analytically tractable models have long played an essential role in their understanding and management.
-...
+Much effort has been spent grappling with the complexity of our natural world in contrast to relative simplicity of the models we use to understand it.
+Now, as we grapple with the manifold consequences of human impacts on that world, we are faced with difficult questions of figuring out how best to respond when our knowledge and models fall so far short of the complexity our actions have disrupted.
+Heroic amounts of data and computation are being brought to bear on developing better, more complex, more realistic models of our environments and ecosystems, yet these models remain disconnected or oversimplify the space of actions they seek to inform.
+In this paper we explore a different tack. 
+Here we explore the potential of a emerging data-driven machine learning technique, not to better capture the complexity of the natural processes, but rather, to embrace the complexity of the potential _policies_ that might be used to manage them.
+Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards. 
 
-
-<!-- Why fisheries-focused examples -->
-Global fisheries management has long been a crucible for both the development of theory and best practices in actual management for many reasons. Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to overfishing [@Worm2006, @Costello2016]. 
+<!-- Why fisheries-focused examples -- maybe we can cut/merge this with paragraph above -->
+There are myriad examples from climate scenarios to protected areas, we will illustrate this with a specific example in the management of marine fisheries, which is both an important issue to itself and a frequent crucible in which methods of ecological management have methods for ecological management have been fired before extending to other fields, and where the space of possible policies is arguably already more richly developed than most.
+Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006, @Costello2016]. 
 Because of this importance, fisheries also represent some of the longest and best studied timeseries of population dynamics available to ecologists, as well as a correspondingly rich area for the development of theory and practice.
 Methods developed in the study and management of fisheries are frequently applied to other areas of ecological management, from concepts such as maximum sustainable yield [], optimal control under observation uncertainty [@Memarzadeh2019], to adaptive management [@Walters], management strategy evaluation [@Punt], to the studies of conservation policy and international negotiations [@].
+
+Mathematically, the ecological management may be understood as an optimal control problem - a manager must determine a sequence of actions (a "policy") to optimize some desired objective(s) and constraints (e.g. conservation goals, natural resource extraction, economic and social constraints.)
+Given an appropriate representation of the underlying mechanistic processes involved, such sequential decision problems may be posed more precisely as Markov Decision Process [MDP, @Marescot2013; @Memarzadeh2019].
+Such problems are notoriously difficult owing not only to the complexity of those underlying mechanisms alone, but to the exponentially branching consequences the decision-maker's actions have upon that system -- a game of chess is not won by thinking only one move ahead at a time. 
+Thus, while MDP problems have been studied in a conservation context since they were first introduced more than six decades ago, their application has been highly constrained to simple scenarios.
+Meanwhile, a class of machine learning techniques designed for MDP problems known as reinforcement learning (RL), has cracked open the door for exploring complex strategies in more realistic settings [@rl_intro].
+
+- This is not a tutorial or a sales pitch for RL - which brings at least as many difficulties as advantages -- including being hard to use, easy to get stuck on far from optimal performance, which itself may be hard to diagnose, as we have already discussed in our tutorial. The method 
+
+has through the use of clever algorithms, deep neural networks, and massive amounts of data,
 
 <!-- A sweeping summary of fisheries decision theory, don't bite me-->
 To understand the importance of a potential application of novel data-driven methods to the real world, it is most instructive to have a clearer picture of how models are currently used to inform ecological management in fisheries.
