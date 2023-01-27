@@ -911,6 +911,12 @@ This way, DRL provides a framework flexible enough to capture the intricate popu
 We have shown that highly non-linear systems may give rise to simplified and good policies and that these may be found via reinforcement learning.
 Moreover, the framework allows for the possibility that these simplifications do not in fact happen, and that good harvest policies are highly non-linear, multi-parameter functions.
 
+Conversely, our analysis suggests that, for high dimensional systems, bang-bang policies lead to increased sustainability and long-term profits as compared to constant mortality strategies.
+Similarly, in App. \ref{app:tbd} we investigate several generalizations of the constant effort approach. 
+For example, we examine strategies with a ramp-down from constant effort to zero effort at low populations.
+These, too, yield subpar results as compared to escapement.
+This seems to indicate that the ‘‘rest periods’’ so prominent in both the DRL solution and in the optimal bang-bang policy -- periods of several time steps with no fishing at all -- are important to maintain the sustainability of the fishery and, additionally, increase long-term profits.
+
 ## Acknowledgements
 
 The title of this piece references a mathematical biology workshop at NIMBioS
