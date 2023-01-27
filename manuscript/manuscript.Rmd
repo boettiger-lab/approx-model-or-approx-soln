@@ -877,6 +877,39 @@ pesc <- opt_escapement |>
 ```
 
 
+# Discussion
+
+Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
+While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making.
+This provides very interpretable solutions, such as constant mortality policies.
+There is a drawback here, however: due to the simplicity of these dynamical models, the policies might not respond effectively in many situations---situations where the predictions of these simple models deviates considerably from reality.
+Because of this, policies such as MSY have faced pushback and are believed to have contributed to the depletion of fish stocks.
+
+We propose an alternative approach to the problem of fishery control: to use a more expressive -- albeit more complicated -- dynamical model to guide decision making.
+Furthermore, rather than computing the optimal control policy for the model -- something that is impossible in practice for complex systems -- we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
+
+In this paper we have exemplified this approach by applying it to the control of a three-species fishery model.
+In this example, we have shown that the DRL agent finds an approximately *bang-bang* type of solution.
+While bang-bang solutions are known to be optimal for a wide variety of single-species fishery control problems [@alexandru], there is no such proof of optimality for general multi-species models.
+In this sense this example is rather surprising and reassuring: while no general guarantee points at the optimality of bang-bang solutions for multi-species model, the existence of one such example provides a benchmark for the use of DRL in fishery control.
+
+One intuition for why a constant escapement policy performs so well in such a model comes from the anticorrelation between $X$ and $Y$ noted in the results section.
+We have observed in a variety of policies, both classical as well as some obtained by training DRL agents.
+In all of these, the pattern has been present.
+In fact, ‘‘crashes’’ in the $X$ population are almost invariably shortly preceeded by dramatic increases in $Y$.
+We hypothesize that this effectively leads to a dimensionality reduction: once the value of $X$ is known, along a path traced by the control system, then $Y$ may be roughly predicted.
+A similar, although weaker, anticorrelation is also observed between $X$ and $Z$.
+These two informal observations point at an effective simplification of the prediction process: the values of $Y$ and $Z$ are much less impactful to policy decisions than the value of $X$ itself.
+We have not yet pushed further to establish a more precise picture of this dynamical simplification.
+
+This way, this manuscript functions as a first step in the process of incorporating DRL into fishery decision making.
+Importantly, DRL is equipped with tools to deal with more complicated models which might require a more refined approach to control them.
+For example *long short-term memories (LSTMs)* may be used to incorporate not only $N_t$ but also $\mathrm{d}N_t/\mathrm{d}t$ into policy decisions---while this additional degree of freedom would make analytical control theory approaches unwieldy, it may be easily and cost-effectively implemented in DRL.
+Similarly, *curriculum learning* could be incorporated to deal with phenomena such as parametric noise or parametric drift [@openai].
+
+This way, DRL provides a framework flexible enough to capture the intricate population dynamics that are relevant in fishery management.
+We have shown that highly non-linear systems may give rise to simplified and good policies and that these may be found via reinforcement learning.
+Moreover, the framework allows for the possibility that these simplifications do not in fact happen, and that good harvest policies are highly non-linear, multi-parameter functions.
 
 ## Acknowledgements
 
