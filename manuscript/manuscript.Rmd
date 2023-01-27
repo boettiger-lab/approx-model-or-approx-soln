@@ -172,16 +172,20 @@ This approach is far more amenable to complex simulations of fisheries dynamics 
 Recent advances in machine learning may now once again bridge these approaches, while also bringing new challenges of their own. 
 Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RamLegacyDB].
 Constrained by computational limits, MDP approaches have been intractable on suitably realistic models and largely confined to more academic applications [@Costello2016].
-However, advances _Deep Reinforcement Learning_, (RL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari] to fusion reactions [@fusion] to the remarkable dialog abilities of ChatGPT [@chatgpt].
+However, advances _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari] to fusion reactions [@fusion] to the remarkable dialog abilities of ChatGPT [@chatgpt].
 RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, immense computational costs, and frequent challenges with transfer-ability or reproducibility. 
 A review of all these issues is beyond our scope but can be found elsewhere [@rl_intro; @millie_AM-RL].
 Here, though, we will focus on the issue of opacity and interpretability raised by these methods.
 In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
-We can only assess the performance of these black box methods relative to alternatives.
+In general, one can only assess the performance of these black box methods relative to alternatives.
 
+<!--NEED some kind of map paragraph here saying what's ahead, what we show  --> 
+We compare the performance of a DRL solution to that of a management strategy evaluation across potential 'constant mortality' policies.  
 
-
+<!--
 Specifically, most fisheries policies are framed in terms of a *constant mortality* policy, (sometimes a simple piece-wise linear function, i.e. a single linear segment, is introduced as a precaution a very low stock sizes), where fishing 'mortality' is defined as the ratio of harvest (catch) to stock size, $F = H_t/x_t$.
+-->
+
 
 ```{r}
 #| label: textbox
