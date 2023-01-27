@@ -170,11 +170,14 @@ This approach is far more amenable to complex simulations of fisheries dynamics 
 <!-- Do we say here that these strategies retain the 'constant mortality' intuition of @Schaefer? -->
 
 Recent advances in machine learning may now once again bridge these approaches, while also bringing new challenges of their own. 
-Advances in data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RamLegacyDB].
+Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RamLegacyDB].
 Constrained by computational limits, MDP approaches have been intractable on suitably realistic models and largely confined to more academic applications [@Costello2016].
 However, advances _Deep Reinforcement Learning_, (RL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari] to fusion reactions [@fusion] to the remarkable dialog abilities of ChatGPT [@chatgpt].
-
-
+RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, immense computational costs, and frequent challenges with transfer-ability or reproducibility. 
+A review of all these issues is beyond our scope but can be found elsewhere [@rl_intro; @millie_AM-RL].
+Here, though, we will focus on the issue of opacity and interpretability raised by these methods.
+In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
+We can only assess the performance of these black box methods relative to alternatives.
 
 
 
