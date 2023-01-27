@@ -228,18 +228,17 @@ and/or *effort controls*, restrictions on the fishing effort -- in numbers of bo
 Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
 
 ```{r}
-
 #| label: conceptual
 #| echo: FALSE
-#| message" FALSE
+#| message: FALSE
 #| fig.align: 'center'
-#| fig.cap: '(A) Classical management strategies often have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $V1$). where the interaction between $V1$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. 
+#| fig.cap:  '(A) Classical management strategies often have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $V1$). where the interaction between $V1$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. 
 #| (B) RL allows us to solve for quantitative decision strategies considering more complex ecosystem dynamics. For example, in this paper, we find harvest strategies for a three-species model using a model-free RL algorithm, PPO. 
-#| (C) We show how the RL-based solution that considers all three species finds harvest policies with higher average reward and with (D) lower probability of harvest species collapse than the classical approaches, only considering the dynamics of V1.', 
-#| out.width: '1\\linewidth', 
+#| (C) We show how the RL-based solution that considers all three species finds harvest policies with higher average reward and with (D) lower probability of harvest species collapse than the classical approaches, only considering the dynamics of V1.'
+#| out.width: '6.5in' 
 #| fig.pos: 'H'
  
-#knitr::include_graphics("Figures/conceptual-figure.png")
+knitr::include_graphics("figures/conceptual.png")
 ```
 
 
@@ -655,19 +654,19 @@ We used the Ray framework [@ray_package] for training, in particular we used a R
 The agent was trained for 250 iterations of the PPO optimization step.
 
 \textbf{Tuning the constant mortality strategy.}
-A grid of 200 mortality rates was laid in the interval $[0, 0.1]$.
+A grid of 100 mortality rates was laid in the interval $[0, 0.1]$.
 For each one of these rates, say $F$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
 At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $FX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
 The optimal mortality rate was the value $F^*$ for which the mean episode reward was maximal.
 We additionally evaluated a more conservative strategy where a mortality of $0.8 F^*$ instead is used.
 
-The result of the tuning procedure is shown in Fig. \ref{fig:linear_tuning}. 
+The result of the tuning procedure is shown in Fig. \ref{fig:tuning}. 
 There, we see that the optimal value $F^*$ lies in an area with high episode reward variance.
 We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this variance is the presence of episodes with early endings.
 Thus, the value $0.8 F^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
 
 ```{r}
-#| label: linear_tuning, 
+#| label: tuning
 #| fig.cap : "Result of the tuning procedure for the constant mortality strategy. 
 #| (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $F^* = $ TBD (red) and $0.8 F^*=$ TBD (green). 
 #| (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $F^*X$ shown in red, while $0.8F^*X$ shown in green." 
@@ -707,7 +706,8 @@ lines <- p + stat_function(fun = linear_f_gen(0.01)) +
   stat_function(fun = linear_f_gen(0.055)) + 
   stat_function(fun = linear_f_gen(0.065)) +
   xlim(0,2) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  xlab("X") + ylab("harvest")
 
 
 (rmsy | lines) + plot_annotation(tag_levels = c('A'))
@@ -890,185 +890,46 @@ pesc <- opt_escapement |>
   plot_annotation(tag_levels = c('A'))
 ```
 
-# Old Methods and Results
 
-## Methods
+# Discussion
 
-Model-based controls, such as MSY, are known to have serious deficiencies when the model used to find the optimal control does not match reality.
-As mentioned, for the particular case of fisheries this can lead to depletion of resources and affect severely the surrounding ecosystems.
-Because of this, we have opted to compare the performance of several data-based approaches to fishery control (see Fig. \ref{fig:decision approaches}).
+Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
+While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making.
+This provides very interpretable solutions, such as constant mortality policies.
+There is a drawback here, however: due to the simplicity of these dynamical models, the policies might not respond effectively in many situations---situations where the predictions of these simple models deviates considerably from reality.
+Because of this, policies such as MSY have faced pushback and are believed to have contributed to the depletion of fish stocks.
 
-As shown in Fig. \ref{fig:decision approaches}, these data-based strategies rely on choosing a family of *approximating functions* for the policy, $\mathcal{P}:=\{\pi_\theta\}_\theta$, parametrized by some vector $\theta$.
-These functions are deterministic policies, i.e. they map states to actions, or, specifically,
-$$
-  \pi_\theta : \mathbb{R}^n \to \mathbb{R}_+,
-$$
-where, as before, $n$ is the number of species.
-The aim of the optimization process is to find a parameter choice $\theta^*$ for which $\pi_{\theta^*}$ is optimal within $\mathcal{P}$.
+We propose an alternative approach to the problem of fishery control: to use a more expressive -- albeit more complicated -- dynamical model to guide decision making.
+Furthermore, rather than computing the optimal control policy for the model -- something that is impossible in practice for complex systems -- we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
 
-Our focus here will be comparing two data-based approaches: *constant mortality* and *DRL*.
-Constant mortality is, as the name suggests, based on MSY.
+In this paper we have exemplified this approach by applying it to the control of a three-species fishery model.
+In this example, we have shown that the DRL agent finds an approximately *bang-bang* type of solution.
+While bang-bang solutions are known to be optimal for a wide variety of single-species fishery control problems [@alexandru], there is no such proof of optimality for general multi-species models.
+In this sense this example is rather surprising and reassuring: while no general guarantee points at the optimality of bang-bang solutions for multi-species model, the existence of one such example provides a benchmark for the use of DRL in fishery control.
 
-For the constant mortality approach, we choose a linear harvest $\pi_F(N_t)= F X_t$, where the parameter $F$ is scalar, and where $N_t = (X_t,\ \dots\ )\in \mathbb{R}^n$.
-This first control is intended to delineate how one might apply MSY to a real-world fishery.
-We will also compare a TAC-inspired rule of thumb which uses, instead, the parameter value $F_{\text{TAC}} = 0.8 F^*$.
-In App. \ref{app:tbd}, we discuss several other MSY-based approaches which yield similar results to the strategies just discussed.
+One intuition for why a constant escapement policy performs so well in such a model comes from the anticorrelation between $X$ and $Y$ noted in the results section.
+We have observed in a variety of policies, both classical as well as some obtained by training DRL agents.
+In all of these, the pattern has been present.
+In fact, ‘‘crashes’’ in the $X$ population are almost invariably shortly preceeded by dramatic increases in $Y$.
+We hypothesize that this effectively leads to a dimensionality reduction: once the value of $X$ is known, along a path traced by the control system, then $Y$ may be roughly predicted.
+A similar, although weaker, anticorrelation is also observed between $X$ and $Z$.
+These two informal observations point at an effective simplification of the prediction process: the values of $Y$ and $Z$ are much less impactful to policy decisions than the value of $X$ itself.
+We have not yet pushed further to establish a more precise picture of this dynamical simplification.
 
-In the DRL approach, we instead parametrize $\mathcal{P}$ using a neural network with two hidden layers of 64 neurons.
-Our hypothesis is that the additional flexibility yielded by neural networks will allow the agent solutions that are better than MSY based approaches.
+This way, this manuscript functions as a first step in the process of incorporating DRL into fishery decision making.
+Importantly, DRL is equipped with tools to deal with more complicated models which might require a more refined approach to control them.
+For example *long short-term memories (LSTMs)* may be used to incorporate not only $N_t$ but also $\mathrm{d}N_t/\mathrm{d}t$ into policy decisions---while this additional degree of freedom would make analytical control theory approaches unwieldy, it may be easily and cost-effectively implemented in DRL.
+Similarly, *curriculum learning* could be incorporated to deal with phenomena such as parametric noise or parametric drift [@openai].
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.8\linewidth]{figures/DecisionApproaches.pdf}
-  \caption{
-  \label{fig:decision approaches}
-  TBD.
-  }
-\end{figure}
+This way, DRL provides a framework flexible enough to capture the intricate population dynamics that are relevant in fishery management.
+We have shown that highly non-linear systems may give rise to simplified and good policies and that these may be found via reinforcement learning.
+Moreover, the framework allows for the possibility that these simplifications do not in fact happen, and that good harvest policies are highly non-linear, multi-parameter functions.
 
-## Results
-
-\textbf{Reword a bit.}
-We trained a DRL agent to obtain a candidate policy
-\begin{align*}
-  \pi: (X_t,Y_t,Z_t) \mapsto h_t
-\end{align*}
-for eq. \eqref{eq:3d model}.
-The agent could fully and precisely observe the state of the system at each time step and decide on its harvest based on this information. 
-The agent was trained using the PPO algorithm, using a neural network with two hidden layers of 64 neurons to express $\pi$.
-Details of the training process may be found in App. \ref{app:tbd}.
-Our code is available at TBD.
-
-Rewards were defined to be a compound of two contributions.
-The first is economical: if at time $t$ a harvest of $h_t$ is secured, then the agents total reward is increased by $h_t$.
-The second regards sustainability: if an extinction happens at time step $t$, then a penalty of $-50/t$ is incurred by the agent.
-The choice of the constant $50$ in this rule was rather arbitrary: we set it to be a fourth of the maximal episode length ($200$ time steps), so as to encourage the agent to find policies that do not lead to extinctions below the time scale of around 100 time steps.
-\textbf{Too long of a "sorry" message?}
-
-We compare the performance of this agent to the performance of MSY and of an 80% TAC. 
-
-Our results suggest that DRL can find solutions that are more sustainable *and* more profitable than any constant mortality strategy.
-Indeed, DRL finds solutions in which, for certain periods of time, no harvest is performed on the system.
-These periods effectively allow the system to, in a sense, "reset" itself.
-They lead to a distinctive oscillating behavior of the system state over time, with periods of relative depletion followed by periods of growth. 
-Figure TBD exemplifies this point by comparing one times series of the system state obtained using each of these policies.
-
-
-```{r timeseries_old, fig.cap="TBD.", out.width = "6.5in"}
-policy_labeller <- function(variable,value){
-  return(policy_labels[value])
-}
-msy_tac_ppo |> 
-    group_by(rep, policy) |>
-    filter(rep == 6) |>
-    ggplot(aes(t, abundance, col = species)) + 
-        geom_line()  + 
-        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
-        facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
-        labs(y = "abundance", x = "time") +
-        theme(aspect.ratio = 2/3)
-```
-
-
-```{r rew_len_fig_old, fig.cap="TBD.", out.width = "6.5in"}
-library(patchwork)
-
-p1 <- msy_tac_ppo |> 
-    group_by(rep, policy) |>
-    filter(t==max(t), species == "X", rep < 50) |>
-    ggplot(aes(rep, t)) + 
-      geom_col() +
-      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
-      labs(y = "episode length", x = "repetition") +
-      theme(axis.text.x = element_blank())
-
-p2 <- msy_tac_ppo |> 
-    group_by(rep, policy) |>
-    filter(t==max(t), species == "X", rep < 50) |>
-    ggplot(aes(rep, reward)) + 
-      geom_col() +
-      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
-      labs(y = "episode harvest", x = "repetition") +
-      theme(axis.text.x = element_blank())
-
-(p1 / p2) + plot_annotation(tag_levels = 'A')
-```
-
-```{r state-space_old, fig.cap="TBD.", out.width = "6.5in"}
-i_tac <- which.min(abs(actions - best_action * 0.8))
-
-# color pallette limits
-library(RColorBrewer)
-myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")))
-sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0,0.25))
-
-pmsy <- msy_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
-  filter(action == best_action) |>
-  ggplot(aes(X, Z, color = harvest)) +
-  geom_point() + sc +
-  ggtitle("Opt. Const. Mortality")
-
-ptac <- msy_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
-  filter(action == actions[[i_tac]]) |>
-  ggplot(aes(X, Z, color = harvest)) +
-  geom_point() + sc +
-  ggtitle("80% Opt. Const. Mortality")
-
-pppo <- ppo_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
-  ggplot(aes(X, Z, color = harvest)) +
-  geom_point() + sc +
-  ggtitle("DRL")
-
-pesc <- opt_escapement |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, 
-        harvest = case_when(
-          X - escapement > 0 ~ X - escapement,
-          X - escapement <= 0 ~  0)
-         ) |> 
-  ggplot(aes(X, Z, color = harvest)) +
-  geom_point() + sc +
-  ggtitle("Opt. Const. Escapement")
-
-(
-  (pmsy | ptac) / (pppo | pesc) +
-  plot_layout(guides = "collect") & theme(legend.position = 'right')
-) + 
-  plot_annotation(tag_levels = c('A'))
-```
-
-
-```{r escapement_timeseries, fig.cap = "TBD", out.width = "6.5in"}
-
-ppo_mod <- ppo_df |> 
-  mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X, time = t)
-
-avg_esc <- mean(ppo_mod$escapement)
-# = 0.6201131
-
-ppo_esc <- ppo_mod |>
-  filter(rep == 6) |>
-  group_by(rep) |>
-  ggplot(aes(time, escapement), alpha = rep) +
-  geom_line() +
-  ylim(0,1) +
-  geom_hline(aes(yintercept=avg_esc), color="red")+
-  theme(aspect.ratio = 1/5)
-
-ppo_esc
-```
-
-**Probably more for the discussion**
-It is well known that following MSY policies can lead to over-fishing.
-Our results reproduce this behavior and, furthermore, warn that using a TAC policy instead might not be enough to gain sustainability.
-Figure \ref{rew_len_fig}-A summarizes episode length distribution for MSY, TAC and DRL.
-While the DRL-derived policy does not lead to extinctions, both MSY and TAC do so, and thus their episode mean length is lower than the maximal episode length (in our case set at 200 years).
-This difference is reflected on the profits earned by the agent, as shown in Fig. TBD-B.
-
-
-
+Conversely, our analysis suggests that, for high dimensional systems, bang-bang policies lead to increased sustainability and long-term profits as compared to constant mortality strategies.
+Similarly, in App. \ref{app:tbd} we investigate several generalizations of the constant effort approach. 
+For example, we examine strategies with a ramp-down from constant effort to zero effort at low populations.
+These, too, yield subpar results as compared to escapement.
+This seems to indicate that the ‘‘rest periods’’ so prominent in both the DRL solution and in the optimal bang-bang policy -- periods of several time steps with no fishing at all -- are important to maintain the sustainability of the fishery and, additionally, increase long-term profits.
 
 ## Acknowledgements
 
