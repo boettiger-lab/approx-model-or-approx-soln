@@ -1,0 +1,170 @@
+
+
+
+
+Mathematically, the ecological management may be understood as an optimal control problem - a manager must determine a sequence of actions (a "policy") to optimize some desired objective(s) and constraints (e.g. conservation goals, natural resource extraction, economic and social constraints.)
+Given an appropriate representation of the underlying mechanistic processes involved, such sequential decision problems may be posed more precisely as Markov Decision Process [MDP, @Marescot2013; @Memarzadeh2019].
+Such problems are notoriously difficult owing not only to the complexity of those underlying mechanisms alone, but to the exponentially branching consequences the decision-maker's actions have upon that system -- a game of chess is not won by thinking only one move ahead at a time. 
+Thus, while MDP problems have been studied in a conservation context since they were first introduced more than six decades ago, their application has been highly constrained to simple scenarios.
+Meanwhile, a class of machine learning techniques designed for MDP problems known as reinforcement learning (RL), has cracked open the door for exploring complex strategies in more realistic settings [@rl_intro].
+
+- This is not a tutorial or a sales pitch for RL - which brings at least as many difficulties as advantages -- including being hard to use, easy to get stuck on far from optimal performance, which itself may be hard to diagnose, as we have already discussed in our tutorial. The method 
+
+has through the use of clever algorithms, deep neural networks, and massive amounts of data,
+
+<!-- A sweeping summary of fisheries decision theory, don't bite me-->
+To understand the importance of a potential application of novel data-driven methods to the real world, it is most instructive to have a clearer picture of how models are currently used to inform ecological management in fisheries.
+In any issue as large and contentious as fisheries management, it may be far more difficult to provide a generalization  about how things actually work than to make sweeping recommendations about how it ought to.
+All the same, it is our firm belief that any researcher seeking to do the latter should first attempt to understand the former, so we beg the forbearance of any specialists in the practice as we seek to provide a concise overview of fisheries management today.
+Here, we focus specifically on practices in data rich, 'well-managed' fisheries, which, despite some issues, may be among the best examples of ecological management at continental scale that is largely driven by scientific processes, models and data. 
+
+<!-- Fisheries population models are rich but decisions aren't, mostly constant mortality -->
+While fisheries stock assessment models are quite rich, the choice of possible strategies remains motivated by intution from much simpler, analytically tractable one-dimensional models.
+This fact is not always obvious at cursory inspection, and can be met with cynicism even among professional fisheries managers -- after all, typical stock assessment models have over 100 parameters (e.g. see the stock assessments referenced from in @RAMLegacy) and best practices such as management strategy evaluation (MSE) evaluate and select potential policies by comparing across large and diverse simulations [e.g. @Punt2016].
+However, the space of policies considered under such approaches is necessarily far smaller than the set of all possible action sequences.
+Instead, fisheries management approaches such as MSE rely on theory based on more tractable models to restrict the search space of possible policies.  
+
+
+<!-- In contrast to constant mortality, the possible decision space is huge-->
+The management of any ecological system can be framed in terms of a Sequential Decision Process - 
+the manager observes the ecosystem state ($x_t$) and decides on action ($a_t$) to take (including potentially no action), potentially receiving any costs or benefits associated with that action and and state (reward $r_t$  $r_t = U(x_t,a_t)$),
+while the system evolves into a new state in response $x_{t+1} = f(x_t, a_t)$. When the probability of the future state can be determined by the current state and action, we say the system is Markovian and the process a Markov Decision Process (MDP).
+As in a game of chess, the space of possible sequences of actions a manager might choose over any realization of the Markov process is enormous.
+When the action and state space are discrete and sufficiently small, computational approaches such as dynamic programming may be used to guarantee an exhaustive search for a single optimal policy.
+Dynamic programming scales very poorly to larger state and action spaces.
+
+
+Effort $Q = E X_t$  
+
+Fisheries policies are typically implemented in terms of *catch quotas*, i.e. a limit to the number of metric tonnes of fish that can be caught during a given season. 
+
+
+and/or *effort controls*, restrictions on the fishing effort -- in numbers of boats, time of year, or days at sea
+
+
+<!-- Reality __
+  |        \
+  v         \
+1-D Model   More expressive model
+  |                  |
+  v                  v
+Optimal        Suboptimal, but
+solution   well-performing solution -->
+
+
+## original draft of abstract?
+
+Existing methods for optimal control methods struggle to deal with the complexity commonly encountered in real-world systems, including dimensionality, process error, model bias and heterogeneity. 
+Instead of tackling these complexities directly, researchers have typically sought to find exact optimal solutions to simplified models of the processes in question. 
+When is the optimal solution to a very approximate, stylized model better than an approximate solution to a more accurate model? 
+This question has largely gone unanswered owing to the difficulty of finding even approximate solutions in the case of complex models.  
+Our approach draws on recent algorithmic and computational advances in deep reinforcement learning. 
+We demonstrate the ability for novel algorithms using deep neural networks to successfully approximate such solutions (the "policy function" or control rule) without knowing or ever attempting to infer a model for the process itself. 
+This powerful new technique lets us finally begin to answer the question.
+We show that in many but not all cases, the optimal policy for a carefully chosen over-simplified model can still out-perform these novel algorithms trained to find approximate solutions to simulations of a realistically complex system. 
+This illustrates the promise of combining complex, realistic simulations with emerging machine-learning techniques to improve our understanding and management of ecological systems.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Millie's suggestion for plots:
+
+```{r}
+msy_sim <- msy_sim |> mutate(type = "Opt const mortality", cumulative_reward = reward)
+tac_sim <- tac_sim |>
+    mutate(abundance = abundance + 1) |>
+    mutate(type = "80% opt const mortality", 
+           cumulative_reward = reward)
+ppo_sim <- ppo_sim |> mutate(type = "DRL")
+all_sim <- bind_rows(msy_sim, tac_sim, ppo_sim)
+```
+
+```{r}
+all_sim |> #filter(rep < 10, species == "X") |> 
+    group_by(rep) |>
+    filter(t==max(t), rep < 10, species == "X") |>
+    ggplot(aes(rep, cumulative_reward)) + geom_col() +
+    facet_wrap(~type)
+
+msy_sim |> 
+  group_by(rep) |>
+  filter(t==max(t), species=="X", rep < 10) |>
+  ggplot(aes(rep, cumulative_reward)) + geom_col()
+
+tac_sim |> 
+  group_by(rep) |>
+  filter(t==max(t), species=="X", rep < 10) |>
+  ggplot(aes(rep, cumulative_reward)) + geom_col()
+
+all_sim |> 
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(t==max(t), species=="X", rep < 10) |>
+    ggplot(aes(rep, cumulative_reward)) + 
+        geom_col()  + 
+        facet_wrap(~type) + 
+        labs(y = "reward", x = "repetition")
+
+
+```
+
+```{r}
+all_sim |> 
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(rep == 0) |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        facet_wrap(~type) + 
+        labs(y = "reward", x = "repetition") +
+        theme(aspect.ratio = 2/5)
+all_sim |>
+    group_by(rep,type) |>
+    filter(rep<10) |>
+    ggplot(aes(t, action)) + 
+    geom_line()  + 
+    facet_wrap(~type) + 
+    labs(y = "action", x = "repetition")
+    
+
+
+
+
+#all_sim |> group_by(rep) |> filter(t==max(t), species == "X") |> group_by(t)
+```
+
+
+
+```{r}
+all_sim |> 
+    mutate(across(type, factor, levels = c("Opt const mortality", "80% opt const mortality", 
+                                           "DRL"))) |>
+    group_by(rep, type) |>
+    filter(t==max(t), species=="X", rep < 10) |>
+    ggplot(aes(rep,t)) + 
+        geom_col()  + 
+        facet_wrap(~type) + 
+        labs(y = "episode length", x = "repetition") +
+        theme(axis.text.x = element_blank())
+```
+
+
+
+
+
