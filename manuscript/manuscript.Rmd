@@ -445,12 +445,14 @@ resc <- esc_rewards |>
 
 # Reinforcement learning {#sec:RL}
 
-Reinforcement learning (RL) is, in a nutshell, a way of approaching *control problems* through machine learning.
-An RL algorithm can be conceptually separated into two parts: an *agent*, and an *environment* which the agent can interact with.
-That is, the agent may act on the environment and thus change its state, while the environment gives a *reward* to the agent in return (see Fig. \ref{tbd}).
+Reinforcement learning (RL) is a way of approaching *sequential decision problems* through machine learning.
+All applications of RL can be conceptually separated into two parts: an *agent* and an *environment* which the agent interacts with.
+That is, the agent takes actions within the environment.
+As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent (see Fig. \ref{tbd}).
 The rewards encode the agent's goal.
-The main part of an RL algorithm is then to progressively improve the agent's *policy*, in order to maximize the cumulative reward received. 
-This is done by aggregating experience and learning from it.
+The main task of any RL algorithm is then to maximize the cumulative reward received. 
+This objective is achieved by aggregating experience in what is called the *training* period and learning from such experience.
+<!-- ML: We could cite our deep RL paper here instead of going into further details. Not sure what we are expecting as the audience. -->.
 
 <!-- The *environment* is commonly a computer simulation, although it sometimes can be a real world system.
 The *agent*, on the other hand, is a computer program which interacts with the environment. -->
@@ -467,9 +469,9 @@ Afterwards, the environment undergoes a timestep under its natural dynamics give
 
 ## Mathematical framework for RL
 
-Mathematically, RL may be formulated using a discrete time *partially observable Markov decision process (POMDP)*.
+The RL environment can be formally described as a discrete time *partially observable Markov decision process (POMDP)*.
 This formalization is rather flexible and allows one, e.g., to account for situations where the agent may not fully observe the environment state, or where the only observations available to the agent are certain functions of the underlying state.
-For the sake of clarity, we will present here only the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (FMDPs for short).
+For the sake of clarity, we will only present here the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (FMDPs for short).
 An FMDP may be defined by the following data:
 
 - $\mathcal{S}$: *state space*, the set of states of the environment,
@@ -505,14 +507,14 @@ $$
   R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, s_t),
 $$
 is the cumulative reward of path $\tau$.
-The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *value function*.
+The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expected return*.
 
 ## Deep Reinforcement Learning
 
-The policy function $\pi$ often lives in a high- or even infinite-dimensional space.
+The policy function $\pi$ often lives in a high or even infinite-dimensional space.
 This makes it unfeasible to directly optimize $\pi$.
-In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parametrized family of functions.
-Deep reinforcement learning uses this strategy, focusing on function families parametrized by neural networks. (See Fig. \ref{tbd}.)
+In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions. <!-- ML: I am not following this line of thought here. I see the main reason why NN's are used as being that NN's are universal function approximators, and we don't know what the policy and/or value function will look like.-->
+Deep reinforcement learning uses this strategy, focusing on function families parameterized by neural networks. (See Fig. \ref{tbd}.)
 <!-- The figure should kinda explain how the parametrization arises, and how gradient ascent is used. Maybe namedrop backpropagataion for the sake of usefulness to the reader? -->
 
 Since our state and observation spaces are continuous, we will focus on deep reinforcement learning throughout this paper.
@@ -535,10 +537,10 @@ More generally, there are many situations in which the exact model of the system
 This is a standard situation in ecology: mathematical models capture the most prominent aspects of the ecosystem's dynamics, while ignoring or summarizing most of its complexity.
 In this case, it is clear, model-based controls run a grave danger of mismanaging the system.
 
-Reinforcement learning is, on the other hand, typically a model-free approach to control theory.\footnote{There are, however, approaches to perform model-based reinforcement learning. While we will not focus on these in this paper they are discussed in \cite{tbd1, tbd2}.}
-While the model is certainly used to generate training data, it is not directly used by the optimization algorithm.
-This provides more flexibility to use model-free RL in instances where the model of the system is not accurately known.
-In fact, it has been shown to generally be preferable to use model-free RL in such instances.
+Reinforcement learning, on the other hand, can provide a model-free approach to control theory.\footnote{There are approaches to perform model-based reinforcement learning. While we will not focus on these in this paper they are discussed in \cite{tbd1, tbd2}.}
+While a model is often used to generate training data, this model is not directly used by model-free RL algorithms.
+This provides more flexibility to use RL in instances where the model of the system is not accurately known.
+In fact, it has been shown that model-free RL outperforms model-based alternatives in such instances \cite{Janner et al., 2019}.
 
 **Mention CL here? Where solutions to other related problems in the curriculum are used to build solutions to the target problem.**
 
@@ -850,7 +852,7 @@ Moreover, the framework allows for the possibility that these simplifications do
 In this regard, DRL provides a framework flexible enough to capture the intricate population dynamics that are relevant in fishery management.
 Importantly, DRL is equipped with tools to deal with complex models for which simple policies might yield unsatisfactory results (and thus more refined techniques are needed to control them).
 For example *long short-term memories (LSTMs)* may be used to incorporate not only $N_t$ but also $\mathrm{d}N_t/\mathrm{d}t$ into policy decisions---while this additional degree of freedom would make analytical control theory approaches unwieldy, it may be easily and cost-effectively implemented in DRL.
-Similarly, *curriculum learning* could be incorporated to deal with phenomena such as parametric noise or parametric drift [@openai].
+Similarly, *curriculum learning* could be incorporated to deal with phenomena such as parametric noise or parametric drift [@openai]. <!-- ML: Could also use LSTMs for parametric drift. Might be better to use a different selling point for curriculum learning like if you want to have a bit more generalizability in your RL agent. -->
 
 Finally, in our study case, we have shown that the ‘‘rest periods’’ so prominent in both the DRL solution and in the optimal bang-bang policy -- periods of several time steps with no fishing at all -- may be important to maintain the sustainability of the fishery and to increase its long-term profits.
 This hypothesis could be explored in more generality as it might apply to a wide variety of models with different optimal control strategies.
