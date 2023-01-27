@@ -641,19 +641,19 @@ We used the Ray framework [@ray_package] for training, in particular we used a R
 The agent was trained for 250 iterations of the PPO optimization step.
 
 \textbf{Tuning the constant mortality strategy.}
-A grid of 200 mortality rates was laid in the interval $[0, 0.1]$.
+A grid of 100 mortality rates was laid in the interval $[0, 0.1]$.
 For each one of these rates, say $F$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
 At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $FX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
 The optimal mortality rate was the value $F^*$ for which the mean episode reward was maximal.
 We additionally evaluated a more conservative strategy where a mortality of $0.8 F^*$ instead is used.
 
-The result of the tuning procedure is shown in Fig. \ref{fig:linear_tuning}. 
+The result of the tuning procedure is shown in Fig. \ref{fig:tuning}. 
 There, we see that the optimal value $F^*$ lies in an area with high episode reward variance.
 We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this variance is the presence of episodes with early endings.
 Thus, the value $0.8 F^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
 
 ```{r}
-#| label: linear_tuning, 
+#| label: tuning
 #| fig.cap : "Result of the tuning procedure for the constant mortality strategy. 
 #| (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $F^* = $ TBD (red) and $0.8 F^*=$ TBD (green). 
 #| (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $F^*X$ shown in red, while $0.8F^*X$ shown in green." 
@@ -693,7 +693,8 @@ lines <- p + stat_function(fun = linear_f_gen(0.01)) +
   stat_function(fun = linear_f_gen(0.055)) + 
   stat_function(fun = linear_f_gen(0.065)) +
   xlim(0,2) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  xlab("X") + ylab("harvest")
 
 
 (rmsy | lines) + plot_annotation(tag_levels = c('A'))
