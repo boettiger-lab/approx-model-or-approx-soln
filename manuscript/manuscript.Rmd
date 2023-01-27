@@ -836,8 +836,7 @@ While bang-bang solutions are known to be optimal for a wide variety of single-s
 In this sense this example is rather surprising and reassuring: while no general guarantee points at the optimality of bang-bang solutions for multi-species model, the existence of one such example provides a benchmark for the use of DRL in fishery control.
 
 One intuition for why a constant escapement policy performs so well in such a model comes from the anticorrelation between $X$ and $Y$ noted in the results section.
-We have observed in a variety of policies, both classical as well as some obtained by training DRL agents.
-In all of these, the pattern has been present.
+We have observed this pattern arise in a variety of policies, both classical as well as some obtained by training DRL agents.
 In fact, ‘‘crashes’’ in the $X$ population are almost invariably shortly preceeded by dramatic increases in $Y$.
 We hypothesize that this effectively leads to a dimensionality reduction: once the value of $X$ is known, along a path traced by the control system, then $Y$ may be roughly predicted.
 A similar, although weaker, anticorrelation is also observed between $X$ and $Z$.
@@ -845,7 +844,7 @@ These two informal observations point at an effective simplification of the pred
 We have not yet pushed further to establish a more precise picture of this dynamical simplification.
 
 This manuscript functions as a first step in the process of incorporating DRL into fishery decision making.
-We have shown that highly non-linear systems may give rise to simplified and good policies and that these may be found via reinforcement learning.
+We have shown that highly non-linear systems may give rise to simple, good policies, and that these may be found via reinforcement learning.
 Moreover, the framework allows for the possibility that these simplifications do not in fact happen, and that good harvest policies are highly non-linear, multi-parameter functions.
 
 In this regard, DRL provides a framework flexible enough to capture the intricate population dynamics that are relevant in fishery management.
