@@ -573,7 +573,7 @@ Thus, we normalized state space (to be contained in a cube of length 2) and enga
 We did not need to tune hyper-parameters for this goal, however.
 
 We used the Ray framework [@ray_package] for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters (cf. [@repo] for the code used).
-The agent was trained for 250 iterations of the PPO optimization step.
+The agent was trained for 200 iterations of the PPO optimization step.
 
 \textbf{Tuning the constant mortality strategy.}
 A grid of 100 mortality rates was laid in the interval $[0, 0.1]$.
@@ -746,7 +746,19 @@ pz <- ppo_df |>
   theme(aspect.ratio = 1/1) +
   stat_function(fun = opt_escapement_harvest, col = 'red')
 
-(py | pz) + plot_annotation(tag_levels = c('A'))
+escxy <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
+  ggplot(aes(X, escapement, color = Y)) +
+  geom_point() +
+  theme(aspect.ratio = 1/1)
+
+escxz <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
+  ggplot(aes(X, escapement, color = Z)) +
+  geom_point() +
+  theme(aspect.ratio = 1/1)
+
+((py | pz)/ (escxy | escxz)) + plot_annotation(tag_levels = c('A'))
 ```
 
 In Fig. \ref{fig:state-space}, we perform a back to back visualization of all the policies evaluated up to now---MSY constant mortality, 80% MSY constant mortality, DRL and escapement.
