@@ -14,7 +14,7 @@ def simulate(env, fixed_action, threshold_pop = 0.5):
       action = fixed_action
       if observation[0]+1 < threshold_pop:
         action = action * (observation[0] + 1) / threshold_pop
-      df.append(np.append([t, rep, action, episode_reward], observation))
+      df.append(np.append([t, rep, fixed_action, action, episode_reward], observation))
       observation, reward, terminated, info = env.step(action)
       episode_reward += reward
       if terminated:
@@ -31,7 +31,7 @@ parallel = [simulate.remote(env, i) for i in actions]
 df = ray.get(parallel)
 
 # convert to data.frame & write to csv
-cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
+cols = ["t", "rep", "policy_action", "action", "reward", "X", "Y", "Z"]
 df2 = pd.DataFrame(np.vstack(df), columns = cols)
 df2.to_csv("data/var_tac.csv.xz", index=False)
 
