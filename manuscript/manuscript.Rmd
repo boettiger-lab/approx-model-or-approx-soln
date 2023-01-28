@@ -684,12 +684,11 @@ msy_tac_ppo |>
         theme(aspect.ratio = 2/3)
 ```
 
-This time series is representative of the patterns observed in the data (see App. \ref{app:tbd}).
+This time series is representative of the patterns observed in the data (see App. A).
 The episode reward and episode length statistics are shown in Fig. \ref{fig:rew_len_fig}.
 There, we highlight two things:
-First, that the tendency towards early episode ends is fixed by the conservative approach of fishing at 80% of the optimal mortality rate.
-(In App. \ref{app:tbd} we discuss a warning about this approach, however: the arbitrarily chosen percentage itself lives on a ‘‘knife's edge.’’
-More concretely, choosing a higher percentage, say 90%, can switch the behaviour of the controlled system and give rise to the proliferation of early episode ends.)
+First, that the tendency towards early episode ends is fixed by the conservative approach of fishing at 80% of the MSY mortality rate.
+(In App. B we discuss and evaluate other policies using a fixed-percentage of the MSY mortality rate.)
 Second, that while the conservative 80% approach has a stable behavior, it consistently produces smaller harvests than a DRL generated policy.
 
 ```{r} 
@@ -787,7 +786,7 @@ The policies are computed at each state along the paths they traverse in the 50 
 This figure highlights the similarity between the policy found by the DRL agent and the optimal escapement policy.
 
 Notice the anti-correlation between $X$ and $Y$ along the paths, this is especially prominent for the constant mortality plots.
-This anti-correlation is, furthermore, observed in the time series plots (see Fig. \ref{fig:timeseries} and App. \ref{app:tbd}).
+This anti-correlation is, furthermore, observed in the time series plots (see Fig. \ref{fig:timeseries} and App. A).
 
 ```{r}
 #| label: state-space
@@ -890,9 +889,11 @@ These techniques can be used to obtain agents who perform well over a variety of
 Finally, in our study case, we have shown that the ‘‘rest periods’’ so prominent in both the DRL solution and in the optimal bang-bang policy -- periods of several time steps with no fishing at all -- may be important to maintain the sustainability of the fishery and to increase its long-term profits.
 This hypothesis could be explored in more generality as it might apply to a wide variety of models with different optimal control strategies.
 
+\appendix
 
+# Appendix
 
-# Appendix A: collected time series data
+## Collected time series data
 
 In this appendix we provide a wider selection of time series taken from the same data set as Fig. \ref{fig:timeseries}.
 Namely, Figs. \ref{fig:timeseries_msy}, \ref{fig:timeseries_tac} and \ref{fig:timeseries_ppo} display these time series.
@@ -909,7 +910,7 @@ msy_tac_ppo |>
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
         facet_wrap(~factor(rep)) +
         labs(y = "abundance", x = "time") +
-        theme(aspect.ratio = 0.6)
+        theme(aspect.ratio = 0.5)
 ```
 
 ```{r} 
@@ -924,7 +925,7 @@ msy_tac_ppo |>
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
         facet_wrap(~factor(rep)) +
         labs(y = "abundance", x = "time") +
-        theme(aspect.ratio = 0.6)
+        theme(aspect.ratio = 0.5)
 ```
 
 ```{r} 
@@ -939,13 +940,13 @@ msy_tac_ppo |>
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
         facet_wrap(~factor(rep)) +
         labs(y = "abundance", x = "time") +
-        theme(aspect.ratio = 0.6)
+        theme(aspect.ratio = 0.5)
 ```
 
 
 
 
-# Appendix B: Conservative scale-downs of MSY
+## Conservative scale-downs of MSY
 
 Here we show the performance of constant mortality policies with a fraction $\alpha$ of the MSY mortality rate (in the main text we focused on $\alpha=0.8$).
 Their performance is evaluated in Fig. \ref{fig:several-tac}.
