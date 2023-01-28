@@ -857,7 +857,7 @@ Because of this, policies such as MSY have faced pushback and are believed to ha
 We propose an alternative approach to the problem of fishery control: to use a more expressive -- albeit more complicated -- dynamical model to guide decision making.
 Furthermore, rather than computing the optimal control policy for the model (something that is impossible in practice for complex systems) we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
 This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model stoch}) as a black box of input-output pairs.
-By not relying on precise knowledge of the model's parameter values, but rather just relying on input-output statistics, model-free approaches have gained traction in a variety of control theory settings [@rl_people].
+By not relying on precise knowledge of the model's parameter values, but rather just relying on input-output statistics, model-free approaches have gained traction in a variety of control theory settings (see, e.g., [@sato2019; @ramirez2022; @zeng2019]).
 
 We compare deep reinforcement learning-based policies against optimal constant mortality policies. 
 While the latter are MSY-inspired, they are optimized in a model-free way as well: the optimal constant mortality rate is computed empirically from simulated data.
