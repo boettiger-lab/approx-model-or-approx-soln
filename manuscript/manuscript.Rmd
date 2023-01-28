@@ -889,25 +889,78 @@ These techniques can be used to obtain agents who perform well over a variety of
 
 Finally, in our study case, we have shown that the ‘‘rest periods’’ so prominent in both the DRL solution and in the optimal bang-bang policy -- periods of several time steps with no fishing at all -- may be important to maintain the sustainability of the fishery and to increase its long-term profits.
 This hypothesis could be explored in more generality as it might apply to a wide variety of models with different optimal control strategies.
-In App. \ref{app:tbd} we provide some elementary support for this hypothesis by examining the performance of several ‘‘rule of thumb’’ policies based on conservative corrections to MSY.
+
+
 
 # Appendix A: collected time series data
 
+In this appendix we provide a wider selection of time series taken from the same data set as Fig. \ref{fig:timeseries}.
+Namely, Figs. \ref{fig:timeseries_msy}, \ref{fig:timeseries_tac} and \ref{fig:timeseries_ppo} display these time series.
 
-# Appendix B: variations on MSY
+```{r} 
+#| label: timeseries_msy
+#| fig.cap: "Nine time series of the system controlled by the MSY constant mortality policy." 
+#| out.width: "6.5in"
+msy_tac_ppo |> 
+    group_by(rep) |>
+    filter(rep < 9, policy == "msy") |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(rep)) +
+        labs(y = "abundance", x = "time") +
+        theme(aspect.ratio = 0.6)
+```
 
-Here we show the performance of some variations of the MSY constant mortality policy.
+```{r} 
+#| label: timeseries_tac
+#| fig.cap: "Nine time series of the system controlled by the policy using 80 percent of the MSY constant mortality." 
+#| out.width: "6.5in"
+msy_tac_ppo |> 
+    group_by(rep) |>
+    filter(rep < 9, policy == "tac") |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(rep)) +
+        labs(y = "abundance", x = "time") +
+        theme(aspect.ratio = 0.6)
+```
 
-First, consider constant mortality policies with a fraction $\alpha$ of the MSY mortality rate (in the main text we focused on $\alpha=0.8$).
+```{r} 
+#| label: timeseries_ppo
+#| fig.cap: "Nine time series of the system controlled by the trained DRL agent." 
+#| out.width: "6.5in"
+msy_tac_ppo |> 
+    group_by(rep) |>
+    filter(rep < 9, policy == "ppo") |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(rep)) +
+        labs(y = "abundance", x = "time") +
+        theme(aspect.ratio = 0.6)
+```
+
+
+
+
+# Appendix B: Conservative scale-downs of MSY
+
+Here we show the performance of constant mortality policies with a fraction $\alpha$ of the MSY mortality rate (in the main text we focused on $\alpha=0.8$).
+Their performance is evaluated in Fig. \ref{fig:several-tac}.
 Notice the sharp transition in performance between $\alpha = 0.9$ and $0.95$.
 While the behaviour of the former closely mimics, e.g., the $\alpha=0.8$ policy, the performance of the latter is essentially the same as the optimal constant mortality ($\alpha=1$, see Fig. \ref{fig:rew_len_fig}).
+This points at the fact that the value of the parameter $\alpha$, although commonly chosen simply as a rule of thumb, lives on a ‘‘knife's edge,’’ small changes in this parameter may lead to drastic changes in the dynamics of the controlled system.
+What is worse: the particular scale at which this transition happens is generally dependent on the system's intrinsic dynamics.
+In reality, where fishery models and their respective parameters are subject to substantial uncertainty, this fact calls to question the purported additional safety obtained via these rules of thumb.
 
 ```{r}
 #| label: several-tac
-#| fig.cap: "Performance of constant mortality policies with mortality $\alpha M^*$ for several values of $\alpha$.
+#| fig.cap: "Performance of constant mortality policies with mortality $\\alpha M^*$ for several values of $\\alpha$.
 #| The top panel displays the episode lengths for each repetition, while the bottom pannel displays the episode harvest.
-#| The labels in the plots are the value of $\alpha$ expressed as a percentage."
-#| out.width: "65.in"
+#| The labels in the plots are the value of $\\alpha$ expressed as a percentage."
+#| out.width: "6.5in"
 N <- 30
 actions <- unique(msy_df$action)
 i85 <- which.min(abs(actions - best_action* 0.85))
@@ -953,7 +1006,6 @@ p2 <- tac4 |>
 
 (p1 / p2)
 ```
-
 
 ## Acknowledgements
 
