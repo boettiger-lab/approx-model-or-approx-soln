@@ -512,7 +512,12 @@ The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expec
 
 The policy function $\pi$ often lives in a high or even infinite-dimensional space.
 This makes it unfeasible to directly optimize $\pi$.
-In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions. <!-- ML: I am not following this line of thought here. I see the main reason why NN's are used as being that NN's are universal function approximators, and we don't know what the policy and/or value function will look like.-->
+In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions. <!-- ML: I am not following this line of thought here. I see the main reason why NN's are used as being that NN's are universal function approximators, and we don't know what the policy and/or value function will look like.
+
+FM: my take here is that the space of functions from states to actions is in principle infinite-dimensional or at least very high dimensional. (e.g. exponentially high dimensional in terms of the number of degrees of freedom in state space, for the case of discretized state spaces).
+By restricting our ansatz to neural networks of a fixed depth/breadth, we're restricting ourselves to a finite dimensional (or, in the discrete case, potentially much lower dimensional) manifold of policies over which gradient descent may be performed much more efficiently.
+E.g. the dimensionality of the space we're searching for is determined by the size of the neural network, it's finite dimensional for continuous state spaces, and its dimension is not necessarily exponential in the number of species.
+-->
 Deep reinforcement learning uses this strategy, focusing on function families parameterized by neural networks. (See Fig. \ref{tbd}.)
 <!-- The figure should kinda explain how the parametrization arises, and how gradient ascent is used. Maybe namedrop backpropagataion for the sake of usefulness to the reader? -->
 
