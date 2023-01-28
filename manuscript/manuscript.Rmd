@@ -448,7 +448,7 @@ resc <- esc_rewards |>
 Reinforcement learning (RL) is a way of approaching *sequential decision problems* through machine learning.
 All applications of RL can be conceptually separated into two parts: an *agent* and an *environment* which the agent interacts with.
 That is, the agent takes actions within the environment.
-As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent (see Fig. \ref{tbd}).
+As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent.\footnote{See Fig. TBD in [@rl-intro-marcus] for a conceptual description of reinforcement learning algorithms.}
 The rewards encode the agent's goal.
 The main task of any RL algorithm is then to maximize the cumulative reward received. 
 This objective is achieved by aggregating experience in what is called the *training* period and learning from such experience.
@@ -471,7 +471,7 @@ Afterwards, the environment undergoes a timestep under its natural dynamics give
 
 The RL environment can be formally described as a discrete time *partially observable Markov decision process (POMDP)*.
 This formalization is rather flexible and allows one, e.g., to account for situations where the agent may not fully observe the environment state, or where the only observations available to the agent are certain functions of the underlying state.
-For the sake of clarity, we will only present here the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (FMDPs for short).
+For the sake of clarity, we will only present here the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (henceforth MDPs for short).
 An FMDP may be defined by the following data:
 
 - $\mathcal{S}$: *state space*, the set of states of the environment,
@@ -718,7 +718,7 @@ Specifically, for each point $(x,y,z)$ visited by one of the aforementioned 50 e
 In panel A we have used color to add the a $Y$-dependence, while in panel B we did the same with $Z$-dependence.
 This shows that the $Z$ and $Y$ dependence of the policy is rather weak and in fact it has roughly the same shape as an escapement policy.
 
-Fig. \ref{action-X} additionally shows (as a red line) the optimal escapement policy.
+Fig. \ref{fig:action-X} additionally shows (as a red line) the optimal escapement policy.
 This policy was computed in a manner similar to how the MSY constant mortality was computed: for each escapement in a grid of 100 values between 0 and 1, 50 episodes were run using the corresponding escapement policy.
 The value with the best mean episode reward was chosen as the optimal escapement value.
 
