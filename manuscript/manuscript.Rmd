@@ -125,7 +125,6 @@ ppo_sim <- ppo_df |>
         names_to = "species", values_to = "abundance") |>
     mutate(abundance = abundance + 1, policy = "ppo")
 
-best_e <- 0.61 # optimal constant escapement, computed from ../data/escapement.csv.gz
 esc_sim_df <- escapement_df |> 
     pivot_longer(c("X", "Y", "Z"),
         names_to = "species", values_to = "abundance") |>
@@ -577,21 +576,21 @@ The agent was trained for 200 iterations of the PPO optimization step.
 
 \textbf{Tuning the constant mortality strategy.}
 A grid of 100 mortality rates was laid in the interval $[0, 0.1]$.
-For each one of these rates, say $F$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
-At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $FX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
-The optimal mortality rate was the value $F^*$ for which the mean episode reward was maximal.
-We additionally evaluated a more conservative strategy where a mortality of $0.8 F^*$ instead is used.
+For each one of these rates, say $M$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
+At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $MX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
+The optimal mortality rate was the value $M^*$ for which the mean episode reward was maximal.
+We additionally evaluated a more conservative strategy where a mortality of $0.8 M^*$ instead is used.
 
 The result of the tuning procedure is shown in Fig. \ref{fig:tuning}. 
-There, we see that the optimal value $F^*$ lies in an area with high episode reward variance.
+There, we see that the optimal value $M^*$ lies in an area with high episode reward variance.
 We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this variance is the presence of episodes with early endings.
-Thus, the value $0.8 F^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
+Thus, the value $0.8 M^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
 
 ```{r}
 #| label: tuning
 #| fig.cap : "Result of the tuning procedure for the constant mortality strategy. 
-#| (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $F^* = $ TBD (red) and $0.8 F^*=$ TBD (green). 
-#| (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $F^*X$ shown in red, while $0.8F^*X$ shown in green." 
+#| (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $M^* = $ 0.045 (green) and $0.8 M^*=$ 0.036 (violet). 
+#| (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $M^*X$ shown in green, while $0.8M^*X$ shown in violet. (TBD choose nicer and plentier  slopes)" 
 #| out.width : "6.5in"
 msy_rewards <- msy_df |>
   group_by(action, rep) |>
@@ -607,8 +606,8 @@ rmsy <- msy_rewards |>
   geom_point() + geom_ribbon(alpha=0.4) +
   labs(y = "episode reward", x = "constant mortality") +
   theme(aspect.ratio = 1/1) + 
-  geom_vline(aes(xintercept=best_action), color="red") + 
-  geom_vline(aes(xintercept=0.8*best_action), color="green") +
+  geom_vline(aes(xintercept=best_action), color="seagreen2") + 
+  geom_vline(aes(xintercept=0.8*best_action), color="violetred1") +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
 # linear function blueprint
@@ -623,8 +622,8 @@ p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
 lines <- p + stat_function(fun = linear_f_gen(0.01)) + 
   stat_function(fun = linear_f_gen(0.02)) +
   stat_function(fun = linear_f_gen(0.03)) +
-  stat_function(fun = linear_f_gen(0.8*best_action), col = "green") +
-  stat_function(fun = linear_f_gen(best_action), col = "red") +
+  stat_function(fun = linear_f_gen(0.8*best_action), col = "violetred") +
+  stat_function(fun = linear_f_gen(best_action), col = "seagreen2") +
   stat_function(fun = linear_f_gen(0.055)) + 
   stat_function(fun = linear_f_gen(0.065)) +
   xlim(0,2) +
@@ -655,9 +654,9 @@ where the higher value of $X_{\text{thresh.}}$ helped select for more sustainabl
 
 We evaluated each of the three control approaches (MSY constant mortality, 80% MSY constant mortality and DRL) by running 50 episodes using the respective control rule.
 In Fig. \ref{fig:timeseries} we show the time series of one such repetition.
-The left panel uses an MSY constant mortality control $F^*X$, the middle panel uses $0.8 F^* X$, while the right panel is controlled by the trained DRL agent.
+The left panel uses an MSY constant mortality control $M^*X$, the middle panel uses $0.8 M^* X$, while the right panel is controlled by the trained DRL agent.
 We see that that optimal constant mortality control leads to a near-extinction event at around $t=150$.
-The constant mortality policy at $0.8 F^*$ is already conservative enough to support a sustainable path.
+The constant mortality policy at $0.8 M^*$ is already conservative enough to support a sustainable path.
 There, the population levels are maintained roughly in a stationary state.
 Finally, the DRL time series shows an oscillatory behavior, with a slight dephase between the $Y$ and $Z$ curves, while the $X$ oscillations are roughly anticorrelated with $Z$.
 
