@@ -732,31 +732,43 @@ opt_escapement_harvest <- function(X) case_when(
   X <= best_e ~ 0
 )
 
+opt_escapement_escapement <- function(X) case_when(
+  X <= best_e ~ X,
+  X > best_e ~ best_e
+)
+
+msy_harvest <- function(X) best_action*X
+tac_harvest <- function(X) 0.8*msy_harvest(X)
+
 py <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
   ggplot(aes(X, harvest, color = Y)) +
   geom_point() +
   theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_harvest, col = 'red')
+  stat_function(fun = opt_escapement_harvest, col = 'deeppink') + 
+  stat_function(fun = msy_harvest, col = 'sienna4')
 
 pz <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
   ggplot(aes(X, harvest, color = Z)) +
   geom_point() +
   theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_harvest, col = 'red')
+  stat_function(fun = opt_escapement_harvest, col = 'deeppink') + 
+  stat_function(fun = msy_harvest, col = 'sienna4')
 
 escxy <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
   ggplot(aes(X, escapement, color = Y)) +
   geom_point() +
-  theme(aspect.ratio = 1/1)
+  theme(aspect.ratio = 1/1) +
+  stat_function(fun = opt_escapement_escapement, col = 'deeppink')
 
 escxz <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
   ggplot(aes(X, escapement, color = Z)) +
   geom_point() +
-  theme(aspect.ratio = 1/1)
+  theme(aspect.ratio = 1/1) +
+  stat_function(fun = opt_escapement_escapement, col = 'deeppink')
 
 ((py | pz)/ (escxy | escxz)) + plot_annotation(tag_levels = c('A'))
 ```
