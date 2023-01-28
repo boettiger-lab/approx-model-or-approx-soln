@@ -891,6 +891,69 @@ Finally, in our study case, we have shown that the ‘‘rest periods’’ so p
 This hypothesis could be explored in more generality as it might apply to a wide variety of models with different optimal control strategies.
 In App. \ref{app:tbd} we provide some elementary support for this hypothesis by examining the performance of several ‘‘rule of thumb’’ policies based on conservative corrections to MSY.
 
+# Appendix A: collected time series data
+
+
+# Appendix B: variations on MSY
+
+Here we show the performance of some variations of the MSY constant mortality policy.
+
+First, consider constant mortality policies with a fraction $\alpha$ of the MSY mortality rate (in the main text we focused on $\alpha=0.8$).
+Notice the sharp transition in performance between $\alpha = 0.9$ and $0.95$.
+While the behaviour of the former closely mimics, e.g., the $\alpha=0.8$ policy, the performance of the latter is essentially the same as the optimal constant mortality ($\alpha=1$, see Fig. \ref{fig:rew_len_fig}).
+
+```{r}
+#| label: several-tac
+#| fig.cap: "Performance of constant mortality policies with mortality $\alpha M^*$ for several values of $\alpha$.
+#| The top panel displays the episode lengths for each repetition, while the bottom pannel displays the episode harvest.
+#| The labels in the plots are the value of $\alpha$ expressed as a percentage."
+#| out.width: "65.in"
+N <- 30
+actions <- unique(msy_df$action)
+i85 <- which.min(abs(actions - best_action* 0.85))
+i90 <- which.min(abs(actions - best_action* 0.90))
+i95 <- which.min(abs(actions - best_action* 0.95))
+tac_85_sim <- msy_df |> 
+    filter(action == actions[[i85]]) |>
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "85%")
+tac_90_sim <- msy_df |> 
+    filter(action == actions[[i90]]) |>
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "90%")
+tac_95_sim <- msy_df |> 
+    filter(action == actions[[i95]]) |>
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "95%")
+
+tac_80_sim <- tac_sim |> mutate(policy = "80%")
+
+tac4 <- bind_rows(tac_80_sim, tac_85_sim, tac_90_sim, tac_95_sim)
+
+p1 <- tac4 |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), species == "X", rep < N) |>
+    ggplot(aes(rep, t)) + 
+      geom_col() +
+      facet_wrap(~factor(policy), ncol = 4) +
+      labs(y = "episode length", x = "repetition") +
+      theme(axis.text.x = element_blank())
+
+p2 <- tac4 |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), species == "X", rep < N) |>
+    ggplot(aes(rep, reward)) + 
+      geom_col() +
+      facet_wrap(~factor(policy), ncol=4) +
+      labs(y = "episode harvest", x = "repetition") +
+      theme(axis.text.x = element_blank())
+
+(p1 / p2)
+```
+
 
 ## Acknowledgements
 
