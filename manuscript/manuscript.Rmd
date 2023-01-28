@@ -8,7 +8,7 @@ thanks: |
 authors: 
 - name: Felipe Montealegre-Mora
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
-- name: Marcus Laperolerie
+- name: Marcus Lapeyrolerie
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
 - name: Melissa Chapman
   address: Department of Environmental Science, Policy, and Management, University of California, Berkeley
