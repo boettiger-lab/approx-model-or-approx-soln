@@ -725,7 +725,10 @@ The value with the best mean episode reward was chosen as the optimal escapement
 
 ```{r}
 #| label: action-X
-#| fig.cap: "TBD"
+#| fig.cap: "(A-B) Harvest and escapement scatter data for the DRL policy together with the optimal constant escapement (pink) and constant mortality (green) policies for comparison. 
+#| (A) includes $Y$ dependence through color, whereas (B) includes $Z$ dependence similarly.
+#| (B-C) escapement (i.e. $X_t - h_t$) scatter data for the DRL policy. 
+#| Optimal constant escapement policy shown in pink for comparison."
 #| out.width: "6.5in"
 opt_escapement_harvest <- function(X) case_when(
   X > best_e ~ X - best_e,
@@ -745,30 +748,30 @@ py <- ppo_df |>
   ggplot(aes(X, harvest, color = Y)) +
   geom_point() +
   theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_harvest, col = 'deeppink') + 
-  stat_function(fun = msy_harvest, col = 'sienna4')
+  stat_function(fun = opt_escapement_harvest, col = 'deeppink', size = 0.8) + 
+  stat_function(fun = msy_harvest, col = 'seagreen2', size = 0.8)
 
 pz <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
   ggplot(aes(X, harvest, color = Z)) +
   geom_point() +
   theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_harvest, col = 'deeppink') + 
-  stat_function(fun = msy_harvest, col = 'sienna4')
+  stat_function(fun = opt_escapement_harvest, col = 'deeppink', size = 0.8) + 
+  stat_function(fun = msy_harvest, col = 'seagreen2', size = 0.8)
 
 escxy <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
   ggplot(aes(X, escapement, color = Y)) +
   geom_point() +
   theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_escapement, col = 'deeppink')
+  stat_function(fun = opt_escapement_escapement, col = 'deeppink', size = 0.8)
 
 escxz <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
   ggplot(aes(X, escapement, color = Z)) +
   geom_point() +
   theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_escapement, col = 'deeppink')
+  stat_function(fun = opt_escapement_escapement, col = 'deeppink', size = 0.8)
 
 ((py | pz)/ (escxy | escxz)) + plot_annotation(tag_levels = c('A'))
 ```
