@@ -722,10 +722,12 @@ Specifically, for each point $(x,y,z)$ visited by one of the aforementioned 50 e
 In panel A we have used color to add the a $Y$-dependence, while in panel B we did the same with $Z$-dependence.
 This shows that the $Z$ and $Y$ dependence of the policy is rather weak and in fact it has roughly the same shape as an escapement policy.
 
-Fig. \ref{fig:action-X} additionally shows (as a red line) the optimal escapement policy.
-This policy was computed in a manner similar to how the MSY constant mortality was computed: for each escapement in a grid of 100 values between 0 and 1, 50 episodes were run using the corresponding escapement policy.
+Fig. \ref{fig:action-X} additionally shows (pink line) the optimal constant escapement policy and the MSY constant mortality policy (green line).
+The optimal constant escapement was computed in a manner similar to how the MSY constant mortality was computed: for each escapement in a grid of 100 values between 0 and 1, 50 episodes were run using the corresponding escapement policy.
 The value with the best mean episode reward was chosen as the optimal escapement value.
-
+We observe that the DRL policy approximates the optimal constant escapement policy, with the difference of being more conservative in its harvest at high $X$ values.
+This pattern can be seen in panels (C-D), where at high $X$ values, the DRL escapement mildly increases in a non-linear fashion rather than staying constant.
+Finally, relative to these two policies, we observe that MSY constant mortality underfishes at high $X$ values and overfishes at low $X$ values.
 
 ```{r}
 #| label: action-X
