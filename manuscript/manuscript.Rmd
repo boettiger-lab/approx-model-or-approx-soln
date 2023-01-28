@@ -163,7 +163,7 @@ Even as our research community develops simulations of the natural world that fi
 
 <!-- Why fisheries-focused examples -- maybe we can cut/merge this with paragraph above -->
 There are myriad examples from climate scenarios to protected areas, we will illustrate this with a specific example in the management of marine fisheries, which is both an important issue to itself and a frequent crucible in which methods of ecological management have been fired before extending to other fields, and where the space of possible policies is arguably already more richly developed than most.
-Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006, @Costello2016]. 
+Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006; @Costello2016]. 
 Because of this importance, fisheries also represent some of the longest and best studied timeseries of population dynamics available to ecologists, as well as a correspondingly rich area for the development of theory and practice.
 Methods developed in the study and management of fisheries are frequently applied to other areas of ecological management, from concepts such as maximum sustainable yield [], optimal control under observation uncertainty [@Memarzadeh2019], to adaptive management [@Walters], management strategy evaluation [@Punt], to the studies of conservation policy and international negotiations [@].
 
@@ -852,7 +852,7 @@ Fisheries are complex ecosystems, with interactions between species leading to h
 While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making.
 This provides very interpretable solutions, such as constant mortality policies.
 There is a drawback here, however: due to the simplicity of these dynamical models, the policies might not respond effectively in many situations---situations where the predictions of these simple models deviate considerably from reality.
-Because of this, policies such as MSY have faced pushback and are believed to have contributed to the depletion of fish stocks [@tbd].
+Because of this, policies such as MSY have faced pushback and are believed to have contributed to the depletion of fish stocks [@Worm2006; @Costello2016].
 
 We propose an alternative approach to the problem of fishery control: to use a more expressive -- albeit more complicated -- dynamical model to guide decision making.
 Furthermore, rather than computing the optimal control policy for the model (something that is impossible in practice for complex systems) we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
@@ -867,7 +867,7 @@ In contrast, DRL optimizes over the more expressive -- and more complicated -- f
 Because of this, our DRL approach uses a variant of *gradient ascent* (the proximal policy optimization algorithm) to obtain a good candidate policy.
 
 We have shown that the DRL agent finds an approximately *bang-bang* type of solution (see Textbox 1 for the definition of bang-bang solutions and Figs. \ref{fig:action-X} and \ref{fig:state-space} for the result).
-While bang-bang solutions are known to be optimal for a wide variety of single-species fishery control problems [@alexandru], there is no such proof of optimality for general multi-species models.
+While bang-bang solutions are known to be optimal for a wide variety of single-species fishery control problems [@hening2019; @hening2021], there is no such proof of optimality for general multi-species models.
 In this sense this example is rather surprising and reassuring: while no general guarantee points at the optimality of bang-bang solutions for multi-species model, the existence of one such example provides a benchmark for the use of DRL in fishery control.
 
 One intuition for why a constant escapement policy performs so well in such a model comes from the anticorrelation between $X$ and $Y$ noted in the results section.
@@ -885,7 +885,7 @@ Moreover, the framework allows for the possibility that these simplifications do
 In this regard, DRL provides a framework flexible enough to capture the intricate population dynamics that are relevant in fishery management.
 Importantly, DRL is equipped with tools to deal with complex models for which simple policies might yield unsatisfactory results (and thus more refined techniques are needed to control them).
 For example *long short-term memories (LSTMs)* may be used to incorporate not only $N_t$ but also $\mathrm{d}N_t/\mathrm{d}t$ into policy decisions---while this additional degree of freedom would make analytical control theory approaches unwieldy, it may be easily and cost-effectively implemented in DRL.
-Similarly, *curriculum learning* could be incorporated to deal with phenomena such as parametric noise or parametric drift [@openai]. <!-- ML: Could also use LSTMs for parametric drift. Might be better to use a different selling point for curriculum learning like if you want to have a bit more generalizability in your RL agent. -->
+Similarly, *curriculum learning* [@curriculum-learning] or *open-ended learning* [@open-ended] could be incorporated to deal with phenomena such as parametric noise, parametric drift, and, more generally, for deriving generally well-performing agents *vis-à-vis* uncertainties in the system's dynamics. <!-- ML: Could also use LSTMs for parametric drift. Might be better to use a different selling point for curriculum learning like if you want to have a bit more generalizability in your RL agent. -->
 
 Finally, in our study case, we have shown that the ‘‘rest periods’’ so prominent in both the DRL solution and in the optimal bang-bang policy -- periods of several time steps with no fishing at all -- may be important to maintain the sustainability of the fishery and to increase its long-term profits.
 This hypothesis could be explored in more generality as it might apply to a wide variety of models with different optimal control strategies.
