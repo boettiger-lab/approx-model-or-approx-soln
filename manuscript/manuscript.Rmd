@@ -684,11 +684,11 @@ msy_tac_ppo |>
         theme(aspect.ratio = 2/3)
 ```
 
-This time series is representative of the patterns observed in the data (see App. A).
+This time series is representative of the patterns observed in the data (see App. A.1).
 The episode reward and episode length statistics are shown in Fig. \ref{fig:rew_len_fig}.
 There, we highlight two things:
 First, that the tendency towards early episode ends is fixed by the conservative approach of fishing at 80% of the MSY mortality rate.
-(In App. B we discuss and evaluate other policies using a fixed-percentage of the MSY mortality rate.)
+(In App. A.2 we discuss and evaluate other policies using a fixed-percentage of the MSY mortality rate.)
 Second, that while the conservative 80% approach has a stable behavior, it consistently produces smaller harvests than a DRL generated policy.
 
 ```{r} 
@@ -786,7 +786,7 @@ The policies are computed at each state along the paths they traverse in the 50 
 This figure highlights the similarity between the policy found by the DRL agent and the optimal escapement policy.
 
 Notice the anti-correlation between $X$ and $Y$ along the paths, this is especially prominent for the constant mortality plots.
-This anti-correlation is, furthermore, observed in the time series plots (see Fig. \ref{fig:timeseries} and App. A).
+This anti-correlation is, furthermore, observed in the time series plots (see Fig. \ref{fig:timeseries} and App. A.1).
 
 ```{r}
 #| label: state-space
