@@ -471,7 +471,7 @@ Afterwards, the environment undergoes a timestep under its natural dynamics give
 The RL environment can be formally described as a discrete time *partially observable Markov decision process (POMDP)*.
 This formalization is rather flexible and allows one, e.g., to account for situations where the agent may not fully observe the environment state, or where the only observations available to the agent are certain functions of the underlying state.
 For the sake of clarity, we will only present here the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (henceforth MDPs for short).
-An FMDP may be defined by the following data:
+An MDP may be defined by the following data:
 
 - $\mathcal{S}$: *state space*, the set of states of the environment,
 
@@ -485,7 +485,7 @@ An FMDP may be defined by the following data:
 
 - $\gamma\in[0,1]$: *discount factor*.
 
-At a time $t$, the FMDP agent observes the full state $s_t$ of the environment and chooses an action based on this observation according to a *policy function* $\pi(a_t | s_t)$.
+At a time $t$, the MDP agent observes the full state $s_t$ of the environment and chooses an action based on this observation according to a *policy function* $\pi(a_t | s_t)$.
 In return, it receives a discounted reward $\gamma^t r(a_t, s_t)$.
 The discount factor helps regularize the agent, helping the optimization algorithm find solutions which pay off within a timescale of $t \sim \log(\gamma^{-1})^{-1}$.
 
