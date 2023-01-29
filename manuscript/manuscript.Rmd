@@ -544,7 +544,7 @@ In this case, it is clear, model-based controls run a grave danger of mismanagin
 Reinforcement learning, on the other hand, can provide a model-free approach to control theory.\footnote{There are approaches to perform model-based reinforcement learning. While we will not focus on these in this paper they are discussed in \cite{tbd1, tbd2}.}
 While a model is often used to generate training data, this model is not directly used by model-free RL algorithms.
 This provides more flexibility to use RL in instances where the model of the system is not accurately known.
-In fact, it has been shown that model-free RL outperforms model-based alternatives in such instances \cite{Janner et al., 2019}.
+In fact, it has been shown that model-free RL outperforms model-based alternatives in such instances \cite{mbpo}.
 
 **Mention CL here? Where solutions to other related problems in the curriculum are used to build solutions to the target problem.**
 
