@@ -295,7 +295,7 @@ The most familiar model of $f(X)$ is that of *logistic growth*, for which
 
 Real world ecological systems are obviously far more complicated than this simple model suggests.
 One particularly important aspect that has garnered much attention is the potential for the kind of highly non-linear functions that can support dynamics such as alternative stable states and hysteresis.
-A seminal example of such dynamics was introduced in \cite{may77}, using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
+A seminal example of such dynamics was introduced in [@may77], using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
 
 \begin{align}
   \label{eq:may}
@@ -320,7 +320,7 @@ This also creates the phenomenon of *hysteresis*, where returning $H$ to its ori
   \includegraphics[width = 0.8\linewidth]{figures/MayStablePoints.pdf}
   \caption{
     \label{fig:may stable}
-    The fixed point diagram for the model \cite{may77} associated to $f_{\text{May}}$ as a function of varying the parameter $\beta H$.
+    The fixed point diagram for the model [@may77] associated to $f_{\text{May}}$ as a function of varying the parameter $\beta H$.
     That is, these are the zeroes of the function $f_{\text{May}}$. 
     Stable fixed points (also known as *attractors*) are plotted using a solid line, while the unstable fixed point is shown as a dotted line.
   }
@@ -541,10 +541,12 @@ More generally, there are many situations in which the exact model of the system
 This is a standard situation in ecology: mathematical models capture the most prominent aspects of the ecosystem's dynamics, while ignoring or summarizing most of its complexity.
 In this case, it is clear, model-based controls run a grave danger of mismanaging the system.
 
-Reinforcement learning, on the other hand, can provide a model-free approach to control theory.\footnote{There are approaches to perform model-based reinforcement learning. While we will not focus on these in this paper they are discussed in \cite{tbd1, tbd2}.}
+Reinforcement learning, on the other hand, can provide a model-free approach to control theory.
 While a model is often used to generate training data, this model is not directly used by model-free RL algorithms.
 This provides more flexibility to use RL in instances where the model of the system is not accurately known.
-In fact, it has been shown that model-free RL outperforms model-based alternatives in such instances \cite{mbpo}.
+In fact, it has been shown that model-free RL outperforms model-based alternatives in such instances [@mbpo].
+(Note that there are approaches to perform model-based reinforcement learning. 
+While we will not focus on these in this paper they are surveyed in, e.g., [@moerland2023model; @polydoros2017survey].)
 
 **Mention CL here? Where solutions to other related problems in the curriculum are used to build solutions to the target problem.**
 
