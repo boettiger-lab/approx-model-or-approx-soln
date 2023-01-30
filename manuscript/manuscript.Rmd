@@ -34,7 +34,7 @@ keywords:
 #- MSC code 2
 
 abstract: |
-  Existing methods for optimal control methods struggle to deal with the
+  Existing methods for optimal control struggle to deal with the
   complexity commonly encountered in real-world systems, including
   dimensionality, process error, model bias and heterogeneity.  Instead
   of tackling these complexities directly, researchers have typically
@@ -168,7 +168,7 @@ This special issue highlights the development of novel data-driven methods, incl
 Much effort has been spent grappling with the complexity of our natural world in contrast to the relative simplicity of the models we use to understand it.
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
  But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
-While simplified models have historically allowed for exploration of large decision spaces,, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
+While simplified models have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
 For instance, Global Circulation Models (GCMs) such as HadOM3 [CITE] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
@@ -185,9 +185,9 @@ Fisheries are an essential natural resource that provide the primary source of p
 Fisheries management has  roots in both the fields of _ecosystem management_ and _natural resource economics_.
 Both fields might trace their origins to the notion of maximum sustainable yield (MSY), introduced independently by a fisheries ecologist [@Schaefer1954] and the economist [@Gordon1954] in the same year.
 From this shared origin, each field would depart from the simplifying assumptions of the Gordon-Schaefer model in divergent ways, leading to different techniques for deriving policies from models.The heart of the management problem is easily understood: a manager seeks to set quotas on fishing that will ensure the long-term profitability and sustainability of the industry.
-Mathematical approaches developed over the past century may be roughly divided between these two fields: (A), ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
+Mathematical approaches developed over the past century may be roughly divided between these two fields: (A) ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
 The economist's approach can be characterized by the mathematics of a Markov decision process [MDP @Clark1973; @Clark1990; @Marescot2013], in which the decision-maker must observe the stock each year and recommend a possible action.
-In this approach, the policy space that must be searched is exponentially large -- for a management horizon of T decisions and a space of N actions, the number of possible policies is N^T.
+In this approach, the policy space that must be searched is exponentially large -- for a management horizon of T decisions and a space of N actions, the number of possible policies is $N^T$.
 In contrast, fisheries ecologists and ecosystem management typically search a space of policies that does not scale with the time horizon.
 Under methods such as "Management Strategy Evaluation" (MSE, [@Punt2016]) a manager identifies a candidate set of "strategies" a priori, and then compares the performance of each strategy over a suite of simulations to determine which strategy gives the best outcome (i.e. best expected utility).
 This approach is far more amenable to complex simulations of fisheries dynamics and more closely corresponds to how most marine fishing quotas are managed today in the United States [see stock assessments documented in @RAMLegacyDB].
@@ -197,8 +197,8 @@ Recent advances in machine learning may allow us to once again bridge these appr
 Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RAMLegacyDB].
 Constrained by computational limits, MDP approaches have been intractable on suitably realistic models and largely confined to more academic applications [@Costello2016].
 However, advances _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari1; @atari2] to fusion reactions [@fusion1; @fusion2] to the remarkable dialog abilities of ChatGPT [@chatgpt].
-RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, immense computational costs, and frequent challenges with transfer-ability or reproducibility.
-A review of all these issues is beyond our scope but can be found elsewhere [@rl_intro; @millie-1; @millie-2].
+RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, requiring immense computational costs, and presenting frequent challenges with transfer-ability or reproducibility.
+A review of all these issues is beyond our scope but can be found elsewhere [@rl-intro; @millie-1; @millie-2].
 Here, though, we will focus on the issue of opacity and interpretability raised by these methods.
 In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
 In general, one can only assess the performance of these black box methods relative to alternatives.
@@ -208,6 +208,9 @@ In this article, we compare the performance of a DRL solution to that of a manag
 We consider the problem of devising harvest strategies in a three species ecosystem (Figure 1B).
 We show that, somewhat surprisingly, the DRL policy closely resembles a *bang-bang* solution (see Text Box 1).
 Bang-bang solutions are known to be optimal for a variety of single-species models, however, there is no a-priori reason why they should be optimal for higher-dimensional systems.
+This way, the DRL agent discovers and exploits, as it were, an effective simplification of the control problem.
+We provide some intuition as to how this simplification arises from the dynamics of the system, but leave a more rigorous characterization of this phenomenon for future work.
+
 The DRL policy drives an oscillation process in the system and, in this way, maintains the long-term sustainability of fishing.
 In contrast, constant mortality policies overfish at low populations and underfish (relative to the DRL solution) at high populations.
 This leads to a tradeoff when leveraging constant mortality strategies: higher constant mortality rates lead to high profitability at the expense of a higher probability of overfishing to extinction, while lower constant mortality rates attain stability at the expense of profit.
@@ -242,12 +245,12 @@ For $n$ species, these models have the general form
 \begin{align}
   \label{eq:general model}
   \begin{split}
-    \Delta X_t &:= X_{t+1} - X_t = f_X(N_t) - M_X X_t\\
-    \Delta Y_t &:= X_{t+1} - Y_t = f_Y(N_t) - M_Y Y_t\\
+    \Delta X_t &= f_X(N_t) - M_X X_t\\
+    \Delta Y_t &= f_Y(N_t) - M_Y Y_t\\
     &\dots
   \end{split}
 \end{align}
-where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations and $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions.
+where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $\Delta X_t := X_{t+1} - X_t$, $\Delta Y_t := Y_{t+1} - Y_t$, and where $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions.
 Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting (sometimes referred to as *fishing effort*).
 Thus, the term $M_X X_t$ is the total $X$ harvest at time $t$.
 We will focus on systems where a single species, $X$ is harvested, i.e. $M_Y = M_Z = \dots = 0$.
@@ -452,7 +455,7 @@ resc <- esc_rewards |>
 Reinforcement learning (RL) is a way of approaching *sequential decision problems* through machine learning.
 All applications of RL can be conceptually separated into two parts: an *agent* and an *environment* which the agent interacts with.
 That is, the agent takes actions within the environment.
-As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent.\footnote{See Fig. TBD in [@rl-intro-marcus] for a conceptual description of reinforcement learning algorithms.}
+As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent. (See Fig. 1 in [@rl-intro] for a conceptual description of reinforcement learning algorithms.)
 The rewards encode the agent's goal.
 The main task of any RL algorithm is then to maximize the cumulative reward received. 
 This objective is achieved by aggregating experience in what is called the *training* period and learning from such experience.
@@ -600,7 +603,7 @@ Thus, the value $0.8 M^*$ supports a smaller variance, and correspondingly -- as
 #| label: tuning
 #| fig.cap : "Result of the tuning procedure for the constant mortality strategy. 
 #| (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $M^* = $ 0.045 (green) and $0.8 M^*=$ 0.036 (violet). 
-#| (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $M^*X$ shown in green, while $0.8M^*X$ shown in violet. (TBD choose nicer and plentier  slopes)" 
+#| (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $M^*X$ shown in green, while $0.8M^*X$ shown in violet." 
 #| out.width : "6.5in"
 msy_rewards <- msy_df |>
   group_by(action, rep) |>
@@ -805,7 +808,7 @@ escxz <- ppo_df |>
 ((py | pz)/ (escxy | escxz)) + plot_annotation(tag_levels = c('A'))
 ```
 
-In Fig. \ref{fig:state-space}, we perform a back to back visualization of all the policies evaluated up to now---MSY constant mortality, 80% MSY constant mortality, DRL and escapement.
+In Fig. \ref{fig:state-space}, we perform a back to back visualization of all the policies evaluated---MSY constant mortality, 80% MSY constant mortality, DRL and optimal constant escapement.
 The policies are computed at each state along the paths they traverse in the 50 evaluation rounds, and the values are projected on the $X$-$Z$ plane for visualization.
 This figure highlights the similarity between the policy found by the DRL agent and the optimal escapement policy.
 
