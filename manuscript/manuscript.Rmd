@@ -919,7 +919,7 @@ Moreover, the framework allows for the possibility that these simplifications do
 In this regard, DRL provides a framework flexible enough to capture the intricate population dynamics that are relevant in fishery management.
 Importantly, DRL is equipped with tools to deal with complex models for which simple policies might yield unsatisfactory results (and thus more refined techniques are needed to control them).
 For example, tools such as *long short-term memories* [@lstm], *curriculum learning* [@curriculum-learning] and *open-ended learning* [@open-ended] can be incorporated when faced with parametric noise or drift, or generally uncertainties about the agent's environment. 
-These techniques can be used to obtain agents who perform well over a variety of different environments [@open-ended]. <!-- ML: Could also use LSTMs for parametric drift. Might be better to use a different selling point for curriculum learning like if you want to have a bit more generalizability in your RL agent. -->
+These techniques can be used to obtain agents who perform well over a variety of different environments. <!-- ML: Could also use LSTMs for parametric drift. Might be better to use a different selling point for curriculum learning like if you want to have a bit more generalizability in your RL agent. -->
 
 Finally, in our study case, we have shown that the ‘‘rest periods’’ -- periods of several time steps with no fishing at all -- prominent in both the DRL solution and in the optimal bang-bang policy, may be important to maintain the sustainability of the fishery and to increase its long-term profits.
 This hypothesis could be explored in more generality as it might apply to a wide variety of models.
