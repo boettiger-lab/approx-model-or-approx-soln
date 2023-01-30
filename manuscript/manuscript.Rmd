@@ -869,13 +869,20 @@ We have shown that the DRL agent finds an approximately *bang-bang* type of solu
 While bang-bang solutions are known to be optimal for a wide variety of single-species fishery control problems [@hening2019; @hening2021], there is no such proof of optimality for general multi-species models.
 In this sense this example is rather surprising and reassuring: while no general guarantee points at the optimality of bang-bang solutions for multi-species model, the existence of one such example provides a benchmark for the use of DRL in fishery control.
 
-One intuition for why a constant escapement policy performs so well in such a model comes from the anticorrelation between $X$ and $Y$ noted in the results section.
+One intuition for why a constant escapement policy performs so well in such a model comes from the anti-correlation between $X$ and $Y$ noted in the results section.
 We have observed this pattern arise in a variety of policies, both classical as well as some obtained by training DRL agents.
 In fact, ‘‘crashes’’ in the $X$ population are almost invariably shortly preceeded by dramatic increases in $Y$.
 We hypothesize that this effectively leads to a dimensionality reduction: once the value of $X$ is known, along a path traced by the control system, then $Y$ may be roughly predicted.
-A similar, although weaker, anticorrelation is also observed between $X$ and $Z$.
+A similar, although weaker, anti-correlation is also observed between $X$ and $Z$.
 These two informal observations point at an effective simplification of the prediction process: the values of $Y$ and $Z$ are much less impactful to policy decisions than the value of $X$ itself.
-We have not yet pushed further to establish a more precise picture of this dynamical simplification.
+We have not yet pushed further to establish a more precise picture of this dynamical simplification.\footnote{
+A hand-waving way to understand this phenomenon is the following:
+The $X$-$Y$ anti-correlation can be associated to the Lotka-Volterra competition term between $X$ and $Y$, i.e. $c_{XY}XY$ in eq. \eqref{eq:3d model stoch}.
+Now, consider a fall in population $X$.
+Because of the aforementioned anti-correlation with $Y$, this is accompanied by a growth in $Y$.
+We may understand this, roughly, as a \emph{replacement} of $X$ for $Y$.
+But then, because the parameter $D = 1.1 > 1$, this increases the effective birth rate $Z$, i.e. the term $f(X+DY)Z$ in eq. \eqref{eq:3d model stoch}.
+This, in turn, leads to a growth of $Z$ and, thus, an anti-correlation between $Z$ and $X$.}
 
 This manuscript functions as a first step in the process of incorporating DRL into fishery decision making.
 We have shown that highly non-linear systems may give rise to simple, good policies, and that these may be found via reinforcement learning.
