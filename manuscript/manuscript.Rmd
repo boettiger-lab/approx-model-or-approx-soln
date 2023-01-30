@@ -169,7 +169,7 @@ Much effort has been spent grappling with the complexity of our natural world in
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
  But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
 While simplified models have historically allowed for exploration of large decision spaces,, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
-For instance, Global Circulation Models (GCMs) such as HadOM3 [CITE] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [Raihi et al., 2017]
+For instance, Global Circulation Models (GCMs) such as HadOM3 [CITE] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
 Similar combinations of rich process models and highly simplified decision models (often not even given the status of 'model') are common [e.g., CITE].
@@ -194,11 +194,11 @@ This approach is far more amenable to complex simulations of fisheries dynamics 
 <!-- Do we say here that these strategies retain the 'constant mortality' intuition of @Schaefer? -->
 
 Recent advances in machine learning may allow us to once again bridge these approaches, while also bringing new challenges of their own.
-Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RamLegacyDB].
+Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RAMLegacyDB].
 Constrained by computational limits, MDP approaches have been intractable on suitably realistic models and largely confined to more academic applications [@Costello2016].
-However, advances _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari] to fusion reactions [@fusion] to the remarkable dialog abilities of ChatGPT [@chatgpt].
+However, advances _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari1; @atari2] to fusion reactions [@fusion1; @fusion2] to the remarkable dialog abilities of ChatGPT [@chatgpt].
 RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, immense computational costs, and frequent challenges with transfer-ability or reproducibility.
-A review of all these issues is beyond our scope but can be found elsewhere [@rl_intro; @millie_AM-RL].
+A review of all these issues is beyond our scope but can be found elsewhere [@rl_intro; @millie-1; @millie-2].
 Here, though, we will focus on the issue of opacity and interpretability raised by these methods.
 In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
 In general, one can only assess the performance of these black box methods relative to alternatives.
@@ -220,9 +220,15 @@ We thus observe that the DRL solution leads to a higher profitability *and* stab
 #| echo: FALSE
 #| message: FALSE
 #| fig.align: 'center'
-#| fig.cap:  '(A) Classical management strategies often have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $V1$). where the interaction between $V1$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. 
-#| (B) RL allows us to solve for quantitative decision strategies considering more complex ecosystem dynamics. For example, in this paper, we find harvest strategies for a three-species model using a model-free RL algorithm, PPO. 
-#| (C) We show how the RL-based solution that considers all three species finds harvest policies with higher average reward and with (D) lower probability of harvest species collapse than the classical approaches, only considering the dynamics of V1.'
+#| fig.cap:  '(A) Classical management strategies often have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $X$). where the interaction between $X$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. 
+#| (B) In contrast to this, we study the problem of managing a three species fishery, where we harvest species $X$.
+#| In addition to $X$, there is a species $Y$ which competes with $X$ for resources, and a species $Z$ which preys on $X$ and $Y$.
+#| We compare two approaches here. 
+#| The first (Harvest $B_{\mathrm{i}}$) is based on the intuition obtained from 1D control: we use simulated data to empirically determine which constant mortality policy is optimal for controlling this fishery.
+#| The second (Harvest $B_{\mathrm{ii}}$) is based on RL.
+#| Here, the policy function is expressed as a neural network and the algorithm uses a variant of \emph{gradient ascent} (namely, \emph{Proximal Policy Optimizaton (PPO)}) to optimize this network.
+#| Both approaches we compare are \emph{model-free:} the optimization algorithm treats the model as a black box, only using its input-output statistics.
+#| This way, the optimal policy is not computed from the values of the model parameters, but rather by comparing how policies perform in controlling the system.'
 #| out.width: '6.5in' 
 #| fig.pos: 'H'
  
