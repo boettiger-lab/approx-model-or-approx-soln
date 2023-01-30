@@ -414,7 +414,8 @@ Fig. \ref{fig:fixed points} provides a rough idea of the fixed point structure b
     \caption{$Z$ component of fixed points.}
     \label{fig:stz}
   \end{subfigure}
-  \caption{Numerically-computed fixed points of the three-species deterministic model, eq. \eqref{eq:3d model}.}
+  \caption{Numerically-computed fixed points of the three-species deterministic model, eq. \eqref{eq:3d model}.
+  Here, the parameter $D$ was varied between 0.75 and 1.25, and the three components of the fixed points are plotted separately, as a function of $D$.}
   \label{fig:fixed points}
 \end{figure}
 
