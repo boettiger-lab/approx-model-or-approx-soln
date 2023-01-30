@@ -220,13 +220,12 @@ We thus observe that the DRL solution leads to a higher profitability *and* stab
 #| echo: FALSE
 #| message: FALSE
 #| fig.align: 'center'
-#| fig.cap:  '(A) Classical management strategies often have the common aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $X$). where the interaction between $X$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. 
+#| fig.cap:  '(A) Classical management strategies are often derived by reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population (say, $X$). where the interaction between $X$ and its environment is summarized to a set of parameters, such as the growth rate $r$, and the carrying capacity $K$. An advantage of one-dimensional approaches is that the optimal policy is often known exactly, and, moreover, is intuitive. For example, in the logistic equation shown, the maximal sustainable yield of the system is attained at K/2. 
 #| (B) In contrast to this, we study the problem of managing a three species fishery, where we harvest species $X$.
 #| In addition to $X$, there is a species $Y$ which competes with $X$ for resources, and a species $Z$ which preys on $X$ and $Y$.
-#| We compare two approaches here. 
+#| We compare two approaches solving harvest strategies in this system. 
 #| The first (Harvest $B_{\mathrm{i}}$) is based on the intuition obtained from 1D control: we use simulated data to empirically determine which constant mortality policy is optimal for controlling this fishery.
-#| The second (Harvest $B_{\mathrm{ii}}$) is based on RL.
-#| Here, the policy function is expressed as a neural network and the algorithm uses a variant of \emph{gradient ascent} (namely, \emph{Proximal Policy Optimizaton (PPO)}) to optimize this network.
+#| The second (Harvest $B_{\mathrm{ii}}$) is an RL policy, where the policy function is expressed as a neural network and the algorithm uses a variant of \emph{gradient ascent} (namely, \emph{Proximal Policy Optimizaton (PPO)}) to optimize this network.
 #| Both approaches we compare are \emph{model-free:} the optimization algorithm treats the model as a black box, only using its input-output statistics.
 #| This way, the optimal policy is not computed from the values of the model parameters, but rather by comparing how policies perform in controlling the system.'
 #| out.width: '6.5in' 
