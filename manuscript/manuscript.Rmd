@@ -368,7 +368,31 @@ The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving acc
 
 As can be expected, the dynamics of eq. \eqref{eq:3d model} are significantly more complex than those of eq. \eqref{eq:may}.
 There are a variety of fixed points for the equations---around 8 or 9 for wide ranges of parameter values.
-Fig. \ref{fig:tbd} provides a rough idea of the fixed point structure by plotting the bifurcation diagram obtained from varying $D$ and fixing the other parameters.
+Fig. \ref{fig:tbd} provides a rough idea of the fixed point structure by plotting the bifurcation diagram obtained from varying $c_{XY}$ and fixing the other parameters.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/stX.png}
+    \caption{$X$ component of fixed points.}
+    \label{fig:stx}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/stY.png}
+    \caption{$Y$ component of fixed points.}
+    \label{fig:sty}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/stZ.png}
+    \caption{$Z$ component of fixed points.}
+    \label{fig:stz}
+  \end{subfigure}
+\end{figure}
 
 Throughout most of this paper we will fix the parameters of the model according to eq. \eqref{eq:param vals}.
 At these values, the fixed points of the model are:\footnote{
