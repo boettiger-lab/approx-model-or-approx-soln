@@ -164,90 +164,55 @@ This special issue highlights the development of novel data-driven methods, incl
 
 # Introduction {#intro}
 
-<!--
-Existing methods for optimal control methods struggle to deal with the complexity commonly encountered in real-world systems, including dimensionality, process error, model bias and heterogeneity. 
-Instead of tackling these complexities directly, researchers have typically sought to find exact optimal solutions to simplified models of the processes in question. 
-When is the optimal solution to a very approximate, stylized model better than an approximate solution to a more accurate model? 
-This question has largely gone unanswered owing to the difficulty of finding even approximate solutions in the case of complex models.  
-Our approach draws on recent algorithmic and computational advances in deep reinforcement learning. 
-These methods have hitherto focused on problems in games or robotic mechanics, which operate under precisely known rules. 
-We demonstrate the ability for novel algorithms using deep neural networks to successfully approximate such solutions (the "policy function" or control rule) without knowing or ever attempting to infer a model for the process itself. 
-This powerful new technique lets us finally begin to answer the question.
-We show that in many but not all cases, the optimal policy for a carefully chosen over-simplified model can still out-perform these novel algorithms trained to find approximate solutions to simulations of a realistically complex system. 
-This illustrates the promise of combining complex, realistic simulations with emerging machine-learning techniques to improve our understanding and management of ecological systems.
--->
+Much effort has been spent grappling with the complexity of our natural world in contrast to the relative simplicity of the models we use to understand it.
+Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
+ But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
+While simplified models have historically allowed for exploration of large decision spaces,, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
+For instance, Global Circulation Models (GCMs) such as HadOM3 [CITE] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [Raihi et al., 2017]
 
-Much effort has been spent grappling with the complexity of our natural world in contrast to relative simplicity of the models we use to understand it.
-Now, as we grapple with the manifold consequences of human impacts on that world, we are faced with difficult questions of figuring out how best to respond when our knowledge and models fall so far short of the complexity our actions have disrupted.
-Heroic amounts of data and computation are being brought to bear on developing better, more complex, more realistic models of our environments and ecosystems, yet these models remain disconnected or oversimplify the space of actions they seek to inform.
-In this paper we explore a different tack. 
-Here we explore the potential of a emerging data-driven machine learning technique, not to better capture the complexity of the natural processes, but rather, to embrace the complexity of the potential _policies_ that might be used to manage them.
-Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards. 
+Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
+Similar combinations of rich process models and highly simplified decision models (often not even given the status of 'model') are common [e.g., CITE].
+Modeling the potential action space as one of a handful of discrete scenarios is sometimes a well justified acknowledgement of the constraints faced by real-world decision-makers – particularly in the context of multilateral decisions –
+and may seem to reflect a division of responsibilities between 'scientists' modeling the 'natural processes' and policy-makers who make the decisions.
+But, more often, this simplification of decision choices is simply mathematically or conceptually convenient.  <!-- there are questions of policy scale hiding here -- e.g. local regulators of a specific industry obviously face a different action space than national legislatures or international diplomats -->
+This simplification reflects trade-offs between tractablity and complexity at the basis of any mathematical modeling -- if we make both the state space and action space too realistic, the problem of finding the best sequence of actions quickly becomes intractable.
+However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in such problems, but at the cost of opacity.  
 
-<!-- Why fisheries-focused examples -- maybe we can cut/merge this with paragraph above -->
-There are myriad examples from climate scenarios to protected areas, we will illustrate this with a specific example in the management of marine fisheries, which is both an important issue to itself and a frequent crucible in which methods of ecological management have been fired before extending to other fields, and where the space of possible policies is arguably already more richly developed than most.
-Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006; @Costello2016]. 
-Because of this importance, fisheries also represent some of the longest and best studied timeseries of population dynamics available to ecologists, as well as a correspondingly rich area for the development of theory and practice.
-Methods developed in the study and management of fisheries are frequently applied to other areas of ecological management, from concepts such as maximum sustainable yield [], optimal control under observation uncertainty [@Memarzadeh2019], to adaptive management [@Walters], management strategy evaluation [@Punt], to the studies of conservation policy and international negotiations [@].
+In this paper, we focus on a well-developed application of model-based management of the natural world that has long illustrated the trade-offs between model complexity and policy complexity: the management of marine fisheries.
+Fisheries management is both an important issue to itself and a rich & frequent test-bed of ecological management more generally.
+Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006, @Costello2016].
+Fisheries management has  roots in both the fields of _ecosystem management_ and _natural resource economics_.
+Both fields might trace their origins to the notion of maximum sustainable yield (MSY), introduced independently by a fisheries ecologist @Schaefer1954 and the economist @Gordon1954 in the same year.
+From this shared origin, each field would depart from the simplifying assumptions of the Gordon-Schaefer model in divergent ways, leading to different techniques for deriving policies from models.The heart of the management problem is easily understood: a manager seeks to set quotas on fishing that will ensure the long-term profitability and sustainability of the industry.
+Mathematical approaches developed over the past century may be roughly divided between these two fields: (A), ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
+The economist's approach can be characterized by the mathematics of a Markov decision process [MDP @Clark1973; @Clark1990; @Marescot2013], in which the decision-maker must observe the stock each year and recommend a possible action.
+In this approach, the policy space that must be searched is exponentially large -- for a management horizon of T decisions and a space of N actions, the number of possible policies is N^T.
+In contrast, fisheries ecologists and ecosystem management typically search a space of policies that does not scale with the time horizon.
+Under methods such as "Management Strategy Evaluation" (MSE, [@Punt2016]) a manager identifies a candidate set of "strategies" a priori, and then compares the performance of each strategy over a suite of simulations to determine which strategy gives the best outcome (i.e. best expected utility).
+This approach is far more amenable to complex simulations of fisheries dynamics and more closely corresponds to how most marine fishing quotas are managed today in the United States [see stock assessments documented in @RAMLegacyDB].
+<!-- Do we say here that these strategies retain the 'constant mortality' intuition of @Schaefer? -->
 
-Mathematically, the ecological management may be understood as an optimal control problem - a manager must determine a sequence of actions (a "policy") to optimize some desired objective(s) and constraints (e.g. conservation goals, natural resource extraction, economic and social constraints.)
-Given an appropriate representation of the underlying mechanistic processes involved, such sequential decision problems may be posed more precisely as Markov Decision Process [MDP, @Marescot2013; @Memarzadeh2019].
-Such problems are notoriously difficult owing not only to the complexity of those underlying mechanisms alone, but to the exponentially branching consequences the decision-maker's actions have upon that system -- a game of chess is not won by thinking only one move ahead at a time. 
-Thus, while MDP problems have been studied in a conservation context since they were first introduced more than six decades ago, their application has been highly constrained to simple scenarios.
-Meanwhile, a class of machine learning techniques designed for MDP problems known as reinforcement learning (RL), has cracked open the door for exploring complex strategies in more realistic settings [@rl_intro].
+Recent advances in machine learning may allow us to now once again bridge these approaches, while also bringing new challenges of their own.
+Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RamLegacyDB].
+Constrained by computational limits, MDP approaches have been intractable on suitably realistic models and largely confined to more academic applications [@Costello2016].
+However, advances _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari] to fusion reactions [@fusion] to the remarkable dialog abilities of ChatGPT [@chatgpt].
+RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, immense computational costs, and frequent challenges with transfer-ability or reproducibility.
+A review of all these issues is beyond our scope but can be found elsewhere [@rl_intro; @millie_AM-RL].
+Here, though, we will focus on the issue of opacity and interpretability raised by these methods.
+In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
+In general, one can only assess the performance of these black box methods relative to alternatives.
 
-- This is not a tutorial or a sales pitch for RL - which brings at least as many difficulties as advantages -- including being hard to use, easy to get stuck on far from optimal performance, which itself may be hard to diagnose, as we have already discussed in our tutorial. The method 
+<!--NEED some kind of map paragraph here saying what's ahead, what we show  -->
+In this article, we We compare the performance of a DRL solution to that of a management strategy evaluation across potential 'constant mortality' policies.\footnote{A repository with all the relevant code to reproduce our results may be found at [@our-repo] in the ‘‘code’’ subdirectory. The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.} 
+We consider the problem of devising harvest strategies in a three species ecosystem (Figure 1B).
+We show that, somewhat surprisingly, the DRL policy closely resembles a *bang-bang* solution (see Text Box 1).
+Bang-bang solutions are known to be optimal for a variety of single-species models, however, there is no a-priori reason why they should be optimal for higher-dimensional systems.
+The DRL policy drives an oscillation process in the system and, in this way, maintains the long-term sustainability of fishing.
+In contrast, constant mortality policies overfish at low populations and underfish (relative to the DRL solution) at high populations.
+This leads to a tradeoff when leveraging constant mortality strategies: higher constant mortality rates lead to high profitability at the expense of a higher probability of overfishing to extinction, while lower constant mortality rates attain stability at the expense of profit.
 
-has through the use of clever algorithms, deep neural networks, and massive amounts of data,
-
-<!-- A sweeping summary of fisheries decision theory, don't bite me-->
-To understand the importance of a potential application of novel data-driven methods to the real world, it is most instructive to have a clearer picture of how models are currently used to inform ecological management in fisheries.
-In any issue as large and contentious as fisheries management, it may be far more difficult to provide a generalization  about how things actually work than to make sweeping recommendations about how it ought to.
-All the same, it is our firm belief that any researcher seeking to do the latter should first attempt to understand the former, so we beg the forbearance of any specialists in the practice as we seek to provide a concise overview of fisheries management today.
-Here, we focus specifically on practices in data rich, 'well-managed' fisheries, which, despite some issues, may be among the best examples of ecological management at continental scale that is largely driven by scientific processes, models and data. 
-
-<!-- Fisheries population models are rich but decisions aren't, mostly constant mortality -->
-While fisheries stock assessment models are quite rich, the choice of possible strategies remains motivated by intution from much simpler, analytically tractable one-dimensional models.
-This fact is not always obvious at cursory inspection, and can be met with cynicism even among professional fisheries managers -- after all, typical stock assessment models have over 100 parameters (e.g. see the stock assessments referenced from in @RAMLegacy) and best practices such as management strategy evaluation (MSE) evaluate and select potential policies by comparing across large and diverse simulations [e.g. @Punt2016].
-However, the space of policies considered under such approaches is necessarily far smaller than the set of all possible action sequences.
-Instead, fisheries management approaches such as MSE rely on theory based on more tractable models to restrict the search space of possible policies.  
-Specifically, most fisheries policies are framed in terms of a *constant mortality* policy, (sometimes a simple piece-wise linear function, i.e. a single linear segment, is introduced as a precaution a very low stock sizes), where fishing 'mortality' is defined as the ratio of harvest (catch) to stock size, $F = H_t/x_t$.
-
-```{r}
-#| label: textbox
-#| out.width: "1\\linewidth"
-
-knitr::include_graphics("figures/textbox.png")
-```
-
-The intuition for a constant mortality strategy is simple and well established 
-
-Constant mortality policies have a strong basis in theory as well as practical justifications.
-
-
-<!-- In contrast to constant mortality, the possible decision space is huge-->
-The management of any ecological system can be framed in terms of a Sequential Decision Process - 
-the manager observes the ecosystem state ($x_t$) and decides on action ($a_t$) to take (including potentially no action), potentially receiving any costs or benefits associated with that action and and state (reward $r_t$  $r_t = U(x_t,a_t)$),
-while the system evolves into a new state in response $x_{t+1} = f(x_t, a_t)$. When the probability of the future state can be determined by the current state and action, we say the system is Markovian and the process a Markov Decision Process (MDP).
-As in a game of chess, the space of possible sequences of actions a manager might choose over any realization of the Markov process is enormous.
-When the action and state space are discrete and sufficiently small, computational approaches such as dynamic programming may be used to guarantee an exhaustive search for a single optimal policy.
-Dynamic programming scales very poorly to larger state and action spaces.
-
-Deep reinforcement learning has opened up increasingly compelling alternative 
-
-Effort $Q = E X_t$  
-
-Fisheries policies are typically implemented in terms of *catch quotas*, i.e. a limit to the number of metric tonnes of fish that can be caught during a given season. 
-
-
-and/or *effort controls*, restrictions on the fishing effort -- in numbers of boats, time of year, or days at sea
-
-
-
-
-# Figures brainstorm
-
-Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
+The DRL approach side-steps this tradeoff by optimizing over a more complex family of possible policies—policies parametrized by a neural network, as opposed to policies labeled by a single parameter (the mortality rate).
+We thus observe that the DRL solution leads to a higher profitability *and* stability as compared to constant mortality policies. 
 
 ```{r}
 #| label: conceptual
@@ -262,30 +227,6 @@ Figure 0: contrast 1D vs 3D strategies (see commented out diagram).
  
 knitr::include_graphics("figures/conceptual.png")
 ```
-
-
-<!-- Reality __
-  |        \
-  v         \
-1-D Model   More expressive model
-  |                  |
-  v                  v
-Optimal        Suboptimal, but
-solution   well-performing solution -->
-
-Figure 1: 1-D and 3-D model conceptual figure. something about the objective / decision
-Figure 2: Stability / multistability in the 1D and 3D models.  state space + time views
-Figure 3: The 1-D optimal management solution.  'constant escapement' intuition etc
-
-RL figures:
-- schematic of RL (a-la previous marcus paper Fig 1)
-- Neural network optimization figure
-
-Results figures:
-- timeseries example of management under the RL policy.  probably compare to managing under 1-D solution / rule-of-thumb methods
-- state-space view of management doughnut 
-- visualization / encapsulation of the policy heatmaps, slices, policy vs position along ellipse 
-- reward plot over time (comparing methods)
 
 # Mathematical models of fisheries
 
