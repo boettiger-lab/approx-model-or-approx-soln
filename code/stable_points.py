@@ -251,10 +251,10 @@ def main() -> None:
     individual_plots(Xs, Ys, Zs, param_vals, varname)
     
     df = DataFrame(zip(param_vals,Xs,Ys,Zs), columns = [varname, "X", "Y", "Z"])
-    df.to_csv(f'FixedPonts_{varname}.csv', index = False)
+    df.to_csv(f'data/FixedPonts_{varname}.csv.xz', index = False)
 
     df_X = DataFrame(zip(param_vals, Xs), columns = [varname, "X"])
-    df.to_csv(f"FixedPoints_{varname}_X.csv", index=False)
+    df.to_csv(f"data/FixedPoints_{varname}_X.csv.xz", index=False)
 
 if __name__ == "__main__":
     main()
