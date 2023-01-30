@@ -122,7 +122,7 @@ def fixed_points_functional(varname, var_range, param_inds, param_vals):
     
     
 
-def create_sol_list(param_vals, N = 100):
+def create_sol_list(param_vals, N = 150):
     sol_list = []
     for _ in range(N):
         eqs_at_params = eqs(param_vals)
@@ -231,19 +231,19 @@ def visualize(sol_list):
 def individual_plots(Xs, Ys, Zs, param_vals, varname):
     import matplotlib.pyplot as plt
     
-    plt.scatter(param_vals, Xs)
+    plt.scatter(param_vals, Xs, marker='.')
     plt.title(f"X coordinate of stable points")
     plt.xlabel(f"{varname}")
     plt.ylabel("X")
     plt.show()
 
-    plt.scatter(param_vals, Ys)
+    plt.scatter(param_vals, Ys, marker='.')
     plt.title(f"Y coordinate of stable points")
     plt.xlabel(f"{varname}")
     plt.ylabel("Y")
     plt.show()
 
-    plt.scatter(param_vals, Zs)
+    plt.scatter(param_vals, Zs, marker='.')
     plt.title(f"Z coordinate of stable points")
     plt.xlabel(f"{varname}")
     plt.ylabel("Z")
@@ -263,30 +263,30 @@ def choose_varying_parameter(name_list):
         return "cXY"
 
 def main() -> None:
-    # param_inds = {"beta":0, "c":1, "cXY":2, "D":3, "dZ":4, "f":5, "alpha":6}
-    # param_vals = (0.3, 0.1, 0.5, 1.1, 0.45, 0.5, 0.3)
-    # param_vals_list = list(param_vals)
+    param_vals = (0.3, 0.1, 0.5, 1.1, 0.45, 0.5, 0.3)
     param_vals_dict = {"beta":0.3, "c":0.1, "cXY":0.5, "D":1.1, "dZ":0.45, "f":0.5, "alpha":0.3}
     print(f"Fixed point for params {param_vals_dict}:")
+    sols = create_sol_list(param_vals)
     for sol in sols: print(sol);
 
     ## Uncomment to plot stable points as function of varying parameter:
+    param_inds = {"beta":0, "c":1, "cXY":2, "D":3, "dZ":4, "f":5, "alpha":6}
+    param_vals_list = list(param_vals)
 
-    sols = create_sol_list(param_vals)
-    # varname = "beta"
-    # varname = choose_varying_parameter(param_inds.keys())
+    varname = "cXY"
+    varname = choose_varying_parameter(param_inds.keys())
     
-    # var_rng = var_range(varname)
-    # param_vals, sol_list = fixed_points(varname, var_rng, param_inds, param_vals)
-    # Xs, Ys, Zs = visualize(sol_list)
+    var_rng = var_range(varname)
+    param_vals, sol_list = fixed_points(varname, var_rng, param_inds, param_vals)
+    Xs, Ys, Zs = visualize(sol_list)
     
-    # individual_plots(Xs, Ys, Zs, param_vals, varname)
+    individual_plots(Xs, Ys, Zs, param_vals, varname)
     
-    # df = DataFrame(zip(param_vals,Xs,Ys,Zs), columns = [varname, "X", "Y", "Z"])
-    # df.to_csv(f'FixedPonts_{varname}.csv', index = False)
+    df = DataFrame(zip(param_vals,Xs,Ys,Zs), columns = [varname, "X", "Y", "Z"])
+    df.to_csv(f'FixedPonts_{varname}.csv', index = False)
 
-    # df_X = DataFrame(zip(param_vals, Xs), columns = [varname, "X"])
-    # df.to_csv(f"FixedPoints_{varname}_X.csv", index=False)
+    df_X = DataFrame(zip(param_vals, Xs), columns = [varname, "X"])
+    df.to_csv(f"FixedPoints_{varname}_X.csv", index=False)
 
 if __name__ == "__main__":
     main()
