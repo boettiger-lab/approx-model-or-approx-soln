@@ -368,7 +368,7 @@ The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving acc
 
 As can be expected, the dynamics of eq. \eqref{eq:3d model} are significantly more complex than those of eq. \eqref{eq:may}.
 There are a variety of fixed points for the equations---around 8 or 9 for wide ranges of parameter values.
-Fig. \ref{fig:tbd} provides a rough idea of the fixed point structure by plotting the bifurcation diagram obtained from varying $c_{XY}$ and fixing the other parameters.
+Fig. \ref{fig:tbd} provides a rough idea of the fixed point structure by plotting the bifurcation diagram obtained from varying $D$ and fixing the other parameters.
 
 \begin{figure}
   \centering
