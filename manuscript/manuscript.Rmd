@@ -645,8 +645,8 @@ lines <- p + stat_function(fun = linear_f_gen(0.009)) +
   xlim(0,2) +
   xlab("X") + ylab("harvest") +
   theme_bw() +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
+  theme(#panel.grid.major = element_blank(), 
+        #panel.grid.minor = element_blank(), 
         aspect.ratio = 1)
 
 
