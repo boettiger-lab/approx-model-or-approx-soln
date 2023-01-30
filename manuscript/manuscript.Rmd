@@ -617,8 +617,8 @@ rmsy <- msy_rewards |>
   geom_point() + geom_ribbon(alpha=0.4) +
   labs(y = "episode reward", x = "constant mortality") +
   theme(aspect.ratio = 1/1) + 
-  geom_vline(aes(xintercept=best_action), color="seagreen2") + 
-  geom_vline(aes(xintercept=0.8*best_action), color="violetred1") +
+  geom_vline(aes(xintercept=best_action), color="seagreen3", size=1) + 
+  geom_vline(aes(xintercept=0.8*best_action), color="violetred3", size=1) +
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
@@ -633,13 +633,16 @@ linear_f_gen <- function(slope) (function(x) slope*x)
 p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
 
 # p + stat_function(fun = linear_f_gen(0.5)) + xlim(0,2)
-lines <- p + stat_function(fun = linear_f_gen(0.01)) + 
-  stat_function(fun = linear_f_gen(0.02)) +
-  stat_function(fun = linear_f_gen(0.03)) +
-  stat_function(fun = linear_f_gen(0.8*best_action), col = "violetred") +
-  stat_function(fun = linear_f_gen(best_action), col = "seagreen2") +
-  stat_function(fun = linear_f_gen(0.055)) + 
-  stat_function(fun = linear_f_gen(0.065)) +
+lines <- p + stat_function(fun = linear_f_gen(0.009)) + 
+  stat_function(fun = linear_f_gen(0.018)) +
+  stat_function(fun = linear_f_gen(0.027)) +
+  stat_function(fun = linear_f_gen(0.8*best_action), col = "violetred3", size=1) +
+  stat_function(fun = linear_f_gen(best_action), col = "seagreen3", size=1) +
+  stat_function(fun = linear_f_gen(0.054)) + 
+  stat_function(fun = linear_f_gen(0.063)) +
+  stat_function(fun = linear_f_gen(0.072)) +
+  stat_function(fun = linear_f_gen(0.081)) +
+  stat_function(fun = linear_f_gen(0.090)) +
   xlim(0,2) +
   xlab("X") + ylab("harvest") +
   theme_bw() +
