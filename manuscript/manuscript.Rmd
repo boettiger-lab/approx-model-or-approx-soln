@@ -524,14 +524,17 @@ FM: my take here is that the space of functions from states to actions is in pri
 By restricting our ansatz to neural networks of a fixed depth/breadth, we're restricting ourselves to a finite dimensional (or, in the discrete case, potentially much lower dimensional) manifold of policies over which gradient descent may be performed much more efficiently.
 E.g. the dimensionality of the space we're searching for is determined by the size of the neural network, it's finite dimensional for continuous state spaces, and its dimension is not necessarily exponential in the number of species.
 -->
-Deep reinforcement learning uses this strategy, focusing on function families parameterized by neural networks. (See Fig. \ref{tbd}.)
+Deep reinforcement learning uses this strategy, focusing on function families parameterized by neural networks. (See Fig. 1 and App. A in [@rl-intro] for a conceptual introduction to the use of reinforcement learning in the context of conservation decision making.)
+<!--(See Fig. \ref{tbd}.)-->
 <!-- The figure should kinda explain how the parametrization arises, and how gradient ascent is used. Maybe namedrop backpropagataion for the sake of usefulness to the reader? -->
 
+
 Since our state and observation spaces are continuous, we will focus on deep reinforcement learning throughout this paper.
-We use the *proximal policy optimization (PPO)* algorithm to optimize $\pi$.
-Within the RL literature there is a wealth of algorithms from which to choose from, each with its pros and cons.
-Here we have focused on a single one of these for the sake of particularity---to draw a clear comparison between the RL-based and the classical fishery management approaches.
-In practice, further improvements can be expected by a careful selection of the optimization algorithm.
+Within the RL literature there is a wealth of algorithms from which to choose from to optimize $\pi$, each with its pros and cons.
+Most, if not all, of these are based on gradient ascent by using the technique of *back-propagation* to efficiently compute the gradient.
+Here we have used only one such algorithm (*proximal policy optimization (PPO)*) for the sake of particularity---to draw a clear comparison between the RL-based and the classical fishery management approaches.
+In practice, further improvements can be expected by a careful selection of the optimization algorithm. 
+(See, e.g., [@franccois2018introduction] for an overview of different optimization schemes used in DRL.)
 
 ## Model-free reinforcement learning
 
