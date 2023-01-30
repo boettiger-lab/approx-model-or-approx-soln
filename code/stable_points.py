@@ -5,14 +5,6 @@ import numpy as np
 import time
 import sys
 
-def timer(func):
-    def wrapper(*args, **kwargs):
-        t = time.time()
-        r = func(*args, **kwargs)
-        print(f"Time spent on {func.__name__}: {time.time()-t}")
-        return r
-    return wrapper
-
 def L(v):
     return v * (1 - v)
 
@@ -85,7 +77,6 @@ def var_range(varname):
     elif varname == "f":
         return np.linspace(0.05, 0.95, 150)
 
-@timer
 def fixed_points(varname, var_range, param_inds, param_vals):
     var_list = []
     sol_list = []
@@ -97,29 +88,6 @@ def fixed_points(varname, var_range, param_inds, param_vals):
         if s is not None:
             sol_list += s
     return var_list, sol_list
-
-@timer    
-def fixed_points_functional(varname, var_range, param_inds, param_vals):
-    """
-    var_range -> change_param_val {x} -> create_sol_list {x} -> flatten
-                                     \-> param_list {x} ------> flatten
-    """
-    def change_tuple_at_ind_generator(tup, ind):
-        return lambda x: reassign_tuple_entry(tup, ind, x)
-    change_param_val = change_tuple_at_ind_generator(param_vals, param_inds[varname])
-    def create_sol_list_and_repeated_param_val(param_vals, index):
-        sols = create_sol_list(param_vals)
-        return sols, len(sols)*[param_vals[index]] 
-    def univariate_create_sol_list_and_etc(index):
-        return lambda x: create_sol_list_and_repeated_param_val(x, index)
-    sol_list_and_repeated_params = univariate_create_sol_list_and_etc(param_inds[varname])
-    
-    param_vals_seq = map(change_param_val, var_range)
-    sol_param_seq = map(sol_list_and_repeated_params, param_vals_seq)
-    sol_param_seq_unzipped = list(zip(*sol_param_seq))[0]
-    sols, params = sol_param_seq_unzipped [0], sol_param_seq_unzipped[1]
-    return params, sols
-    
     
 
 def create_sol_list(param_vals, N = 150):
