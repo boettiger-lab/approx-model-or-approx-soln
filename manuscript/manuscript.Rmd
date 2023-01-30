@@ -34,7 +34,6 @@ keywords:
 #- MSC code 2
 
 abstract: |
-  TBD Change slightly!!!!!
   Existing methods for optimal control methods struggle to deal with the
   complexity commonly encountered in real-world systems, including
   dimensionality, process error, model bias and heterogeneity.  Instead
@@ -52,13 +51,13 @@ abstract: |
   approximate such solutions (the ‘‘policy function’’ or control rule)
   without knowing or ever attempting to infer a model for the process
   itself. This powerful new technique lets us finally begin to answer
-  the question. We show that in many but not all cases, the optimal
-  policy for a carefully chosen over-simplified model can still
-  out-perform these novel algorithms trained to find approximate
-  solutions to simulations of a realistically complex system. Comparing
-  these two approaches can lead to insights in the importance of
-  real-world features of observation and process error, model biases,
-  and heterogeneity.
+  the question. We showcase this approach by applying it to the control
+  of a highly non-linear three-variable model for a fishery. Here, the
+  reinforcement learning agent discovers an effective simplification of
+  the problem to obtain a simple, interpretable control rule. Moreover,
+  the policy obtained is both more profitable and more sustainable than
+  any constant mortality policy---the standard family of policies considered
+  in fishery management.
   
 bibliography: bibliography.bib
 biblio-style: spphys
@@ -476,7 +475,7 @@ esc_rewards <- escapement_df |>
   filter(t == max(t)) |> 
   group_by(escapement) |>
   summarise(mean_reward = mean(reward),
-            sd = sd(reward)) 
+            sd = sd(reward))
 
 rmsy <- msy_rewards |>
   ggplot(aes(action, mean_reward, 
@@ -657,7 +656,7 @@ msy_rewards <- msy_df |>
   filter(t == max(t)) |> 
   group_by(action) |>
   summarise(mean_reward = mean(reward),
-            sd = sd(reward)) 
+            sd = sd(reward))
 
 rmsy <- msy_rewards |>
   ggplot(aes(action, mean_reward, 
@@ -668,7 +667,10 @@ rmsy <- msy_rewards |>
   theme(aspect.ratio = 1/1) + 
   geom_vline(aes(xintercept=best_action), color="seagreen2") + 
   geom_vline(aes(xintercept=0.8*best_action), color="violetred1") +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        aspect.ratio = 1) 
 
 # linear function blueprint
 linear_f <- function(slope, x) slope*x
@@ -687,8 +689,11 @@ lines <- p + stat_function(fun = linear_f_gen(0.01)) +
   stat_function(fun = linear_f_gen(0.055)) + 
   stat_function(fun = linear_f_gen(0.065)) +
   xlim(0,2) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-  xlab("X") + ylab("harvest")
+  xlab("X") + ylab("harvest") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        aspect.ratio = 1)
 
 
 (rmsy | lines) + plot_annotation(tag_levels = c('A'))
@@ -739,6 +744,7 @@ msy_tac_ppo |>
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
         facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
         labs(y = "abundance", x = "time") +
+        theme_bw() +
         theme(aspect.ratio = 2/3)
 ```
 
@@ -760,6 +766,7 @@ p1 <- msy_tac_ppo |>
       geom_col() +
       facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
       labs(y = "episode length", x = "repetition") +
+      theme_bw() + 
       theme(axis.text.x = element_blank())
 
 p2 <- msy_tac_ppo |> 
@@ -769,6 +776,7 @@ p2 <- msy_tac_ppo |>
       geom_col() +
       facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
       labs(y = "episode harvest", x = "repetition") +
+      theme_bw() + 
       theme(axis.text.x = element_blank())
 
 (p1 / p2) + plot_annotation(tag_levels = 'A')
@@ -810,6 +818,7 @@ py <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
   ggplot(aes(X, harvest, color = Y)) +
   geom_point() +
+  theme_bw() + 
   theme(aspect.ratio = 1/1) +
   stat_function(fun = opt_escapement_harvest, col = 'deeppink', size = 0.7) + 
   stat_function(fun = msy_harvest, col = 'seagreen2', size = 0.7)
@@ -818,6 +827,7 @@ pz <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
   ggplot(aes(X, harvest, color = Z)) +
   geom_point() +
+  theme_bw() + 
   theme(aspect.ratio = 1/1) +
   stat_function(fun = opt_escapement_harvest, col = 'deeppink', size = 0.7) + 
   stat_function(fun = msy_harvest, col = 'seagreen2', size = 0.7)
@@ -826,6 +836,7 @@ escxy <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
   ggplot(aes(X, escapement, color = Y)) +
   geom_point() +
+  theme_bw() + 
   theme(aspect.ratio = 1/1) +
   stat_function(fun = opt_escapement_escapement, col = 'deeppink', size = 0.7)
 
@@ -833,6 +844,7 @@ escxz <- ppo_df |>
   mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
   ggplot(aes(X, escapement, color = Z)) +
   geom_point() +
+  theme_bw() + 
   theme(aspect.ratio = 1/1) +
   stat_function(fun = opt_escapement_escapement, col = 'deeppink', size = 0.7)
 
@@ -864,6 +876,7 @@ pmsy <- msy_df |>
   geom_point() + sc +
   xlim(0,1) +
   ylim(0,0.85) +
+  theme_bw() + 
   ggtitle("Opt. Const. Mortality")
 
 ptac <- msy_df |>
@@ -873,6 +886,7 @@ ptac <- msy_df |>
   geom_point() + sc +
   xlim(0,1) +
   ylim(0,0.85) +
+  theme_bw() + 
   ggtitle("80% Opt. Const. Mortality")
 
 pppo <- ppo_df |>
@@ -881,6 +895,7 @@ pppo <- ppo_df |>
   geom_point() + sc +
   xlim(0,1) +
   ylim(0,0.85) +
+  theme_bw() + 
   ggtitle("DRL")
 
 pesc <- opt_escapement |>
@@ -893,6 +908,7 @@ pesc <- opt_escapement |>
   geom_point() + sc +
   xlim(0,1) +
   ylim(0,0.85) +
+  theme_bw() + 
   ggtitle("Opt. Const. Escapement")
 
 (
@@ -975,6 +991,7 @@ msy_tac_ppo |>
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
         facet_wrap(~factor(rep)) +
         labs(y = "abundance", x = "time") +
+        theme_bw() + 
         theme(aspect.ratio = 0.5)
 ```
 
@@ -990,6 +1007,7 @@ msy_tac_ppo |>
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
         facet_wrap(~factor(rep)) +
         labs(y = "abundance", x = "time") +
+        theme_bw() + 
         theme(aspect.ratio = 0.5)
 ```
 
@@ -1005,6 +1023,7 @@ msy_tac_ppo |>
         scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
         facet_wrap(~factor(rep)) +
         labs(y = "abundance", x = "time") +
+        theme_bw() + 
         theme(aspect.ratio = 0.5)
 ```
 
@@ -1059,6 +1078,7 @@ p1 <- tac4 |>
       geom_col() +
       facet_wrap(~factor(policy), ncol = 4) +
       labs(y = "episode length", x = "repetition") +
+      theme_bw() + 
       theme(axis.text.x = element_blank())
 
 p2 <- tac4 |> 
@@ -1068,6 +1088,7 @@ p2 <- tac4 |>
       geom_col() +
       facet_wrap(~factor(policy), ncol=4) +
       labs(y = "episode harvest", x = "repetition") +
+      theme_bw() + 
       theme(axis.text.x = element_blank())
 
 (p1 / p2)
