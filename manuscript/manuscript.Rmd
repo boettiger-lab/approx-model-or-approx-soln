@@ -34,7 +34,31 @@ keywords:
 #- MSC code 2
 
 abstract: |
-  Write something here
+  TBD Change slightly!!!!!
+  Existing methods for optimal control methods struggle to deal with the
+  complexity commonly encountered in real-world systems, including
+  dimensionality, process error, model bias and heterogeneity.  Instead
+  of tackling these complexities directly, researchers have typically
+  sought to find exact optimal solutions to simplified models of the
+  processes in question. When is the optimal solution to a very
+  approximate, stylized model better than an approximate solution to a
+  more accurate model? This question has largely gone unanswered owing
+  to the difficulty of finding even approximate solutions in the case of
+  complex models.  Our approach draws on recent algorithmic and
+  computational advances in deep reinforcement learning. These methods
+  have hitherto focused on problems in games or robotic mechanics, which
+  operate under precisely known rules. We demonstrate the ability for
+  novel algorithms using deep neural networks to successfully
+  approximate such solutions (the ‘‘policy function’’ or control rule)
+  without knowing or ever attempting to infer a model for the process
+  itself. This powerful new technique lets us finally begin to answer
+  the question. We show that in many but not all cases, the optimal
+  policy for a carefully chosen over-simplified model can still
+  out-perform these novel algorithms trained to find approximate
+  solutions to simulations of a realistically complex system. Comparing
+  these two approaches can lead to insights in the importance of
+  real-world features of observation and process error, model biases,
+  and heterogeneity.
   
 bibliography: bibliography.bib
 biblio-style: spphys
@@ -309,22 +333,21 @@ where,
 
 The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
 
-Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{fig:may stable}).
+Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{fig:may}).
 Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $\hat X_t$ of the system, these two attractors separated by an unstable fixed point.
 At a certain threshold value of $H$, however, the top stable fixed point collides with the unstable fixed point and both are annihilated.
 For this value of $H$, and for higher values, only the lower fixed point remains.
 This also creates the phenomenon of *hysteresis*, where returning $H$ to its original value is not sufficient to restore $\hat X_t$ to the original stable state. 
 
-\begin{figure}
-  \centering
-  \includegraphics[width = 0.8\linewidth]{figures/MayStablePoints.pdf}
-  \caption{
-    \label{fig:may stable}
-    The fixed point diagram for the model [@may77] associated to $f_{\text{May}}$ as a function of varying the parameter $\beta H$.
-    That is, these are the zeroes of the function $f_{\text{May}}$. 
-    Stable fixed points (also known as *attractors*) are plotted using a solid line, while the unstable fixed point is shown as a dotted line.
-  }
-\end{figure}
+```{r}
+#| label: may
+#| fig.cap: "The fixed point diagram for the model associated to $f_{\\text{May}}$ as a function of varying the parameter $\\beta H$.
+#| That is, these are the zeroes of the function $f_{\\text{May}}$. 
+#| Stable fixed points (also known as *attractors*) are plotted using a solid line, while the unstable fixed point is shown as a dotted line."
+#| out.width: "6.5in"
+
+knitr::include_graphics("figures/MayStablePoints.pdf")
+```
 
 This structure implies two things.
 First, that a drift in $H$ could lead to catastrophic consequences, with the population $X_t$ plummeting to the lower fixed stable point.
