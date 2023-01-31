@@ -219,6 +219,12 @@ The DRL approach side-steps this tradeoff by optimizing over a more complex fami
 We thus observe that the DRL solution leads to a higher profitability *and* stability as compared to constant mortality policies. 
 
 ```{r}
+#| label: textbox
+#| out.width: "1\\linewidth"
+knitr::include_graphics("figures/textbox.png")
+```
+
+```{r}
 #| label: conceptual
 #| echo: FALSE
 #| message: FALSE
