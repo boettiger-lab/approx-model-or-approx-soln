@@ -862,7 +862,7 @@ Because of the simplicity of the constant mortality ansatz, the optimal such pol
 In contrast, DRL optimizes over the more expressive -- and more complicated -- family of policies parametrized by a neural network.
 Because of this, our DRL approach uses a variant of *gradient ascent* (the proximal policy optimization algorithm) to obtain a good candidate policy.
 
-We have shown that the DRL agent finds an approximately *bang-bang* type of solution (see Textbox 1 for the definition of bang-bang solutions and Figs. \ref{fig:action-X} and \ref{fig:state-space} for the result).
+We have shown that the DRL agent finds an approximately *bang-bang* type of solution (see Text Box 1 for the definition of bang-bang solutions and Figs. \ref{fig:action-X} and \ref{fig:state-space} for the result).
 While bang-bang solutions are known to be optimal for a wide variety of single-species fishery control problems [@hening2019; @hening2021], there is no such proof of optimality for general multi-species models.
 In this sense this example is rather surprising and reassuring: while no general guarantee points at the optimality of bang-bang solutions for multi-species model, the existence of one such example provides a benchmark for the use of DRL in fishery control.
 
