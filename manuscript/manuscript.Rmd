@@ -171,7 +171,7 @@ While simplified models have historically allowed for exploration of large decis
 For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
-Similar combinations of rich process models and highly simplified decision models (often not even given the status of 'model') are common [e.g., CITE].
+Similar combinations of rich process models and highly simplified decision models (often not even given the status of 'model') are common.
 Modeling the potential action space as one of a handful of discrete scenarios is sometimes a well justified acknowledgement of the constraints faced by real-world decision-makers – particularly in the context of multilateral decisions –
 and may seem to reflect a division of responsibilities between 'scientists' modeling the 'natural processes' and policy-makers who make the decisions.
 But, more often, this simplification of decision choices is simply mathematically or conceptually convenient.  <!-- there are questions of policy scale hiding here -- e.g. local regulators of a specific industry obviously face a different action space than national legislatures or international diplomats -->
