@@ -259,7 +259,7 @@ For $n$ species, these models have the general form
 where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $\Delta X_t := X_{t+1} - X_t$, $\Delta Y_t := Y_{t+1} - Y_t$, and where $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions.
 Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting (sometimes referred to as *fishing effort*).
 Thus, the term $M_X X_t$ is the total $X$ harvest at time $t$.
-We will focus on systems where a single species, $X$ is harvested, i.e. $M_Y = M_Z = \dots = 0$.
+We will focus on systems where a single species, $X$, is harvested, i.e. $M_Y = M_Z = \dots = 0$.
 
 ## A single species model
 
