@@ -36,28 +36,27 @@ keywords:
 abstract: |
   Existing methods for optimal control struggle to deal with the
   complexity commonly encountered in real-world systems, including
-  dimensionality, process error, model bias and heterogeneity.  Instead
-  of tackling these complexities directly, researchers have typically
-  sought to find exact optimal solutions to simplified models of the
-  processes in question. When is the optimal solution to a very
-  approximate, stylized model better than an approximate solution to a
-  more accurate model? This question has largely gone unanswered owing
-  to the difficulty of finding even approximate solutions in the case of
-  complex models.  Our approach draws on recent algorithmic and
-  computational advances in deep reinforcement learning. These methods
-  have hitherto focused on problems in games or robotic mechanics, which
-  operate under precisely known rules. We demonstrate the ability for
-  novel algorithms using deep neural networks to successfully
-  approximate such solutions (the ‘‘policy function’’ or control rule)
-  without knowing or ever attempting to infer a model for the process
-  itself. This powerful new technique lets us finally begin to answer
-  the question. We showcase this approach by applying it to the control
-  of a highly non-linear three-variable model for a fishery. Here, the
-  reinforcement learning agent discovers an effective simplification of
-  the problem to obtain a simple, interpretable control rule. Moreover,
-  the policy obtained is both more profitable and more sustainable than
-  any constant mortality policy---the standard family of policies considered
-  in fishery management.
+  dimensionality, process error, model bias and data heterogeneity.
+  Instead of tackling these system complexities directly, researchers 
+  have typically sought to simplify models to fit optimal control 
+  methods. But when is the optimal solution to an approximate, stylized 
+  model better than an approximate solution to a more accurate model? 
+  While this question has largely gone unanswered owing to the 
+  difficulty of finding even approximate solutions for complex models, 
+  recent algorithmic and computational advances in deep reinforcement 
+  learning (DRL) might finally allow us to address these questions. DRL 
+  methods have to date been applied primarily in the context of games 
+  or robotic mechanics, which operate under precisely known rules. Here, 
+  we demonstrate the ability for DRL algorithms using deep neural networks 
+  to successfully approximate solutions (the ‘‘policy function’’ or control 
+  rule) in a non-linear three-variable model for a fishery without knowing 
+  or ever attempting to infer a model for the process itself. We find that 
+  the reinforcement learning agent discovers an effective simplification of
+  the problem to obtain an interpretable control rule. We show that the 
+  policy obtained with DRL is both more profitable and more sustainable 
+  than any constant mortality policy---the standard family of policies 
+  considered in fishery management.
+
   
 bibliography: bibliography.bib
 biblio-style: spphys
