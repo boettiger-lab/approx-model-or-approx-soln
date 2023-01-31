@@ -1,0 +1,25 @@
+Pretty darn good control: when are approximate solutions better than approximate models
+
+
+  Existing methods for optimal control struggle to deal with the
+  complexity commonly encountered in real-world systems, including
+  dimensionality, process error, model bias and data heterogeneity.
+  Instead of tackling these system complexities directly, researchers
+  have typically sought to simplify models to fit optimal control
+  methods. But when is the optimal solution to an approximate, stylized
+  model better than an approximate solution to a more accurate model?
+  While this question has largely gone unanswered owing to the
+  difficulty of finding even approximate solutions for complex models,
+  recent algorithmic and computational advances in deep reinforcement
+  learning (DRL) might finally allow us to address these questions. DRL
+  methods have to date been applied primarily in the context of games
+  or robotic mechanics, which operate under precisely known rules. Here,
+  we demonstrate the ability for DRL algorithms using deep neural networks
+  to successfully approximate solutions (the ‘‘policy function’’ or control
+  rule) in a non-linear three-variable model for a fishery without knowing
+  or ever attempting to infer a model for the process itself. We find that
+  the reinforcement learning agent discovers an effective simplification of
+  the problem to obtain an interpretable control rule. We show that the
+  policy obtained with DRL is both more profitable and more sustainable
+  than any constant mortality policy---the standard family of policies
+  considered in fishery management.
