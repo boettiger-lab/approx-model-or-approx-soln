@@ -286,7 +286,7 @@ where,
   F(X_t,H;\ \beta,c) := \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align*}
 
-The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal rate of predation $\beta$, and the predation half-maximum biomass $c$.
+The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal predation rate $\beta$, and the predation rate half-maximum biomass $c$.
 
 Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{fig:may}).
 Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $\hat X_t$ of the system, these two attractors separated by an unstable fixed point.
@@ -331,7 +331,7 @@ Species $Z$ preys on both $X$ and $Y$, while the latter two compete for resource
 There are ten parameters in this model: 
 The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and $Y$.
 A parameter $c_{XY}$ mediating a Lotka-Volterra competition between $X$ and $Y$.
-A maximum hunting intensity $\beta$ and half-maximum $c$ specifying how $Z$ forages on $X$ and $Y$.
+A maximum predation rate $\beta$ and a predation rate half-maximum biomass $c$ specifying how $Z$ forages on $X$ and $Y$.
 A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
 Finally, a death rate $d_Z$ and a parameter $f$ related to the birth rate of $Z$.
 
