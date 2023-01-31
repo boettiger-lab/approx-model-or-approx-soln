@@ -439,13 +439,13 @@ This objective is achieved by aggregating experience in what is called the *trai
 <!-- The *environment* is commonly a computer simulation, although it sometimes can be a real world system.
 The *agent*, on the other hand, is a computer program which interacts with the environment. -->
 
-For our use case, the environment will be a computational model of the population dynamics of a fishery, with the environment state at time $t$ being a vector of all the fish populations, $S_t=(X_t,Y_t,Z_t)$.
+For our use case, the environment will be a computational model of the population dynamics of a fishery, with the environment state at time $t$ being a vector of all the fish populations, $N_t=(X_t,Y_t,Z_t)$.
 At each time step, the agent observes the state $S$ and harvests $X$,
 \begin{align*}
   (X_t, Y_t, Z_t) \mapsto ((1-M_X)\cdot X_t, Y_t, Z_t),
 \end{align*}
-where the fish mortality-from-harvest $M_X=M_X(S_t)$ is the agent's action at time $t$. 
-This secures a reward of $M_X(S_t)X$.
+where the fish mortality-from-harvest $M_X=M_X(N_t)$ is the agent's action at time $t$. 
+This secures a reward of $M_X(N_t)X$.
 Afterwards, the environment undergoes a time step under its natural dynamics given by \eqref{eq:3d model stoch}.
 
 ## Mathematical framework for RL
@@ -459,25 +459,25 @@ An MDP may be defined by the following data:
 
 - $\mathcal{A}$: *action space*, the set of actions which the agent may choose from,
 
-- $T(s_{t+1}|s_t, a_t)$: *transition operator*, a conditional distribution which describes the dynamics of the system,
+- $T(N_{t+1}|N_t, a_t)$: *transition operator*, a conditional distribution which describes the dynamics of the system (where $N_i\in\mathcal{S}$ are states of the environment),
 
-- $r(s_t, a_t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $s_t$,
+- $r(N_t, a_t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $N_t$,
 
-- $d(s_0)$: *initial state distribution*, the initial state of the environment is sampled from this distribution,
+- $d(N_0)$: *initial state distribution*, the initial state of the environment is sampled from this distribution,
 
 - $\gamma\in[0,1]$: *discount factor*.
 
-At a time $t$, the MDP agent observes the full state $s_t$ of the environment and chooses an action based on this observation according to a *policy function* $\pi(a_t | s_t)$.
-In return, it receives a discounted reward $\gamma^t r(a_t, s_t)$.
+At a time $t$, the MDP agent observes the full state $s_t$ of the environment and chooses an action based on this observation according to a *policy function* $\pi(a_t | N_t)$.
+In return, it receives a discounted reward $\gamma^t r(a_t, N_t)$.
 The discount factor helps regularize the agent, helping the optimization algorithm find solutions which pay off within a timescale of $t \sim \log(\gamma^{-1})^{-1}$.
 
 With any fixed policy function, the agent will traverse a path 
-$\tau=(s_0,\ a_0,\ s_1,\ a_1\ \dots,\ s_{t_{\text{fin.}}})$ 
+$\tau=(N_0,\ a_0,\ N_1,\ a_1\ \dots,\ N_{t_{\text{fin.}}})$ 
 sampled randomly from the distribution
 \begin{align*}
   p_\pi(\tau) = 
-  d(s_0) \prod_{t=0}^{ t_{\text{fin.}}-1 }
-  \pi( a_t | s_t ) T( s_{t+1} | s_t, a_t ).
+  d(N_0) \prod_{t=0}^{ t_{\text{fin.}}-1 }
+  \pi( a_t | N_t ) T( N_{t+1} | N_t, a_t ).
 \end{align*}
 Reinforcement learning seeks to optimize $\pi$ such that the expected rewards are maximal,
 $$  
@@ -485,7 +485,7 @@ $$
 $$
 where,
 $$
-  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, s_t),
+  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, N_t),
 $$
 is the cumulative reward of path $\tau$.
 The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expected return*.
@@ -494,7 +494,17 @@ The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expec
 
 The policy function $\pi$ often lives in a high or even infinite-dimensional space.
 This makes it unfeasible to directly optimize $\pi$.
-In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions. <!-- ML: I am not following this line of thought here. I see the main reason why NN's are used as being that NN's are universal function approximators, and we don't know what the policy and/or value function will look like.
+In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions.\footnote{
+Policies are, in general, functions from state space to policy space.
+In our case, these are real-valued functions on a cube $\pi:[0,2]^{\times 3}\to \mathbb{R}_+$.
+The space of all such functions is highly singular, spanning a \emph{non-separable Hilbert space}.
+Even restricting ourselves to continuous policy functions, we end up with a set of policies which span the infinite dimensional space $L^2([0,2]^{\times3})$.
+One way to avoid optimizing over an infinite dimensional ambient space is to discretize state space into a set of bins.
+This approach runs into tractability problems: First, the dimension of policy space scales exponentially with the number of species.
+Second, even for a fixed number of species (e.g., 3), the dimension optimized over can be prohibitively large---for example if one uses 1000 bins for each population in a three-species model, the overall number of parameters being optimized over is $10^9$.
+Neural networks with much smaller number of parameters, on the other hand, can be quite expressive and sufficient to find a rather good (if not optimal) policy function.
+}
+<!-- ML: I am not following this line of thought here. I see the main reason why NN's are used as being that NN's are universal function approximators, and we don't know what the policy and/or value function will look like.
 
 FM: my take here is that the space of functions from states to actions is in principle infinite-dimensional or at least very high dimensional. (e.g. exponentially high dimensional in terms of the number of degrees of freedom in state space, for the case of discretized state spaces).
 By restricting our ansatz to neural networks of a fixed depth/breadth, we're restricting ourselves to a finite dimensional (or, in the discrete case, potentially much lower dimensional) manifold of policies over which gradient descent may be performed much more efficiently.
@@ -505,8 +515,8 @@ Deep reinforcement learning uses this strategy, focusing on function families pa
 <!-- The figure should kinda explain how the parametrization arises, and how gradient ascent is used. Maybe namedrop backpropagataion for the sake of usefulness to the reader? -->
 
 
-Since our state and observation spaces are continuous, we will focus on deep reinforcement learning throughout this paper.
-Within the RL literature there is a wealth of algorithms from which to choose from to optimize $\pi$, each with its pros and cons.
+We will focus on deep reinforcement learning throughout this paper.
+Within the DRL literature there is a wealth of algorithms from which to choose from to optimize $\pi$, each with its pros and cons.
 Most, if not all, of these are based on gradient ascent by using the technique of *back-propagation* to efficiently compute the gradient.
 Here we have used only one such algorithm (*proximal policy optimization (PPO)*) for the sake of particularity---to draw a clear comparison between the RL-based and the classical fishery management approaches.
 In practice, further improvements can be expected by a careful selection of the optimization algorithm. 
@@ -539,7 +549,7 @@ This way, it is plausible that model-free RL controls outperform currently used 
 
 \textbf{Training a DRL agent.}
 We trained a DRL agent parametrized by a neural network $\theta$ with two hidden, 64-neuron, layers.
-The state space used was a cube $[0,2]^{\times 3}$, while the policies explored mapped states $N_t$ to a single number, $h_t = \pi_\theta(N_t)$, the harvest quota on species $X$ at that timestep.
+The state space used was a cube $[0,2]^{\times 3}$, while the policies explored mapped states $N_t$ to a single number, $M_X(N_t) = \pi_\theta(N_t)$, the harvest mortality on species $X$ at that timestep.
 Each episode in the training and in the evaluation stages was at most 200 time steps long.
 Episodes were ended early in case of a ‘‘near-extinction event,’’ a moment in which any of the populations dipped below a threshold value, i.e.,
 \begin{align}
@@ -647,7 +657,7 @@ The threshold values used to determine an early episode end were chosen as
 $$
   X_{\text{thresh.}} = 0.08,\quad Y_{\text{thresh.}} = Z_{\text{thresh.}} = 10^{-4},
 $$
-where the higher value of $X_{\text{thresh.}}$ helped select for more sustainable fishing strategies (for both the DRL and constant mortality approaches).
+where the higher value of $X_{\text{thresh.}}$ helped select for more sustainable fishing strategies.
 
 # Results
 
