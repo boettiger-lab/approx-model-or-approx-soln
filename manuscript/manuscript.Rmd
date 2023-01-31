@@ -1038,7 +1038,7 @@ We may see that the two policies lead to essentially the same reward distributio
 ```{r}
 #| label: esc-tuning-eval
 #| fig.cap: "(Left panel) Tuning results for constant escapement policies: mean episode reward scatter data (averaged over 50 episodes) together with two standard deviations shaded in grey. 
-#| The optimal escapement level (the one producing maximum mean harvest) is $X_{\text{esc.}}=0.62$.
+#| The optimal escapement level (the one producing maximum mean harvest) is $X_{\\text{esc.}}=0.62$.
 #| (Middle and right panels) Reward histograms for the optimal constant escapement policy (middle) and for the DRL policy (right).
 #| For both DRL and optimal constant escapement, no early episode ends are observed (i.e. all episodes last for 200 time steps)."
 #| out.width: "6.5in"
