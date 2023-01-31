@@ -168,7 +168,7 @@ Much effort has been spent grappling with the complexity of our natural world in
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
  But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
 While simplified models have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
-For instance, Global Circulation Models (GCMs) such as HadOM3 [CITE] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [@riahi2017shared].
+For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
 Similar combinations of rich process models and highly simplified decision models (often not even given the status of 'model') are common [e.g., CITE].
