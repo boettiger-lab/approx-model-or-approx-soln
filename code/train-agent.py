@@ -57,15 +57,33 @@ df.to_csv(f"data/PPO{iterations}.csv.xz", index = False)
 
 
 ## Plots ## 
+import plotnine
 from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
 ## Timeseries
+df = pd.read_csv(f"data/PPO{iterations}.csv.xz")
 df2 = (df
        .melt(id_vars=["t", "action", "reward", "rep"])
        .groupby(['t', "variable"], as_index=False)
        .agg({'reward': 'mean',
              'value': 'mean',
              'action': 'mean'})) 
-(ggplot(df2, aes("t", "value", color="variable")) +
- geom_line())
+ggplot(df2, aes("t", "value", color="variable")) + geom_line()
+
+
+## quick policy plot
+df = []
+obs = env.reset()
+states = np.linspace(-1,0.5,101)
+episode_reward = 0
+for rep in range(5):
+  for observation in states:
+      obs[0] = observation
+      action = agent.compute_single_action(obs)
+      df.append([observation, action[0]])
+df2 = pd.DataFrame(df, columns =  ["observation","action"])
+
+# transform to natural space & compute escapement
+df2["escapement"] = df2["observation"] + 1 - df2["action"]
+ggplot(df2, aes("observation", "escapement")) + geom_point()
 
 
