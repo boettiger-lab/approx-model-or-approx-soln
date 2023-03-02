@@ -15,7 +15,7 @@ class fish_tipping(gym.Env):
          "K_x": np.float32(1.0),
          "K_y": np.float32(1.0),
          "beta": np.float32(0.3),
-         "v0":  np.float32(0.1),
+         "v0":  np.float32(0.5),
          "D": np.float32(1.1),
          "tau_yx": np.float32(0),
          "tau_xy": np.float32(0),
@@ -23,19 +23,20 @@ class fish_tipping(gym.Env):
          "f": np.float32(0.5), 
          "dH": np.float32(0.45),
          "alpha": np.float32(0.3),
-         "sigma_x": np.float32(0.05),
-         "sigma_y": np.float32(0.1),
-         "sigma_z": np.float32(0.1)
+         "sigma_x": 0, #np.float32(0.05),
+         "sigma_y": 0, #np.float32(0.1),
+         "sigma_z": 0 #np.float32(0.1)
         }
-        initial_state = np.array([0.8396102377828771, 
-                                    0.05489978383850558,
-                                    0.3773367609828674],
-                                    dtype=np.float32) 
+        initial_pop = np.array([0.8396102377828771, 
+                                0.05489978383850558,
+                                0.3773367609828674],
+                                dtype=np.float32)
+                                
         ## these parameters may be specified in config                                  
         self.Tmax = config.get("Tmax", 200)
-        self.threshhold = config.get("threshhold", np.float32(0.08))
+        self.threshold = config.get("threshold", np.float32(1e-4))
         self.training = config.get("training", True)
-        self.initial_state = config.get("initial_state", initial_state)
+        self.initial_pop = config.get("initial_pop", initial_pop)
         self.parameters = config.get("parameters", parameters)
         
         self.bound = 2 * self.parameters["K_x"]
@@ -55,8 +56,8 @@ class fish_tipping(gym.Env):
 
     def reset(self, *, seed=None, options=None):
         self.timestep = 0
-        self.state = self.initial_state
-        return [self.state], {}
+        self.state = self.update_state(self.initial_pop)
+        return self.state, {}
 
     def step(self, action):
         action = np.clip(action, [0], [1])
@@ -72,7 +73,7 @@ class fish_tipping(gym.Env):
         # in training mode only: punish for population collapse
         if any(pop <= self.threshold) and self.training:
             terminated = True
-            self.reward -= 50/self.timestep
+            reward -= 50/self.timestep
         
         self.state = self.update_state(pop) # transform into [-1, 1] space
         observation = self.observation() # same as self.state
@@ -82,8 +83,8 @@ class fish_tipping(gym.Env):
     
     def harvest(self, pop, action): 
         harvest = action * pop[0]
-        pop[0] = pop[0] - harvest
-        return pop, harvest
+        pop[0] = pop[0] - harvest[0]
+        return pop, harvest[0]
       
     def population_growth(self, pop):
         X, Y, Z = pop[0], pop[1], pop[2]
@@ -97,16 +98,17 @@ class fish_tipping(gym.Env):
              )
         
         Y += (p["r_y"] * Y * (1 - Y / p["K_y"])
-              - p["D"] * ["beta"] * Z * (X**2) / (p["v0"]**2 + X**2)
+              - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2 + Y**2)
               - p["cV"] * X * Y
               - p["tau_yx"] * Y + p["tau_xy"] * X  
               + p["sigma_y"] * Y * np.random.normal()
              )
+             
         Z = Z + p["alpha"] * (Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
                               + p["sigma_z"] * Z  * np.random.normal())
                               
-        state = np.array(X, Y, Z, dtype=np.float32)
-        return(self.state)
+        pop = np.array([X, Y, Z], dtype=np.float32)
+        return(pop)
 
     def observation(self): # perfectly observed case
         return(self.state)

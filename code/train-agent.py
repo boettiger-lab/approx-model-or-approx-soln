@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import torch
 
+register_env("fish_tipping", fish_tipping)
+
 ## We could call env directly without this if only  our envs took a env_config dict argument
 register_env("threeFishing-v2", lambda config: forageVVHcont())
 
@@ -14,10 +16,10 @@ config.num_envs_per_worker=20
 config = config.resources(num_gpus=torch.cuda.device_count())
 config.framework_str="torch"
 config.create_env_on_local_worker = True
-agent = config.build(env="threeFishing-v2")
+agent = config.build(env="fish_tipping")
 
 
-iterations = 200
+iterations = 220
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
@@ -53,8 +55,6 @@ for rep in range(50):
 cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
 df = pd.DataFrame(df, columns = cols)
 df.to_csv(f"data/PPO{iterations}.csv.xz", index = False)
-
-
 
 ## Plots ## 
 import plotnine

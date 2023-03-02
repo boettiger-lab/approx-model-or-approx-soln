@@ -1,4 +1,3 @@
-import gym_fishing
 import gym
 import pandas as pd
 import numpy as np
@@ -7,19 +6,18 @@ import ray
 @ray.remote
 def simulate(env, action):
   df = []
-  for rep in range(50):
+  for rep in range(5):
     episode_reward = 0
-    observation = env.reset()
+    observation, _ = env.reset()
     for t in range(env.Tmax):
       df.append(np.append([t, rep, action, episode_reward], observation))
-      observation, reward, terminated, info = env.step(action)
+      observation, reward, terminated, done, info = env.step(action)
       episode_reward += reward
       if terminated:
         break
   return(df)
 
-
-env = gym.make("threeFishing-v2")
+env = fish_tipping()
 env.training = False
 actions = np.linspace(0,0.1,101)
 
