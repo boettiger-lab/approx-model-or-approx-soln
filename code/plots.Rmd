@@ -28,6 +28,8 @@ best
 ```
 
 ```{r}
+msy$action |> max()
+
 rewards <- msy |>
   group_by(action, rep) |>
   filter(t == max(t)) |> 
@@ -36,7 +38,6 @@ rewards <- msy |>
             sd = sd(reward)) 
 
 rewards |>
-  filter(action < 0.1) |>
   ggplot(aes(action, mean_reward, 
              ymin = mean_reward - 2*sd,
              ymax=mean_reward+2*sd)) +
@@ -99,7 +100,10 @@ tac_sim |>
 ```{r}
 ppo <- read_csv("../data/PPO250.csv.gz")
 
+
 ```
+
+
 
 ```{r}
 ppo_sims <- ppo |> 
@@ -148,7 +152,9 @@ esc_sims <- escapement |>
   pivot_longer(c("sp1", "sp2", "sp3"),
                names_to = "species", values_to = "abundance") |>
   mutate(abundance = abundance + 1) |>
-  rename(escapement = action)
+  rename(escapement = action) |>
+  mutate(effort = pmax(c(abundance - escapement),0) / abundance)
+
 
 esc_sims |>
   filter(rep < 4) |>
@@ -173,3 +179,39 @@ rewards |>
   geom_point() + geom_ribbon(alpha=0.4)
 ```
 
+
+
+
+
+
+```{r}
+
+
+ppo |> 
+  group_by(rep) |>
+  filter(t==max(t)) |> ungroup() |>
+  summarise(reward = mean(reward),
+            t = mean(t),
+            effort = mean(action)) |>
+  mutate(policy="ppo")
+
+msy_sim |> 
+  group_by(rep) |>
+  filter(t==max(t)) |> ungroup() |>
+  summarise(reward = mean(reward),
+            t = mean(t),
+            effort = mean(action))|>
+  mutate(policy="msy")
+
+
+esc_sims |> 
+  group_by(rep) |>
+  filter(t==max(t)) |> ungroup() |>
+  summarise(reward = mean(reward),
+            t = mean(t),
+            effort = mean(effort))|>
+  mutate(policy="escapement")
+
+
+
+```
