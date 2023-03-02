@@ -1,4 +1,7 @@
-import gym_fishing
+import sys
+sys.path.insert(0, ".") # rstudio / repl_python doesn't add cwd to path
+from src.envs import fish_tipping
+
 import gym
 import pandas as pd
 import numpy as np
@@ -9,18 +12,20 @@ def simulate(env, esc_level):
   df = []
   for rep in range(50):
     episode_reward = 0
-    observation = env.reset()
+    observation, _ = env.reset()
     for t in range(env.Tmax):
+      population = env.population()
       df.append(np.append([t, rep, esc_level, episode_reward], observation))
-      sp1_pop = (observation[0] + 1 ) # natural state-space
-      action = np.max([1 - esc_level / sp1_pop, 0]) # action is a mortality rate. 
+      action = np.max([1 - esc_level / population[0], 0]) # action is a mortality rate. 
+      observation, reward, terminated, done, info = env.step(action)
       episode_reward += reward
       if terminated:
         break
   return(df)
 
-env = gym.make("threeFishing-v2")
-env.training = False
+env = fish_tipping.three_sp()
+env.training = True
+env.threshold = 0
 esc_choices = np.linspace(0,1,101)
 
 # define parllel loop and execute

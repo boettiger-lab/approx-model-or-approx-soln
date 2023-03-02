@@ -1,15 +1,15 @@
-from gym_fishing.envs import forageVVHcont
 from ray.rllib.algorithms import ppo
 from ray.tune import register_env
 import os
 import pandas as pd
 import numpy as np
 import torch
+from src.envs import fish_tipping
 
-register_env("fish_tipping", fish_tipping)
+
+register_env("fish_tipping", lambda config: fish_tipping.three_sp())
 
 ## We could call env directly without this if only  our envs took a env_config dict argument
-register_env("threeFishing-v2", lambda config: forageVVHcont())
 
 config = ppo.PPOConfig()
 config.num_envs_per_worker=20
@@ -17,7 +17,6 @@ config = config.resources(num_gpus=torch.cuda.device_count())
 config.framework_str="torch"
 config.create_env_on_local_worker = True
 agent = config.build(env="fish_tipping")
-
 
 iterations = 220
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
@@ -36,18 +35,18 @@ stats = agent.evaluate() # built-in method to evaluate agent on eval env
 
 # Initialize saved copy of eval environment:
 config = agent.evaluation_config.env_config
-config.update({'seed': 41})
+config.update({'seed': 42})
 env = agent.env_creator(config)
 
 env.training = False
 df = []
 for rep in range(50):
   episode_reward = 0
-  observation = env.reset()
+  observation, _ = env.reset()
   for t in range(env.Tmax):
     action = agent.compute_single_action(observation)
     df.append(np.append([t, rep, action[0], episode_reward], observation))
-    observation, reward, terminated, info = env.step(action)
+    observation, reward, terminated, done, info = env.step(action)
     episode_reward += reward
     if terminated:
       break
@@ -72,7 +71,7 @@ ggplot(df2, aes("t", "value", color="variable")) + geom_line()
 
 ## quick policy plot
 df = []
-obs = env.reset()
+obs, _ = env.reset()
 states = np.linspace(-1,0.5,101)
 episode_reward = 0
 for rep in range(5):

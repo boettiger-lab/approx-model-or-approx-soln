@@ -1,3 +1,7 @@
+import sys
+sys.path.insert(0, ".") # rstudio / repl_python doesn't add cwd to path
+from src.envs import fish_tipping
+
 import gym
 import pandas as pd
 import numpy as np
@@ -6,7 +10,7 @@ import ray
 @ray.remote
 def simulate(env, action):
   df = []
-  for rep in range(5):
+  for rep in range(30):
     episode_reward = 0
     observation, _ = env.reset()
     for t in range(env.Tmax):
@@ -17,7 +21,7 @@ def simulate(env, action):
         break
   return(df)
 
-env = fish_tipping()
+env = fish_tipping.three_sp()
 env.training = False
 actions = np.linspace(0,0.1,101)
 

@@ -5,7 +5,7 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 
-class fish_tipping(gym.Env):
+class three_sp(gym.Env):
     """A 3-species ecosystem model"""
     def __init__(self, config=None):
         config = config or {}
@@ -23,9 +23,9 @@ class fish_tipping(gym.Env):
          "f": np.float32(0.5), 
          "dH": np.float32(0.45),
          "alpha": np.float32(0.3),
-         "sigma_x": 0, #np.float32(0.05),
-         "sigma_y": 0, #np.float32(0.1),
-         "sigma_z": 0 #np.float32(0.1)
+         "sigma_x": np.float32(0.05),
+         "sigma_y": np.float32(0.1),
+         "sigma_z": np.float32(0.1)
         }
         initial_pop = np.array([0.8396102377828771, 
                                 0.05489978383850558,
