@@ -14,6 +14,7 @@ def simulate(env, esc_level):
       df.append(np.append([t, rep, esc_level, episode_reward], observation))
       sp1_pop = (observation[0] + 1 ) # natural state-space
       action = np.max([1 - esc_level / sp1_pop, 0]) # action is a mortality rate. 
+      observation, reward, terminated, info = env.step(action)
       episode_reward += reward
       if terminated:
         break
