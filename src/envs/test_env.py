@@ -1,28 +1,29 @@
-env = fish_tipping(config = {"Tmax": 200})
-env.Tmax
-#env.threshold = 0.00
+from envs import fish_tipping
+
+import gym
+import pandas as pd
+import numpy as np
+import ray
+env = fish_tipping.three_sp()
 env.training = False
-env.reset()
-env.state = np.array([-0.5,-1,-1], dtype=np.float32)
-
-env.state = np.array([-1,-0.5,-1], dtype=np.float32)
-
-env.state = np.array([-0.7,-1,-0.5], dtype=np.float32)
-
-env.population()
-
 df = []
 episode_reward = 0
-action = 0.01
 observation, _ = env.reset()
+esc_level = 0.6
 for t in range(env.Tmax):
-  df.append(np.append([t, action, episode_reward], observation))
+  population = env.population()
+  df.append(np.append([t, esc_level, episode_reward], observation))
+  action = np.max([1 - esc_level / population[0], 0]) # action is a mortality rate. 
   observation, reward, terminated, done, info = env.step(action)
   episode_reward += reward
-  if terminated:
-    break
-  
-import pandas as pd
-cols = ["t", "action", "reward", "X", "Y", "Z"]
-df = pd.DataFrame(df, columns = cols)
-env.population()
+
+print(episode_reward)
+
+cols = ["t", "escapement", "reward", "X", "Y", "Z"]
+df2 = pd.DataFrame(df,columns=cols)
+
+from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
+
+ggplot(df2, aes("t", "X")) + geom_line()
+
+

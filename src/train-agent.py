@@ -1,13 +1,13 @@
+from envs import fish_tipping # setwd to source file location if using repl_python()
 from ray.rllib.algorithms import ppo
 from ray.tune import register_env
 import os
 import pandas as pd
 import numpy as np
 import torch
-from src.envs import fish_tipping
 
 
-register_env("fish_tipping", lambda config: fish_tipping.three_sp())
+register_env("fish_tipping",fish_tipping.three_sp)
 
 ## We could call env directly without this if only  our envs took a env_config dict argument
 
@@ -18,7 +18,7 @@ config.framework_str="torch"
 config.create_env_on_local_worker = True
 agent = config.build(env="fish_tipping")
 
-iterations = 220
+iterations = 200
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
@@ -40,7 +40,7 @@ env = agent.env_creator(config)
 
 env.training = False
 df = []
-for rep in range(50):
+for rep in range(20):
   episode_reward = 0
   observation, _ = env.reset()
   for t in range(env.Tmax):

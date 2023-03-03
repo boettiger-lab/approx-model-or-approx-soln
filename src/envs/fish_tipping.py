@@ -10,12 +10,12 @@ class three_sp(gym.Env):
     def __init__(self, config=None):
         config = config or {}
         parameters = {
-         "r_x": np.float32(0.1),
-         "r_y": np.float32(0.1),
+         "r_x": np.float32(1.0),
+         "r_y": np.float32(1.0),
          "K_x": np.float32(1.0),
          "K_y": np.float32(1.0),
          "beta": np.float32(0.3),
-         "v0":  np.float32(0.5),
+         "v0":  np.float32(0.1),
          "D": np.float32(1.1),
          "tau_yx": np.float32(0),
          "tau_xy": np.float32(0),
@@ -24,8 +24,8 @@ class three_sp(gym.Env):
          "dH": np.float32(0.45),
          "alpha": np.float32(0.3),
          "sigma_x": np.float32(0.05),
-         "sigma_y": np.float32(0.1),
-         "sigma_z": np.float32(0.1)
+         "sigma_y": np.float32(0.05),
+         "sigma_z": np.float32(0.05)
         }
         initial_pop = np.array([0.8396102377828771, 
                                 0.05489978383850558,
@@ -35,6 +35,7 @@ class three_sp(gym.Env):
         ## these parameters may be specified in config                                  
         self.Tmax = config.get("Tmax", 200)
         self.threshold = config.get("threshold", np.float32(1e-4))
+        self.init_sigma = config.get("init_sigma", np.float32(1e-4))
         self.training = config.get("training", True)
         self.initial_pop = config.get("initial_pop", initial_pop)
         self.parameters = config.get("parameters", parameters)
@@ -57,7 +58,9 @@ class three_sp(gym.Env):
     def reset(self, *, seed=None, options=None):
         self.timestep = 0
         self.state = self.update_state(self.initial_pop)
-        return self.state, {}
+        self.state += np.float32(self.init_sigma * np.random.normal(size=3) )
+        info = {}
+        return self.state, info
 
     def step(self, action):
         action = np.clip(action, [0], [1])
