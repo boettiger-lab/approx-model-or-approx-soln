@@ -1,6 +1,4 @@
-import sys
-sys.path.insert(0, ".") # rstudio / repl_python doesn't add cwd to path
-from src.envs import fish_tipping
+from envs import fish_tipping
 
 import gym
 import pandas as pd
@@ -23,7 +21,7 @@ def simulate(env, action):
 
 env = fish_tipping.three_sp()
 env.training = False
-actions = np.linspace(0,0.1,101)
+actions = np.linspace(0,0.2,101)
 
 # define parllel loop and execute
 parallel = [simulate.remote(env, i) for i in actions]

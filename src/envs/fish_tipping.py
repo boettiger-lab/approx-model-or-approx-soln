@@ -23,7 +23,7 @@ class three_sp(gym.Env):
          "f": np.float32(0.5), 
          "dH": np.float32(0.45),
          "alpha": np.float32(0.3),
-         "sigma_x": np.float32(0.05),
+         "sigma_x": np.float32(0.1),
          "sigma_y": np.float32(0.05),
          "sigma_z": np.float32(0.05)
         }
@@ -35,7 +35,7 @@ class three_sp(gym.Env):
         ## these parameters may be specified in config                                  
         self.Tmax = config.get("Tmax", 200)
         self.threshold = config.get("threshold", np.float32(1e-4))
-        self.init_sigma = config.get("init_sigma", np.float32(1e-4))
+        self.init_sigma = config.get("init_sigma", np.float32(1e-3))
         self.training = config.get("training", True)
         self.initial_pop = config.get("initial_pop", initial_pop)
         self.parameters = config.get("parameters", parameters)

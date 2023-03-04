@@ -1,4 +1,5 @@
-from envs import fish_tipping # setwd to source file location if using repl_python()
+
+from src.envs import fish_tipping
 from ray.rllib.algorithms import ppo
 from ray.tune import register_env
 import os
@@ -12,13 +13,14 @@ register_env("fish_tipping",fish_tipping.three_sp)
 ## We could call env directly without this if only  our envs took a env_config dict argument
 
 config = ppo.PPOConfig()
+config.training(vf_clip_param = 50.0)
 config.num_envs_per_worker=20
 config = config.resources(num_gpus=torch.cuda.device_count())
 config.framework_str="torch"
 config.create_env_on_local_worker = True
 agent = config.build(env="fish_tipping")
 
-iterations = 200
+iterations = 150
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
 if not os.path.exists(checkpoint): # train only if no trained agent saved
@@ -40,7 +42,7 @@ env = agent.env_creator(config)
 
 env.training = False
 df = []
-for rep in range(20):
+for rep in range(50):
   episode_reward = 0
   observation, _ = env.reset()
   for t in range(env.Tmax):
@@ -71,18 +73,16 @@ ggplot(df2, aes("t", "value", color="variable")) + geom_line()
 
 ## quick policy plot
 df = []
-obs, _ = env.reset()
 states = np.linspace(-1,0.5,101)
-episode_reward = 0
-for rep in range(5):
-  for observation in states:
-      obs[0] = observation
+for rep in range(10):
+  obs, _ = env.reset()
+  for state in states:
+      obs[0] = state
       action = agent.compute_single_action(obs)
-      df.append([observation, action[0]])
-df2 = pd.DataFrame(df, columns =  ["observation","action"])
-
-# transform to natural space & compute escapement
-df2["escapement"] = df2["observation"] + 1 - df2["action"]
-ggplot(df2, aes("observation", "escapement")) + geom_point()
+      escapement = max(state + 1 - action[0], 0)
+      df.append([state+1, escapement, action[0], rep])
+      
+df2 = pd.DataFrame(df, columns=["observation","escapement","action","rep"])
+ggplot(df2, aes("observation", "escapement", color = "rep")) + geom_point(shape=".")
 
 

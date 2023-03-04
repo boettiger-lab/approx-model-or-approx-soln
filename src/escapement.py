@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, ".") # rstudio / repl_python doesn't add cwd to path
-from src.envs import fish_tipping
+from envs import fish_tipping
 
 import gym
 import pandas as pd
@@ -34,4 +34,4 @@ df = ray.get(parallel)
 
 cols = ["t", "rep", "escapement", "reward", "X", "Y", "Z"]
 df2 = pd.DataFrame(np.vstack(df), columns = cols)
-df2.to_csv("data/escapement.csv.xz", index=False)
+df2.to_csv("../data/escapement.csv.xz", index=False)
