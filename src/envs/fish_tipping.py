@@ -92,16 +92,18 @@ class three_sp(gym.Env):
     def population_growth(self, pop):
         X, Y, Z = pop[0], pop[1], pop[2]
         p = self.parameters
+        
+        coupling = p["v0"]**2 + 0.02 * np.sin(2 * np.pi / 30)
 
         X += (p["r_x"] * X * (1 - X / p["K_x"])
-              - p["beta"] * Z * (X**2) / (p["v0"]**2 + X**2)
+              - p["beta"] * Z * (X**2) / (coupling + X**2)
               - p["cV"] * X * Y
               + p["tau_yx"] * Y - p["tau_xy"] * X  
               + p["sigma_x"] * X * np.random.normal()
              )
         
-        Y += (p["r_y"] * Y * (1 - Y / p["K_y"])
-              - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2 + Y**2)
+        Y += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+              - p["D"] * p["beta"] * Z * (Y**2) / (coupling + Y**2)
               - p["cV"] * X * Y
               - p["tau_yx"] * Y + p["tau_xy"] * X  
               + p["sigma_y"] * Y * np.random.normal()

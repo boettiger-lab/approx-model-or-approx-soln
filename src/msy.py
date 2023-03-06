@@ -30,6 +30,8 @@ df = ray.get(parallel)
 # convert to data.frame & write to csv
 cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
 df2 = pd.DataFrame(np.vstack(df), columns = cols)
+
+# kinda slow to compress
 df2.to_csv("data/msy.csv.xz", index=False)
 
 

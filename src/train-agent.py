@@ -23,14 +23,12 @@ agent = config.build(env="fish_tipping")
 iterations = 150
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
-if not os.path.exists(checkpoint): # train only if no trained agent saved
+#if not os.path.exists(checkpoint): # train only if no trained agent saved
   for _ in range(iterations):
     print(f"iteration {_}", end = "\r")
     agent.train()
   checkpoint = agent.save("cache")
 
-#agent_restored = config.build(env="threeFishing-v2")
-#agent_restored.evaluate()
 agent.restore(checkpoint)
 
 stats = agent.evaluate() # built-in method to evaluate agent on eval env
@@ -70,9 +68,13 @@ df2 = (df
              'action': 'mean'})) 
 ggplot(df2, aes("t", "value", color="variable")) + geom_line()
 
+## summary stats
+reward = df[df.t == max(df2.t)].reward
+reward.mean()
+np.sqrt(reward.var())
 
 ## quick policy plot
-df = []
+policy_df = []
 states = np.linspace(-1,0.5,101)
 for rep in range(10):
   obs, _ = env.reset()
@@ -80,9 +82,9 @@ for rep in range(10):
       obs[0] = state
       action = agent.compute_single_action(obs)
       escapement = max(state + 1 - action[0], 0)
-      df.append([state+1, escapement, action[0], rep])
+      policy_df.append([state+1, escapement, action[0], rep])
       
-df2 = pd.DataFrame(df, columns=["observation","escapement","action","rep"])
-ggplot(df2, aes("observation", "escapement", color = "rep")) + geom_point(shape=".")
+policy_df = pd.DataFrame(policy_df, columns=["observation","escapement","action","rep"])
+ggplot(policy_df, aes("observation", "escapement", color = "rep")) + geom_point(shape=".")
 
 
