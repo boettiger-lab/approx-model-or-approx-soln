@@ -93,9 +93,10 @@ class three_sp(gym.Env):
         X, Y, Z = pop[0], pop[1], pop[2]
         p = self.parameters
         
-        coupling = p["v0"]**2 + 0.02 * np.sin(2 * np.pi / 30)
+        coupling = p["v0"]**2 + 0.02 * np.sin(2 * np.pi * self.timestep / 60)
+        K_x = p["K_x"] # + 0.01 * np.sin(2 * np.pi * self.timestep / 30)
 
-        X += (p["r_x"] * X * (1 - X / p["K_x"])
+        X += (p["r_x"] * X * (1 - X / K_x)
               - p["beta"] * Z * (X**2) / (coupling + X**2)
               - p["cV"] * X * Y
               + p["tau_yx"] * Y - p["tau_xy"] * X  
