@@ -18,12 +18,14 @@ config.num_envs_per_worker=20
 config = config.resources(num_gpus=torch.cuda.device_count())
 config.framework_str="torch"
 config.create_env_on_local_worker = True
-agent = config.build(env="fish_tipping")
+config.env="fish_tipping"
+config.env_config["training"] = False
+agent = config.build()
 
-iterations = 150
+iterations = 400
 checkpoint = ("cache/checkpoint_000{}".format(iterations))
 
-#if not os.path.exists(checkpoint): # train only if no trained agent saved
+if not os.path.exists(checkpoint): # train only if no trained agent saved
   for _ in range(iterations):
     print(f"iteration {_}", end = "\r")
     agent.train()
@@ -60,16 +62,17 @@ import plotnine
 from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
 ## Timeseries
 df = pd.read_csv(f"data/PPO{iterations}.csv.xz")
-df2 = (df
-       .melt(id_vars=["t", "action", "reward", "rep"])
+df2 = (df[df.rep == 3.0]
+       .melt(id_vars=["t",  "reward", "rep"])
        .groupby(['t', "variable"], as_index=False)
        .agg({'reward': 'mean',
              'value': 'mean',
-             'action': 'mean'})) 
+             #'action': 'mean'
+             })) 
 ggplot(df2, aes("t", "value", color="variable")) + geom_line()
 
 ## summary stats
-reward = df[df.t == max(df2.t)].reward
+reward = df[df.t == max(df.t)].reward
 reward.mean()
 np.sqrt(reward.var())
 
@@ -78,6 +81,7 @@ policy_df = []
 states = np.linspace(-1,0.5,101)
 for rep in range(10):
   obs, _ = env.reset()
+  #obs[2] += .05 * rep
   for state in states:
       obs[0] = state
       action = agent.compute_single_action(obs)

@@ -25,7 +25,8 @@ class three_sp(gym.Env):
          "alpha": np.float32(0.3),
          "sigma_x": np.float32(0.1),
          "sigma_y": np.float32(0.05),
-         "sigma_z": np.float32(0.05)
+         "sigma_z": np.float32(0.05),
+         "cost": np.float32(0.01)
         }
         initial_pop = np.array([0.8396102377828771, 
                                 0.05489978383850558,
@@ -87,7 +88,9 @@ class three_sp(gym.Env):
     def harvest(self, pop, action): 
         harvest = action * pop[0]
         pop[0] = pop[0] - harvest[0]
-        return pop, harvest[0]
+        
+        reward = np.max(harvest[0],0) - self.parameters["cost"] * action
+        return pop, np.float32(reward[0])
       
     def population_growth(self, pop):
         X, Y, Z = pop[0], pop[1], pop[2]
@@ -117,7 +120,7 @@ class three_sp(gym.Env):
         return(pop)
 
     def observation(self): # perfectly observed case
-        return(self.state)
+        return self.state
     
     # inverse of self.population()
     def update_state(self, pop):
@@ -127,14 +130,15 @@ class three_sp(gym.Env):
           2 * pop[1] / self.bound - 1,
           2 * pop[2] / self.bound - 1],
           dtype=np.float32)
-        return(self.state)
+        return self.state
     
     def population(self):
-        return np.array(
+        pop = np.array(
           [(self.state[0] + 1) * self.bound / 2,
            (self.state[1] + 1) * self.bound / 2,
            (self.state[2] + 1) * self.bound / 2],
            dtype=np.float32)
+        return np.clip(pop, 0, np.Inf)
     
     
     
