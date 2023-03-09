@@ -20,7 +20,7 @@ class three_sp(gym.Env):
          "tau_yx": np.float32(0),
          "tau_xy": np.float32(0),
          "cV": np.float32(0.5), 
-         "f": np.float32(0.5), 
+         "f": np.float32(0.25), 
          "dH": np.float32(0.45),
          "alpha": np.float32(0.3),
          "sigma_x": np.float32(0.1),
@@ -96,7 +96,7 @@ class three_sp(gym.Env):
         X, Y, Z = pop[0], pop[1], pop[2]
         p = self.parameters
         
-        coupling = p["v0"]**2 + 0.02 * np.sin(2 * np.pi * self.timestep / 60)
+        coupling = p["v0"]**2 #+ 0.02 * np.sin(2 * np.pi * self.timestep / 60)
         K_x = p["K_x"] # + 0.01 * np.sin(2 * np.pi * self.timestep / 30)
 
         X += (p["r_x"] * X * (1 - X / K_x)
@@ -112,9 +112,18 @@ class three_sp(gym.Env):
               - p["tau_yx"] * Y + p["tau_xy"] * X  
               + p["sigma_y"] * Y * np.random.normal()
              )
-             
-        Z = Z + p["alpha"] * (Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
-                              + p["sigma_z"] * Z  * np.random.normal())
+
+        Z = Z + p["alpha"] * (
+                              Z * (p["f"] * ( 
+                                             X**2 / (coupling + X**2) 
+                                             + p["D"] * Y**2 / (coupling + Y**2)
+                                             ) - p["dH"]) 
+                              + p["sigma_z"] * Z  * np.random.normal()
+                             )        
+        
+        # consider adding the handling-time component here too instead of these   
+        #Z = Z + p["alpha"] * (Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+        #                      + p["sigma_z"] * Z  * np.random.normal())
                               
         pop = np.array([X, Y, Z], dtype=np.float32)
         return(pop)
