@@ -1,4 +1,4 @@
-from env import fish_tipping
+from envs import fish_tipping
 
 import gym
 import pandas as pd
