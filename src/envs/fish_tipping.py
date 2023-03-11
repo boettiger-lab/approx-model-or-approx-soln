@@ -5,6 +5,42 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 
+def default_population_growth(pop, parameters):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+    
+    coupling = p["v0"]**2 #+ 0.02 * np.sin(2 * np.pi * self.timestep / 60)
+    K_x = p["K_x"] # + 0.01 * np.sin(2 * np.pi * self.timestep / 30)
+
+    pop[0] += (p["r_x"] * X * (1 - X / K_x)
+          - p["beta"] * Z * (X**2) / (coupling + X**2)
+          - p["cV"] * X * Y
+          + p["tau_yx"] * Y - p["tau_xy"] * X  
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"] * p["beta"] * Z * (Y**2) / (coupling + Y**2)
+          - p["cV"] * X * Y
+          - p["tau_yx"] * Y + p["tau_xy"] * X  
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+
+    pop[2] = Z + p["alpha"] * (
+                          Z * (p["f"] * ( 
+                                         X**2 / (coupling + X**2) 
+                                         + p["D"] * Y**2 / (coupling + Y**2)
+                                         ) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )        
+    
+    # consider adding the handling-time component here too instead of these   
+    #Z = Z + p["alpha"] * (Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+    #                      + p["sigma_z"] * Z  * np.random.normal())
+                          
+    pop = pop.astype(np.float32)
+    return(pop)
+
 class three_sp(gym.Env):
     """A 3-species ecosystem model"""
     def __init__(self, config=None):
@@ -39,10 +75,10 @@ class three_sp(gym.Env):
         self.training = config.get("training", True)
         self.initial_pop = config.get("initial_pop", initial_pop)
         self.parameters = config.get("parameters", parameters)
-        self.growth_fn = config.get("growth_fn", self.population_growth)
+        self.growth_fn = config.get("growth_fn", default_population_growth)
         self.cost = config.get("cost", np.float32(0.01))
         
-        self.bound = 2 * self.parameters["K_x"]
+        self.bound = 2 * self.parameters.get("K_x", 10)
         
         self.action_space = spaces.Box(
             np.array([0], dtype=np.float32),
@@ -70,7 +106,7 @@ class three_sp(gym.Env):
         
         # harvest and recruitment. 
         pop, reward = self.harvest(pop, action)
-        pop = self.growth_fn(pop) # wrapper around self.population_growth that allows customization of dynamics.
+        pop = self.growth_fn(pop, self.parameters) # wrapper around self.population_growth that allows customization of dynamics.
         
         self.timestep += 1
         terminated = bool(self.timestep > self.Tmax)
@@ -93,41 +129,6 @@ class three_sp(gym.Env):
         reward = np.max(harvest[0],0) - self.cost * action
         return pop, np.float32(reward[0])
       
-    def population_growth(self, pop):
-        X, Y, Z = pop[0], pop[1], pop[2]
-        p = self.parameters
-        
-        coupling = p["v0"]**2 #+ 0.02 * np.sin(2 * np.pi * self.timestep / 60)
-        K_x = p["K_x"] # + 0.01 * np.sin(2 * np.pi * self.timestep / 30)
-
-        pop[0] += (p["r_x"] * X * (1 - X / K_x)
-              - p["beta"] * Z * (X**2) / (coupling + X**2)
-              - p["cV"] * X * Y
-              + p["tau_yx"] * Y - p["tau_xy"] * X  
-              + p["sigma_x"] * X * np.random.normal()
-             )
-        
-        pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
-              - p["D"] * p["beta"] * Z * (Y**2) / (coupling + Y**2)
-              - p["cV"] * X * Y
-              - p["tau_yx"] * Y + p["tau_xy"] * X  
-              + p["sigma_y"] * Y * np.random.normal()
-             )
-
-        pop[2] = Z + p["alpha"] * (
-                              Z * (p["f"] * ( 
-                                             X**2 / (coupling + X**2) 
-                                             + p["D"] * Y**2 / (coupling + Y**2)
-                                             ) - p["dH"]) 
-                              + p["sigma_z"] * Z  * np.random.normal()
-                             )        
-        
-        # consider adding the handling-time component here too instead of these   
-        #Z = Z + p["alpha"] * (Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
-        #                      + p["sigma_z"] * Z  * np.random.normal())
-                              
-        pop = pop.astype(np.float32)
-        return(pop)
 
     def observation(self): # perfectly observed case
         return self.state
