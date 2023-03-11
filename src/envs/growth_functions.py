@@ -17,9 +17,9 @@ def rockPaperScissors(pop, p):
 	"""
 	X, Y, Z = pop[0], pop[1], pop[2]
 
-	pop[0] += p["X"] * X + p["XY"] * X * Y - p["XZ"] * X * Z
-	pop[1] += p["Y"] * Y + p["YZ"] * Y * Z - p["YX"] * Y * X
-	pop[2] += p["Z"] * Z + p["ZX"] * Z * X - p["ZY"] * Z * Y
+	pop[0] += - p["X"] * X + p["XY"] * X * Y - p["XZ"] * X * Z
+	pop[1] += - p["Y"] * Y + p["YZ"] * Y * Z - p["YX"] * Y * X
+	pop[2] += - p["Z"] * Z + p["ZX"] * Z * X - p["ZY"] * Z * Y
 
 	return pop
 
@@ -31,9 +31,9 @@ def params_rockPaperScissors(params = None):
 		""" for flexibility """
 		return params
 	params = {
-		"X": np.float32(1),
-		"Y": np.float32(1),
-		"Z": np.float32(1),
+		"X": np.float32(0.),
+		"Y": np.float32(0.),
+		"Z": np.float32(0.),
 		"XY": np.float32(0.5),
 		"XZ": np.float32(0.5),
 		"YX": np.float32(0.5),

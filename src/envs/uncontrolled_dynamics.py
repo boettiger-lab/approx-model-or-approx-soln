@@ -7,8 +7,9 @@ import numpy as np
 from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
 
 params = params_rockPaperScissors()
+initial_pop = np.array([0.5,0.5,0.5], dtype=np.float32)
 env = fish_tipping.three_sp(
-		config={"growth_fn": rockPaperScissors, "parameters": params},
+		config={"growth_fn": rockPaperScissors, "parameters": params, "initial_pop": initial_pop},
 	)
 
 def timeEvolution(env, T=100):
@@ -21,4 +22,4 @@ def timeEvolution(env, T=100):
 	return path_df
 
 path_df = timeEvolution(env)
-print(path_df.head())
+print(path_df)
