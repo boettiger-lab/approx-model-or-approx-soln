@@ -25,8 +25,7 @@ class three_sp(gym.Env):
          "alpha": np.float32(0.3),
          "sigma_x": np.float32(0.1),
          "sigma_y": np.float32(0.05),
-         "sigma_z": np.float32(0.05),
-         "cost": np.float32(0.01)
+         "sigma_z": np.float32(0.05)
         }
         initial_pop = np.array([0.8396102377828771, 
                                 0.05489978383850558,
@@ -40,6 +39,8 @@ class three_sp(gym.Env):
         self.training = config.get("training", True)
         self.initial_pop = config.get("initial_pop", initial_pop)
         self.parameters = config.get("parameters", parameters)
+        self.growth_fn = config.get("growth_fn", self.population_growth)
+        self.cost = config.get("cost", np.float32(0.01))
         
         self.bound = 2 * self.parameters["K_x"]
         
@@ -67,9 +68,9 @@ class three_sp(gym.Env):
         action = np.clip(action, [0], [1])
         pop = self.population() # current state in natural units
         
-        # harvest and recruitment
+        # harvest and recruitment. 
         pop, reward = self.harvest(pop, action)
-        pop = self.population_growth(pop)
+        pop = self.growth_fn(pop) # wrapper around self.population_growth that allows customization of dynamics.
         
         self.timestep += 1
         terminated = bool(self.timestep > self.Tmax)
@@ -89,7 +90,7 @@ class three_sp(gym.Env):
         harvest = action * pop[0]
         pop[0] = pop[0] - harvest[0]
         
-        reward = np.max(harvest[0],0) - self.parameters["cost"] * action
+        reward = np.max(harvest[0],0) - self.cost * action
         return pop, np.float32(reward[0])
       
     def population_growth(self, pop):
