@@ -1,5 +1,5 @@
 
-from src.envs import fish_tipping
+from envs import fish_tipping
 from ray.rllib.algorithms import ppo
 from ray.tune import register_env
 import os
