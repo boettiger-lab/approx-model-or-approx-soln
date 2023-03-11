@@ -26,11 +26,8 @@ def default_population_growth(pop, parameters):
           + p["sigma_y"] * Y * np.random.normal()
          )
 
-    pop[2] = Z + p["alpha"] * (
-                          Z * (p["f"] * ( 
-                                         X**2 / (coupling + X**2) 
-                                         + p["D"] * Y**2 / (coupling + Y**2)
-                                         ) - p["dH"]) 
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
                           + p["sigma_z"] * Z  * np.random.normal()
                          )        
     
