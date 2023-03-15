@@ -17,9 +17,9 @@ def rockPaperScissors(pop, p):
 	"""
 	X, Y, Z = pop[0], pop[1], pop[2]
 
-	pop[0] += - p["X"] * X + p["XY"] * X * Y - p["XZ"] * X * Z
-	pop[1] += - p["Y"] * Y + p["YZ"] * Y * Z - p["YX"] * Y * X
-	pop[2] += - p["Z"] * Z + p["ZX"] * Z * X - p["ZY"] * Z * Y
+	pop[0] += p["X"] * X * (1 - X) + p["XY"] * X * Y - p["XZ"] * X * Z
+	pop[1] += p["Y"] * Y * (1 - Y) + p["YZ"] * Y * Z - p["YX"] * Y * X
+	pop[2] += p["Z"] * Z * (1 - Z)+ p["ZX"] * Z * X - p["ZY"] * Z * Y
 
 	return pop
 
@@ -30,16 +30,17 @@ def params_rockPaperScissors(params = None):
 	if params is not None:
 		""" for flexibility """
 		return params
+	c = 0.3
 	params = {
-		"X": np.float32(0.),
-		"Y": np.float32(0.),
-		"Z": np.float32(0.),
-		"XY": np.float32(0.5),
-		"XZ": np.float32(0.5),
-		"YX": np.float32(0.5),
-		"YZ": np.float32(0.5),
-		"ZX": np.float32(0.5),
-		"ZY": np.float32(0.5),
+		"X": np.float32(c),
+		"Y": np.float32(c),
+		"Z": np.float32(c),
+		"XY": np.float32(c),
+		"XZ": np.float32(c),
+		"YX": np.float32(c),
+		"YZ": np.float32(c),
+		"ZX": np.float32(c),
+		"ZY": np.float32(c),
 	}
 	return params
 
