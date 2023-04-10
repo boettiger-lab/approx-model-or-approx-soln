@@ -115,6 +115,34 @@ def params_threeSpHolling3(params = None):
 	return params
 
 
+def K_fluctuation_growth(pop, parameters):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+
+
+    
+    coupling = p["v0"]**2 #+ 0.02 * np.sin(2 * np.pi * self.timestep / 60)
+    K_x = p["K_x"] + 0.1 * p["K_x"] * np.sin(2 * np.pi * self.timestep / 30)
+
+    pop[0] += (p["r_x"] * X * (1 - X / K_x)
+          - p["beta"] * Z * (X**2) / (coupling + X**2)
+          - p["cV"] * X * Y
+          + p["tau_yx"] * Y - p["tau_xy"] * X  
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"] * p["beta"] * Z * (Y**2) / (coupling + Y**2)
+          - p["cV"] * X * Y
+          - p["tau_yx"] * Y + p["tau_xy"] * X  
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )  
+
 
 
 

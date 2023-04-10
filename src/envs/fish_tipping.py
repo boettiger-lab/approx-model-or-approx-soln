@@ -103,7 +103,7 @@ class three_sp(gym.Env):
         
         # harvest and recruitment. 
         pop, reward = self.harvest(pop, action)
-        pop = self.growth_fn(pop, self.parameters) # wrapper around self.population_growth that allows customization of dynamics.
+        pop = self.growth_fn(pop, self.parameters) 
         
         self.timestep += 1
         terminated = bool(self.timestep > self.Tmax)
