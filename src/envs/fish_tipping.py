@@ -4,6 +4,26 @@
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
+from growth_functions import threeSpHolling3, K_fluctuation_growth, coupling_fluctuation_growth, competition_fluctuation_growth
+
+_DEFAULT_PARAMETERS = {
+         "r_x": np.float32(1.0),
+         "r_y": np.float32(1.0),
+         "K_x": np.float32(1.0),
+         "K_y": np.float32(1.0),
+         "beta": np.float32(0.3),
+         "v0":  np.float32(0.1),
+         "D": np.float32(1.1),
+         "tau_yx": np.float32(0),
+         "tau_xy": np.float32(0),
+         "cV": np.float32(0.5), 
+         "f": np.float32(0.25), 
+         "dH": np.float32(0.45),
+         "alpha": np.float32(0.3),
+         "sigma_x": np.float32(0.1),
+         "sigma_y": np.float32(0.05),
+         "sigma_z": np.float32(0.05)
+        }
 
 def default_population_growth(pop, parameters):
     X, Y, Z = pop[0], pop[1], pop[2]
@@ -41,39 +61,24 @@ def default_population_growth(pop, parameters):
 class three_sp(gym.Env):
     """A 3-species ecosystem model"""
     def __init__(self, config=None):
-        config = config or {}
-        parameters = {
-         "r_x": np.float32(1.0),
-         "r_y": np.float32(1.0),
-         "K_x": np.float32(1.0),
-         "K_y": np.float32(1.0),
-         "beta": np.float32(0.3),
-         "v0":  np.float32(0.1),
-         "D": np.float32(1.1),
-         "tau_yx": np.float32(0),
-         "tau_xy": np.float32(0),
-         "cV": np.float32(0.5), 
-         "f": np.float32(0.25), 
-         "dH": np.float32(0.45),
-         "alpha": np.float32(0.3),
-         "sigma_x": np.float32(0.1),
-         "sigma_y": np.float32(0.05),
-         "sigma_z": np.float32(0.05)
-        }
-        initial_pop = np.array([0.8396102377828771, 
-                                0.05489978383850558,
-                                0.3773367609828674],
-                                dtype=np.float32)
+        config = config or {"parameters": _DEFAULT_PARAMETERS},
+        # initial_pop = np.array([0.8396102377828771, 
+        #                         0.05489978383850558,
+        #                         0.3773367609828674],
+        #                         dtype=np.float32)
+        initial_pop = np.array([0.85, 0.05, 0.35], dtype = np.float32)
                                 
         ## these parameters may be specified in config                                  
         self.Tmax = config.get("Tmax", 200)
-        self.threshold = config.get("threshold", np.float32(1e-4))
+        self.threshold = config.get("threshold", np.float32(5e-3))
         self.init_sigma = config.get("init_sigma", np.float32(1e-3))
         self.training = config.get("training", True)
         self.initial_pop = config.get("initial_pop", initial_pop)
         self.parameters = config.get("parameters", parameters)
         self.growth_fn = config.get("growth_fn", default_population_growth)
         self.cost = config.get("cost", np.float32(0.01))
+        
+        # Growth function:
         
         self.bound = 2 * self.parameters.get("K_x", 10)
         

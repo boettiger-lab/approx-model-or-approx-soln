@@ -1,5 +1,11 @@
-
 from envs import fish_tipping
+from envs.growth_functions import (
+  threeSpHolling3, 
+  params_threeSpHolling3
+  K_fluctuation_growth, 
+  coupling_fluctuation_growth, 
+  competition_fluctuation_growth,
+)
 from ray.rllib.algorithms import ppo
 from ray.tune import register_env
 import os
@@ -18,8 +24,11 @@ config.num_envs_per_worker=20
 config = config.resources(num_gpus=torch.cuda.device_count())
 config.framework_str="torch"
 config.create_env_on_local_worker = True
+#
 config.env="fish_tipping"
-config.env_config["training"] = False
+config.env_config["growth_fn"] = threeSpHolling3 # comment out to use default growth_fn
+config.env_config["parameters"] = params_threeSpHolling3() # comment out to use default parameters
+#
 agent = config.build()
 
 iterations = 400
