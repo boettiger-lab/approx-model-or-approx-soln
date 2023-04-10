@@ -150,8 +150,7 @@ def coupling_fluctuation_growth(pop, parameters):
 
 
     
-    coupling = p["v0"]**2 + 0.1 * (p["v0"]**2) * np.sin(2 * np.pi * self.timestep / 60)
-    # K_x = p["K_x"] + 0.1 * p["K_x"] * np.sin(2 * np.pi * self.timestep / 30)
+    coupling = p["v0"]**2 + 0.1 * (p["v0"]**2) * np.sin(2 * np.pi * self.timestep / 30)
 
     pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
           - p["beta"] * Z * (X**2) / (coupling + X**2)
@@ -163,6 +162,32 @@ def coupling_fluctuation_growth(pop, parameters):
     pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
           - p["D"] * p["beta"] * Z * (Y**2) / (coupling + Y**2)
           - p["cV"] * X * Y
+          - p["tau_yx"] * Y + p["tau_xy"] * X  
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )  
+
+def competition_fluctuation_growth(pop, parameters):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+
+
+    competition = p["cV"] + p["cV"] * 0.1 * np.sin(2 * np.pi * self.timestep / 30)
+
+    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (p["v0"]**2  + X**2)
+          - pcompetition * X * Y
+          + p["tau_yx"] * Y - p["tau_xy"] * X  
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2  + Y**2)
+          - competition * X * Y
           - p["tau_yx"] * Y + p["tau_xy"] * X  
           + p["sigma_y"] * Y * np.random.normal()
          )
