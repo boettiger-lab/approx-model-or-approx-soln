@@ -1,11 +1,5 @@
 from envs import fish_tipping
-from envs.growth_functions import (
-  threeSpHolling3, 
-  params_threeSpHolling3
-  K_fluctuation_growth, 
-  coupling_fluctuation_growth, 
-  competition_fluctuation_growth,
-)
+from envs import growth_functions
 from ray.rllib.algorithms import ppo
 from ray.tune import register_env
 import os
@@ -26,8 +20,10 @@ config.framework_str="torch"
 config.create_env_on_local_worker = True
 #
 config.env="fish_tipping"
-config.env_config["growth_fn"] = threeSpHolling3 # comment out to use default growth_fn
-config.env_config["parameters"] = params_threeSpHolling3() # comment out to use default parameters
+config.env_config["growth_fn"] = growth_functions.K_fluctuation_growth # comment out to use default growth_fn
+config.env_config["fluctuating"] = True
+_DATACODE = "KFLUC_data"
+# config.env_config["parameters"] = growth_functions.params_threeSpHolling3() # comment out to use _DEFALUT_PARAMETERS in fish_tipping
 #
 agent = config.build()
 
@@ -64,7 +60,7 @@ for rep in range(50):
     
 cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
 df = pd.DataFrame(df, columns = cols)
-df.to_csv(f"data/PPO{iterations}.csv.xz", index = False)
+df.to_csv(f"{_DATACODE}/PPO{iterations}.csv.xz", index = False)
 
 ## Plots ## 
 import plotnine

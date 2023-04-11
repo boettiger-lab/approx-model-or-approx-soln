@@ -44,6 +44,7 @@ def params_rockPaperScissors(params = None):
 	}
 	return params
 
+""" CODE: HOLL3 """
 def threeSpHolling3(pop, p):
 	"""
 	in: 
@@ -114,15 +115,15 @@ def params_threeSpHolling3(params = None):
 	}
 	return params
 
-
-def K_fluctuation_growth(pop, parameters):
+""" CODE: KFLUC """
+def K_fluctuation_growth(pop, parameters, t):
     X, Y, Z = pop[0], pop[1], pop[2]
     p = parameters
 
 
     
     coupling = p["v0"]**2 #+ 0.02 * np.sin(2 * np.pi * self.timestep / 60)
-    K_x = p["K_x"] + 0.1 * p["K_x"] * np.sin(2 * np.pi * self.timestep / 30)
+    K_x = p["K_x"] + 0.1 * p["K_x"] * np.sin(2 * np.pi * t / 30)
 
     pop[0] += (p["r_x"] * X * (1 - X / K_x)
           - p["beta"] * Z * (X**2) / (coupling + X**2)
@@ -142,15 +143,16 @@ def K_fluctuation_growth(pop, parameters):
                           Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
                           + p["sigma_z"] * Z  * np.random.normal()
                          )  
+    return pop.astype(np.float32)
 
-
-def coupling_fluctuation_growth(pop, parameters):
+""" CODE: COUPLFLUC """
+def coupling_fluctuation_growth(pop, parameters, t):
     X, Y, Z = pop[0], pop[1], pop[2]
     p = parameters
 
 
     
-    coupling = p["v0"]**2 + 0.1 * (p["v0"]**2) * np.sin(2 * np.pi * self.timestep / 30)
+    coupling = p["v0"]**2 + 0.1 * (p["v0"]**2) * np.sin(2 * np.pi * t / 30)
 
     pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
           - p["beta"] * Z * (X**2) / (coupling + X**2)
@@ -170,13 +172,15 @@ def coupling_fluctuation_growth(pop, parameters):
                           Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
                           + p["sigma_z"] * Z  * np.random.normal()
                          )  
+    return pop.astype(np.float32)
 
-def competition_fluctuation_growth(pop, parameters):
+""" CODE: COMPFLUC """
+def competition_fluctuation_growth(pop, parameters, t):
     X, Y, Z = pop[0], pop[1], pop[2]
     p = parameters
 
 
-    competition = p["cV"] + p["cV"] * 0.1 * np.sin(2 * np.pi * self.timestep / 30)
+    competition = p["cV"] + p["cV"] * 0.1 * np.sin(2 * np.pi * t / 30)
 
     pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
           - p["beta"] * Z * (X**2) / (p["v0"]**2  + X**2)
@@ -196,7 +200,7 @@ def competition_fluctuation_growth(pop, parameters):
                           Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
                           + p["sigma_z"] * Z  * np.random.normal()
                          )  
-
+    return pop.astype(np.float32)
 
 
 

@@ -4,7 +4,6 @@
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
-from growth_functions import threeSpHolling3, K_fluctuation_growth, coupling_fluctuation_growth, competition_fluctuation_growth
 
 _DEFAULT_PARAMETERS = {
          "r_x": np.float32(1.0),
@@ -61,12 +60,15 @@ def default_population_growth(pop, parameters):
 class three_sp(gym.Env):
     """A 3-species ecosystem model"""
     def __init__(self, config=None):
-        config = config or {"parameters": _DEFAULT_PARAMETERS},
+        config = config or {},
         # initial_pop = np.array([0.8396102377828771, 
         #                         0.05489978383850558,
         #                         0.3773367609828674],
         #                         dtype=np.float32)
         initial_pop = np.array([0.85, 0.05, 0.35], dtype = np.float32)
+        
+        ## kink due to initializing the env through PPOConfig().build()
+        config = config[0]
                                 
         ## these parameters may be specified in config                                  
         self.Tmax = config.get("Tmax", 200)
@@ -74,13 +76,14 @@ class three_sp(gym.Env):
         self.init_sigma = config.get("init_sigma", np.float32(1e-3))
         self.training = config.get("training", True)
         self.initial_pop = config.get("initial_pop", initial_pop)
-        self.parameters = config.get("parameters", parameters)
+        self.parameters = config.get("parameters", _DEFAULT_PARAMETERS)
         self.growth_fn = config.get("growth_fn", default_population_growth)
+        self.fluctuating = config.get("fluctuating", False) # do parameters fluctuate with time?
         self.cost = config.get("cost", np.float32(0.01))
         
         # Growth function:
         
-        self.bound = 2 * self.parameters.get("K_x", 10)
+        self.bound = 10 * self.parameters.get("K_x", 1)
         
         self.action_space = spaces.Box(
             np.array([0], dtype=np.float32),
@@ -108,7 +111,10 @@ class three_sp(gym.Env):
         
         # harvest and recruitment. 
         pop, reward = self.harvest(pop, action)
-        pop = self.growth_fn(pop, self.parameters) 
+        if self.fluctuating:
+          pop = self.growth_fn(pop, self.parameters, self.timestep)
+        else:
+          pop = self.growth_fn(pop, self.parameters)
         
         self.timestep += 1
         terminated = bool(self.timestep > self.Tmax)
