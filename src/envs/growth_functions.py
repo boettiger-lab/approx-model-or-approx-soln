@@ -5,6 +5,10 @@ import numpy as np
 # 
 # populations: X, Y, Z
 
+""" for fluctuating functions: """
+_PERIOD = 50
+_AMPLITUDE = 0.1
+
 def rockPaperScissors(pop, p):
 	"""
 	in: 
@@ -106,7 +110,7 @@ def params_threeSpHolling3(params = None):
 		"tau_xy": np.float32(0),
 		"cV": np.float32(0.5), 
 		"f": np.float32(0.25), 
-		"dH": np.float32(0.45),
+		"dH": np.float32(0.2),
 		"alpha": np.float32(0.3),
 		"sigma_x": np.float32(0.1),
 		"sigma_y": np.float32(0.05),
@@ -123,7 +127,7 @@ def K_fluctuation_growth(pop, parameters, t):
 
     
     coupling = p["v0"]**2 #+ 0.02 * np.sin(2 * np.pi * self.timestep / 60)
-    K_x = p["K_x"] + 0.1 * p["K_x"] * np.sin(2 * np.pi * t / 30)
+    K_x = p["K_x"] + _AMPLITUDE * p["K_x"] * np.sin(2 * np.pi * t / _PERIOD)
 
     pop[0] += (p["r_x"] * X * (1 - X / K_x)
           - p["beta"] * Z * (X**2) / (coupling + X**2)
@@ -152,7 +156,7 @@ def coupling_fluctuation_growth(pop, parameters, t):
 
 
     
-    coupling = p["v0"]**2 + 0.1 * (p["v0"]**2) * np.sin(2 * np.pi * t / 30)
+    coupling = p["v0"]**2 + _AMPLITUDE * (p["v0"]**2) * np.sin(2 * np.pi * t / _PERIOD)
 
     pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
           - p["beta"] * Z * (X**2) / (coupling + X**2)
@@ -180,11 +184,11 @@ def competition_fluctuation_growth(pop, parameters, t):
     p = parameters
 
 
-    competition = p["cV"] + p["cV"] * 0.1 * np.sin(2 * np.pi * t / 30)
+    competition = p["cV"] + p["cV"] * _AMPLITUDE * np.sin(2 * np.pi * t / _PERIOD)
 
     pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
           - p["beta"] * Z * (X**2) / (p["v0"]**2  + X**2)
-          - pcompetition * X * Y
+          - competition * X * Y
           + p["tau_yx"] * Y - p["tau_xy"] * X  
           + p["sigma_x"] * X * np.random.normal()
          )
@@ -202,7 +206,46 @@ def competition_fluctuation_growth(pop, parameters, t):
                          )  
     return pop.astype(np.float32)
 
+""" CODE: ZABIOTIC """
+def z_abiotic_growth(pop, parameters, t):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
 
+    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (p["v0"]**2  + X**2)
+          - p["cV"] * X * Y
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2  + Y**2)
+          - p["cV"] * X * Y
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+    
+    pop[2] += 0.02 * Z * np.cos( 2 * np.pi * t / 50)
+    
+    return pop.astype(np.float32)
 
+""" CODE: YABIOTIC """
+def y_abiotic_growth(pop, parameters, t):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    Y_center = 0.3
+    p = parameters
+
+    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (p["v0"]**2  + X**2)
+          - p["cV"] * X * Y
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] = Y_center + 0.2 * Y_center * np.sin(2 * np.pi * t / 50)
+    
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )   
+    
+    return pop.astype(np.float32)
 
 
