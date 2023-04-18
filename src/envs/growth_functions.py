@@ -239,7 +239,7 @@ def y_abiotic_growth(pop, parameters, t):
           + p["sigma_x"] * X * np.random.normal()
          )
     
-    pop[1] = Y_center + 0.6 * Y_center * np.sin(2 * np.pi * t / 50)
+    pop[1] = Y_center + 1 * Y_center * np.sin(2 * np.pi * t / 50)
     
     pop[2] += p["alpha"] * (
                           Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
