@@ -26,6 +26,7 @@ _DEFAULT_PARAMS = {
   "sigma_y": np.float32(0.05),
   "sigma_z": np.float32(0.05)
 }
+
 _DATACODE = "TwoFisheriesStatic"
 _PATH = f"../data/{_DATACODE}"
 _FILENAME = f"PPO{iterations}"
@@ -53,8 +54,8 @@ iterations = 250
 checkpoint = f"cache/checkpoint_{_DATACODE}_iter{iterations}"
 
 for i in range(iterations):
-    print(f"iteration nr. {i}", end="\r")
-    agent.train()
+  print(f"iteration nr. {i}", end="\r")
+  agent.train()
 
 checkpoint = agent.save(f"cache/{checkpoint}")
 
