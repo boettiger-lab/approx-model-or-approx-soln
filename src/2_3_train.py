@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import torch
 
+## GLOBALS:
 _DEFAULT_PARAMS = {
   "r_x": np.float32(1.0),
   "r_y": np.float32(1.0),
@@ -25,6 +26,11 @@ _DEFAULT_PARAMS = {
   "sigma_y": np.float32(0.05),
   "sigma_z": np.float32(0.05)
 }
+_DATACODE = "TwoFisheriesStatic"
+_PATH = f"../data/{_DATACODE}"
+_FILENAME = f"PPO{iterations}"
+
+## SETTING UP RL ALGO
 
 register_env("two_three_fishing", two_three_fishing.twoThreeFishing)
 
@@ -40,3 +46,21 @@ config.env_config["parameters"] = _DEFAULT_PARAMS
 config.env_config["growth_fn"] = growth_functions.default_population_growth
 #
 agent = config.build()
+#
+
+## TRAIN
+iterations = 250
+checkpoint = f"cache/checkpoint_{_DATACODE}_iter{iterations}"
+
+for i in range(iterations):
+    print(f"iteration nr. {i}", end="\r")
+    agent.train()
+
+checkpoint = agent.save(f"cache/{checkpoint}")
+
+## POST TRAINING
+stats = agent.evaluate()
+
+config = agent.evaluation_config.env_config
+config.update({'seed': 42})
+env = agent.env_creator(config)
