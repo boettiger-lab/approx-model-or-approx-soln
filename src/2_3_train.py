@@ -60,8 +60,16 @@ for i in range(iterations):
 checkpoint = agent.save(f"cache/{checkpoint}")
 
 ## POST TRAINING
+from eval_util import generate_episodes, episode_plots, state_policy_plot
 stats = agent.evaluate()
 
 config = agent.evaluation_config.env_config
 config.update({'seed': 42})
 env = agent.env_creator(config)
+
+episodes_df = generate_episodes(agent, env, reps = 50)
+episodes_df.to_csv(f"{_PATH}/{_FILENAME}.csv.xz", index = False)
+
+episode_plots(episodes_df[episodes_df <= 10], path_and_filename = f"{_PATH}/{_FILENAME}-eps.png")
+state_policy_plot(agent, path_and_filename= f"{_PATH}/{_FILENAME}-pol.png")
+
