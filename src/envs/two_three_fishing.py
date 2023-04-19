@@ -8,6 +8,7 @@ class twoThreeFishing(gym.Env):
   """3 species, 2 are fished"""
   def __init__(self, config=None):
     config = config or {}
+    config = config[0]
     #
     self.parameters = config.get("parameters", None)
     self.growth_fn = config.get(

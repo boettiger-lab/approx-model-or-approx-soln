@@ -1,4 +1,4 @@
-from envs import 2_3_fishing
+from envs import two_three_fishing
 from envs import growth_functions
 from ray.rllib.algorithms import ppo
 from ray.tune import register_env
@@ -26,7 +26,7 @@ _DEFAULT_PARAMS = {
   "sigma_z": np.float32(0.05)
 }
 
-register_env("2_3_fishing", 2_3_fishing.twoThreeFishing)
+register_env("two_three_fishing", two_three_fishing.twoThreeFishing)
 
 config = ppo.PPOConfig()
 config.training(vf_clip_param = 50.0)
@@ -34,7 +34,7 @@ config.num_envs_per_worker=20
 config = config.resources(num_gpus=torch.cuda.device_count())
 config.framework_str="torch"
 config.create_env_on_local_worker = True
-config.env="2_3_fishing"
+config.env="two_three_fishing"
 #
 config.env_config["parameters"] = _DEFAULT_PARAMS
 config.env_config["growth_fn"] = growth_functions.default_population_growth
