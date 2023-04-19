@@ -1,16 +1,25 @@
 import fish_tipping
-from growth_functions import rockPaperScissors, params_rockPaperScissors
+from growth_functions import (
+  rockPaperScissors, params_rockPaperScissors, threeSpHolling3, params_threeSpHolling3, K_fluctuation_growth,
+  coupling_fluctuation_growth, 
+  competition_fluctuation_growth,
+  z_abiotic_growth,
+)
 
-import gym
+import gymnasium as gym
 import pandas as pd
 import numpy as np
 from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
 
-params = params_rockPaperScissors()
-initial_pop = np.array([np.random.rand(), np.random.rand(), np.random.rand()], dtype=np.float32)
+# initial_pop = np.array([np.random.rand(), np.random.rand(), np.random.rand()], dtype=np.float32)
+initial_pop = np.array([0.8, 0.1, 0.4], dtype=np.float32)
 env = fish_tipping.three_sp(
-		config={"growth_fn": rockPaperScissors, "parameters": params, "initial_pop": initial_pop},
+		config={
+		  "growth_fn": z_abiotic_growth, 
+		  "initial_pop": initial_pop
+		  },
 	)
+env.fluctuating = True
 
 def timeEvolution(env, T=100):
 	path = np.empty((T, 4))

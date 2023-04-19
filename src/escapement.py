@@ -1,6 +1,6 @@
-from src.envs import fish_tipping
+from envs import fish_tipping, growth_functions
 
-import gym
+import gymnasium as gym
 import pandas as pd
 import numpy as np
 import ray
@@ -21,9 +21,16 @@ def simulate(env, escapement):
         break
   return(x)
 
-env = fish_tipping.three_sp()
+config = {}
+config["growth_fn"] = growth_functions.z_abiotic_growth
+config["fluctuating"] = True
+env = fish_tipping.three_sp(
+    config = config
+)
 env.training = False
 esc_choices = np.linspace(0,1,101)
+
+_DATACODE = "ZABIOTIC"
 
 # define parllel loop and execute
 parallel = [simulate.remote(env, i) for i in esc_choices]
@@ -46,6 +53,7 @@ tmp = (df[df.t == max(df.t)]
  .agg({'reward': 'mean'})
  )
 best = tmp[tmp.reward == tmp.reward.max()]
+print(best)
 
  
 ## Plot averages 
@@ -59,8 +67,10 @@ df4 = (df2[df2.escapement == best.escapement.values[0]]
              'value': 'mean',
              'escapement': 'mean',
              'effort': 'mean'})) 
-ggplot(df4, aes("t", "value", color="variable")) + geom_line()
-best
+opt_esc_plot = ggplot(df4, aes("t", "value", color="variable")) + geom_line()
+opt_esc_plot.save(path = f"../data/{_DATACODE}", filename = "opt_esc_plot500.png")
+
+#print(df2["escapement"][0:200])
 
 #ggplot(df4, aes("t", "reward", color="variable")) + geom_line()
 #ggplot(df4, aes("t", "effort", color="variable")) + geom_line()
