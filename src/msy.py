@@ -1,6 +1,6 @@
-from envs import fish_tipping
+from envs import fish_tipping, growth_functions
 
-import gym
+import gymnasium as gym
 import pandas as pd
 import numpy as np
 import ray
@@ -19,7 +19,15 @@ def simulate(env, action):
         break
   return(df)
 
-env = fish_tipping.three_sp()
+config = {}
+config["growth_fn"] = growth_functions.v0_drift_growth
+config["fluctuating"] = True
+env = fish_tipping.three_sp(
+    config = config
+)
+
+
+_DATACODE = "V0DRIFT"
 env.training = False
 actions = np.linspace(0,0.2,101)
 
@@ -29,11 +37,34 @@ df = ray.get(parallel)
 
 # convert to data.frame & write to csv
 cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
-df2 = pd.DataFrame(np.vstack(df), columns = cols)
+df = pd.DataFrame(np.vstack(df), columns = cols)
+
+df2 = (
+  df
+  .loc[df.t == df.t.max()]
+  .groupby(["action"])
+  .agg({"reward": "mean"})
+)
+print(df2)
+
+tmp = (df[df.t == max(df.t)]
+ .groupby('action', as_index=False)
+ .agg({'reward': 'mean'})
+ )
+best = tmp[tmp.reward == tmp.reward.max()]
+print(best)
 
 # kinda slow to compress
-df2.to_csv("data/msy.csv.xz", index=False)
+# df2.to_csv(f"../data/{_DATACODE}/msy.csv.xz", index=False)
 
+## Plot averages 
+from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
 
+df3 = (df[df.action == best.action.values[0]]
+       .melt(id_vars=["t", "action", "reward", "rep"])
+       )
+
+opt_msy_plot = ggplot(df3[df3.rep == 4.0], aes("t", "value", color="variable")) + geom_line()
+opt_msy_plot.save(path = f"../data/{_DATACODE}", filename = "opt_msy_plot.png")
 
 

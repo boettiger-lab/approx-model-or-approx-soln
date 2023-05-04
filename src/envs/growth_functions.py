@@ -39,6 +39,31 @@ def default_population_growth(pop, parameters):
   pop = pop.astype(np.float32)
   return(pop)
 
+""" DATACODE: KLIMIT """
+def K_limit_growth(pop, parameters):
+  X, Y, Z = pop[0], pop[1], pop[2]
+  p = parameters
+
+  pop[0] += (p["r_x"] * X * (1 - X /  (p["K_x"] - p["cV"] * Y))
+        - p["beta"] * Z * (X**2) / (p["v0"]**2 + X**2)
+        + p["tau_yx"] * Y - p["tau_xy"] * X  
+        + p["sigma_x"] * X * np.random.normal()
+       )
+    
+  pop[1] += (p["r_y"] * Y * (1 - Y /  (p["K_y"] - p["cV"] * X) )
+        - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2 + Y**2)
+        - p["tau_yx"] * Y + p["tau_xy"] * X  
+        + p["sigma_y"] * Y * np.random.normal()
+       )
+
+  pop[2] += p["alpha"] * (
+      Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+      + p["sigma_z"] * Z  * np.random.normal()
+    )
+                          
+  pop = pop.astype(np.float32)
+  return(pop)
+
 """ for fluctuating functions: """
 _PERIOD = 50
 _AMPLITUDE = 0.1
@@ -240,27 +265,6 @@ def competition_fluctuation_growth(pop, parameters, t):
                          )  
     return pop.astype(np.float32)
 
-""" CODE: ZABIOTIC """
-def z_abiotic_growth(pop, parameters, t):
-    X, Y, Z = pop[0], pop[1], pop[2]
-    p = parameters
-
-    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
-          - p["beta"] * Z * (X**2) / (p["v0"]**2  + X**2)
-          - p["cV"] * X * Y
-          + p["sigma_x"] * X * np.random.normal()
-         )
-    
-    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
-          - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2  + Y**2)
-          - p["cV"] * X * Y
-          + p["sigma_y"] * Y * np.random.normal()
-         )
-    
-    pop[2] += 0.02 * Z * np.cos( 2 * np.pi * t / 50)
-    
-    return pop.astype(np.float32)
-
 """ CODE: YABIOTIC """
 def y_abiotic_growth(pop, parameters, t):
     X, Y, Z = pop[0], pop[1], pop[2]
@@ -282,4 +286,199 @@ def y_abiotic_growth(pop, parameters, t):
     
     return pop.astype(np.float32)
 
+""" CODE: ZABIOTIC """
+def z_abiotic_growth(pop, parameters, t):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+
+    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (p["v0"]**2  + X**2)
+          - p["cV"] * X * Y
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2  + Y**2)
+          - p["cV"] * X * Y
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+    
+    pop[2] += 0.02 * Z * np.cos( 2 * np.pi * t / 50)
+    
+    return pop.astype(np.float32)
+
+""" CODE: DDRIFT"""
+def D_drift_growth(pop, parameters, t):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+    
+    D = (
+      p["D"] 
+      - t * abs(p["D"]-1)/100 
+      #+ np.random.normal(0,1) * 0.01 * abs(p["D"]-1)
+    )
+
+    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (p["v0"]**2 + X**2)
+          - p["cV"] * X * Y
+          + p["tau_yx"] * Y - p["tau_xy"] * X  
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - D * p["beta"] * Z * (Y**2) / (p["v0"]**2 + Y**2)
+          - p["cV"] * X * Y
+          - p["tau_yx"] * Y + p["tau_xy"] * X  
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + D * Y) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )  
+    return pop.astype(np.float32)
+  
+""" CODE: V0DRIFT"""
+def v0_drift_growth(pop, parameters, t):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+    
+    v0 = (
+      p["v0"] * max(
+        (1 - t/150),
+        1/3
+        )
+    )
+
+    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (v0**2 + X**2)
+          - p["cV"] * X * Y
+          + p["tau_yx"] * Y - p["tau_xy"] * X  
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"] * p["beta"] * Z * (Y**2) / (v0**2 + Y**2)
+          - p["cV"] * X * Y
+          - p["tau_yx"] * Y + p["tau_xy"] * X  
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )  
+    return pop.astype(np.float32)
+
+""" CODE: CVDRIFT"""
+def cV_drift_growth(pop, parameters, t):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+    
+    cV = p["cV"] * min(1 + t/100, 2)
+
+    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (p["v0"]**2 + X**2)
+          - cV * X * Y
+          + p["tau_yx"] * Y - p["tau_xy"] * X  
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2 + Y**2)
+          - cV * X * Y
+          - p["tau_yx"] * Y + p["tau_xy"] * X  
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )  
+    return pop.astype(np.float32)
+
+""" DATA CODE: BETADRIFT """ 
+def beta_drift_growth(pop, parameters, t):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+    
+    beta = p["beta"] * (1 + t/100)
+
+    pop[0] += (p["r_x"] * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (p["v0"]**2 + X**2)
+          - p["cV"] * X * Y
+          + p["tau_yx"] * Y - p["tau_xy"] * X  
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2 + Y**2)
+          - p["cV"] * X * Y
+          - p["tau_yx"] * Y + p["tau_xy"] * X  
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )  
+    return pop.astype(np.float32)
+
+""" CODE: RXDRIFT"""
+def rx_drift_growth(pop, parameters, t):
+    X, Y, Z = pop[0], pop[1], pop[2]
+    p = parameters
+    
+    r_x = (
+      p["r_x"] * max(1 - 0.5 * t/100, 1/2)
+    )
+
+    pop[0] += (r_x * X * (1 - X / p["K_x"])
+          - p["beta"] * Z * (X**2) / (p["v0"]**2 + X**2)
+          - p["cV"] * X * Y
+          + p["tau_yx"] * Y - p["tau_xy"] * X  
+          + p["sigma_x"] * X * np.random.normal()
+         )
+    
+    pop[1] += (p["r_y"] * Y * (1 - Y / p["K_y"] )
+          - p["D"]  * p["beta"] * Z * (Y**2) / (p["v0"]**2 + Y**2)
+          - p["cV"] * X * Y
+          - p["tau_yx"] * Y + p["tau_xy"] * X  
+          + p["sigma_y"] * Y * np.random.normal()
+         )
+
+    pop[2] += p["alpha"] * (
+                          Z * (p["f"] * (X + p["D"]  * Y) - p["dH"]) 
+                          + p["sigma_z"] * Z  * np.random.normal()
+                         )  
+    return pop.astype(np.float32)
+
+""" DATACODE: KLIMIT_RXDRIFT """
+def K_limit_rx_drift_growth(pop, parameters, t):
+  X, Y, Z = pop[0], pop[1], pop[2]
+  p = parameters
+  
+  r_x = (
+      p["r_x"] * max(1 - 0.5 * t/100, 1/2)
+    )
+
+  pop[0] += (r_x * X * (1 - X /  (p["K_x"] - p["cV"] * Y))
+        - p["beta"] * Z * (X**2) / (p["v0"]**2 + X**2)
+        + p["tau_yx"] * Y - p["tau_xy"] * X  
+        + p["sigma_x"] * X * np.random.normal()
+       )
+    
+  pop[1] += (p["r_y"] * Y * (1 - Y /  (p["K_y"] - p["cV"] * X) )
+        - p["D"] * p["beta"] * Z * (Y**2) / (p["v0"]**2 + Y**2)
+        - p["tau_yx"] * Y + p["tau_xy"] * X  
+        + p["sigma_y"] * Y * np.random.normal()
+       )
+
+  pop[2] += p["alpha"] * (
+      Z * (p["f"] * (X + p["D"] * Y) - p["dH"]) 
+      + p["sigma_z"] * Z  * np.random.normal()
+    )
+                          
+  pop = pop.astype(np.float32)
+  return(pop)
 

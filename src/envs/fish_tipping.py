@@ -1,28 +1,13 @@
 # NB: It is typical to use float32 precision to benefit from enhanced GPU speeds
-
-
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
+from parameters import parameters
 
-_DEFAULT_PARAMETERS = {
-    "r_x": np.float32(1.0),
-    "r_y": np.float32(1.0),
-    "K_x": np.float32(1.0),
-    "K_y": np.float32(1.0),
-    "beta": np.float32(0.3),
-    "v0":  np.float32(0.1),
-    "D": np.float32(1.2),
-    "tau_yx": np.float32(0),
-    "tau_xy": np.float32(0),
-    "cV": np.float32(0.1), 
-    "f": np.float32(0.4), 
-    "dH": np.float32(0.3),
-    "alpha": np.float32(0.3),
-    "sigma_x": np.float32(0.05),
-    "sigma_y": np.float32(0.05),
-    "sigma_z": np.float32(0.05)
-}
+_DEFAULT_PARAMETERS = parameters().parameters()
+
+def default_early_end_penalty(t):
+  return - 100/t
 
 def default_population_growth(pop, parameters):
     X, Y, Z = pop[0], pop[1], pop[2]
@@ -78,6 +63,7 @@ class three_sp(gym.Env):
         self.initial_pop = config.get("initial_pop", initial_pop)
         self.parameters = config.get("parameters", _DEFAULT_PARAMETERS)
         self.growth_fn = config.get("growth_fn", default_population_growth)
+        self.early_end_penalty = config.get("early_end_penalty", default_early_end_penalty)
         self.fluctuating = config.get("fluctuating", False) # do parameters fluctuate with time?
         self.cost = config.get("cost", np.float32(0.0))
         
@@ -123,7 +109,7 @@ class three_sp(gym.Env):
         # in training mode only: punish for population collapse
         if any(pop <= self.threshold) and self.training:
             terminated = True
-            reward -= 50/self.timestep
+            reward += self.early_end_penalty(self.timestep)
         
         self.state = self.update_state(pop) # transform into [-1, 1] space
         observation = self.observation() # same as self.state
