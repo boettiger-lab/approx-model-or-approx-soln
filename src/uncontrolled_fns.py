@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from plotnine import ggplot, aes, geom_line
 
+from eval_util import values_at_max_t
+
 def generate_uncontrolled_timeseries_plot(
 	  env, path_and_filename="uncontrolled_experiment.png", T=200, reps=1
 	) -> None:
@@ -21,5 +23,14 @@ def generate_time_evolution_df(env, T=200, reps = 5):
 		  obs, rew, ter, aux, info = env.step(0)
 		  pop = list(env.population())
 		  dynamics.append([t, *pop, rep])
+		  if ter:
+		    break
 	dynamics_df = pd.DataFrame(dynamics, columns = ["t", "X", "Y", "Z", "rep"])
 	return dynamics_df
+
+def non_coexistence_fraction(env, T=200, reps=100):
+  dynamics_df = generate_time_evolution_df(env, T=T, reps=reps)
+  df = values_at_max_t(dynamics_df, group="rep").loc[dynamics_df.t < T-1]
+  return len(df.index)/reps
+  
+  

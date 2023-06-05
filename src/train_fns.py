@@ -45,7 +45,7 @@ def create_env(
 	env_class type object
 	"""
 	config = {}
-	config["parameters"] = parameter_obj.params()
+	config["parameters"] = parameter_obj.parameters()
 	config["growth_fn"] = _datacode_to_growth_fn[datacode]
 	config["fluctuating"] = fluctuating
 	config["training"] = training
@@ -74,8 +74,10 @@ def create_agent(env_class, parameters_obj, *, datacode = "DEFAULT", env_name="t
   agent = PPOTrainer(config=config)
   return agent
 
-def train_agent(agent, iterations, path_to_checkpoint="cache"):
+def train_agent(agent, iterations, path_to_checkpoint="cache", verbose = True):
   for i in range(iterations):
-    print(f"iteration nr. {i}", end="\r")
+    if verbose:
+      print(f"iteration nr. {i}", end="\r")
     agent.train()
   checkpoint = agent.save(os.path.join(path_to_checkpoint, f"PPO{iterations}_checkpoint"))
+  return agent
