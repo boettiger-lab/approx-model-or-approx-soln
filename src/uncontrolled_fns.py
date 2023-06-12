@@ -4,6 +4,19 @@ from plotnine import ggplot, aes, geom_line
 
 from eval_util import values_at_max_t
 
+def generate_uncontrolled_timeseries_plot_oneSp(
+	  env, path_and_filename="uncontrolled_experiment.png", T=200, reps=1
+	) -> None:
+	dynamics_df = generate_time_evolution_df(
+	  env, T=T, reps=reps, columns = ["t", "X", "rep"]
+	 )
+	dynamics_df_long = dynamics_df.melt(id_vars=["t", "rep"])
+	ggp = ggplot(
+        dynamics_df_long.groupby(["t", "rep"]),
+        aes("t", "value", color = "variable")
+      ) + geom_line()
+	ggp.save(filename = path_and_filename)
+
 def generate_uncontrolled_timeseries_plot(
 	  env, path_and_filename="uncontrolled_experiment.png", T=200, reps=1
 	) -> None:
@@ -16,7 +29,7 @@ def generate_uncontrolled_timeseries_plot(
 	ggp.save(filename = path_and_filename)
 
 
-def generate_time_evolution_df(env, T=200, reps = 5):
+def generate_time_evolution_df(env, T=200, reps = 5, columns = ["t", "X", "Y", "Z", "rep"]):
 	dynamics = []
 	for rep in range(reps):
 	  for t in range(T):
@@ -25,7 +38,7 @@ def generate_time_evolution_df(env, T=200, reps = 5):
 		  dynamics.append([t, *pop, rep])
 		  if ter:
 		    break
-	dynamics_df = pd.DataFrame(dynamics, columns = ["t", "X", "Y", "Z", "rep"])
+	dynamics_df = pd.DataFrame(dynamics, columns = columns)
 	return dynamics_df
 
 def non_coexistence_fraction(env, T=200, reps=100):

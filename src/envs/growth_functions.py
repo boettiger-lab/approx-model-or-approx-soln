@@ -5,6 +5,12 @@ import numpy as np
 # 
 # populations: X, Y, Z
 
+def single_species_growth(pop, parameters):
+  X = pop[0]
+  p = parameters
+  pop[0] += p["r"] * X * (1 - X / p["K"]) - p["betaZ"] * X / (X**2 + p["v0"]**2)
+  pop = pop.astype(np.float32)
+  return pop
 
 def default_population_growth(pop, parameters):
   X, Y, Z = pop[0], pop[1], pop[2]

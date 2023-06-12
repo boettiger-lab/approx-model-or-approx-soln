@@ -360,7 +360,10 @@ def generate_episodes_1fish(
       episode_reward += reward
       if terminated:
         break
+  # 3 species as default
   cols = ["t", "rep", "act", "reward", "esc", "X", "Y", "Z"]
+  if env.num_species == 1:
+    cols = ["t", "rep", "act", "reward", "esc", "X"]
   df = pd.DataFrame(df_list, columns = cols)
   return df
 
@@ -388,6 +391,8 @@ def generate_gpp_episodes_1fish(gpp, env, reps=50):
       if terminated:
         break
   cols = ["t", "rep", "act", "reward", "esc", "X", "Y", "Z"]
+  if env.num_species == 1:
+    cols = ["t", "rep", "act", "reward", "esc", "X"]
   df = pd.DataFrame(df_list, columns = cols)
   return df
 
@@ -438,6 +443,53 @@ def episode_plots_1fish(df, *, path_and_filename = "path_plots.png"):
   
   the_plot = (((pw_esc / pw_act) / pw_xyz) / pw_rew)
   the_plot.savefig(path_and_filename)
+  
+def episode_plots_1species(df, *, path_and_filename = "path_plots.png"):
+  """
+  Generates plots for the episodes provided in the df.
+  - df:                meant to be df with same columns as those generated with
+                       generate_episodes_1fish.
+  - path_and_filename: the full path and filename which you want to be saved 
+                       (i.e. like fname for plt.savefig)
+  """
+  df2 = df.melt(id_vars=["t", "rep"])
+  
+  esc_t_plot = ggplot(
+    df2.loc[
+      df2.variable == "esc"
+    ].groupby(["rep", "variable"]), 
+    aes("t", "value", color="variable")
+  ) + geom_line()
+  
+  act_t_plot = ggplot(
+    df2.loc[
+      df2.variable == "act"
+    ].groupby(["rep", "variable"]), 
+    aes("t", "value", color="variable")
+  ) + geom_line()
+  
+  x_t_plot = ggplot(
+    df2.loc[
+      df2.variable == "X"
+    ].groupby(["rep", "variable"]), 
+    aes("t", "value", color="variable")
+  ) + geom_line()
+  
+  rew_t_plot = ggplot(
+    df2.loc[
+      (df2.variable == "reward")
+    ].groupby(["rep"]), 
+    aes("t", "value")
+  ) + geom_line()
+  
+  
+  pw_esc = pw.load_ggplot(esc_t_plot, figsize = (5,2))
+  pw_act = pw.load_ggplot(act_t_plot, figsize = (5,2))
+  pw_x = pw.load_ggplot(x_t_plot, figsize = (5,2))
+  pw_rew = pw.load_ggplot(rew_t_plot, figsize = (5,2))
+  
+  the_plot = (((pw_esc / pw_act) / pw_x) / pw_rew)
+  the_plot.savefig(path_and_filename)
 
 
 def state_policy_plot_1fish(agent, env, path_and_filename = None):
@@ -461,6 +513,25 @@ def state_policy_plot_1fish(agent, env, path_and_filename = None):
     the_plot.savefig(path_and_filename)
   
   return pd.concat([x_policy_df, y_policy_df, z_policy_df])
+
+def state_policy_plot_1species(agent, env, path_and_filename = None):
+  import os
+  path, filename = os.path.split(path_and_filename)
+  policy_df = pd.DataFrame(
+    [
+      [X, agent.compute_single_action(X/env.bound)[0]] 
+      for X in np.linspace(0, 1, int(101))
+    ],
+    columns = ["X", "action"],
+  )
+
+  act_plt = ggplot(policy_df, aes("X", "action")) + geom_point(shape=".")
+  
+  if path_and_filename is not None:
+    act_plt.save(path=path, filename=filename)
+    
+  
+  return policy_df
 
 def evaluate_policy_1fish(
   agent, 
@@ -562,6 +633,23 @@ def GaussianProcessPolicy_1fish(policy_df, length_scale=10, noise_level=0.1):
   """
   predictors = policy_df[["X", "Y", "Z"]].to_numpy()
   targets = policy_df[["act"]].to_numpy()
+  kernel = (
+    1.0 * RBF(length_scale = length_scale) 
+    + WhiteKernel(noise_level=noise_level)
+    )
+  gpp = (
+    GaussianProcessRegressor(kernel=kernel, random_state=0)
+    .fit(predictors, targets)
+    )
+  return gpp
+
+def GaussianProcessPolicy_1species(policy_df, length_scale=10, noise_level=0.1):
+  """
+  policy_df.columns = [X, action]
+                    -> action (act_x, act_y) taken at point (X)
+  """
+  predictors = policy_df[["X"]].to_numpy()
+  targets = policy_df[["action"]].to_numpy()
   kernel = (
     1.0 * RBF(length_scale = length_scale) 
     + WhiteKernel(noise_level=noise_level)

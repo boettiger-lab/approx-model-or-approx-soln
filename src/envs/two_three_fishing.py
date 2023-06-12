@@ -20,6 +20,7 @@ class twoThreeFishing(gym.Env):
       "growth_fn", 
       lambda x: np.array(x * (1 - x), dtype = np.float32)
     )
+    self.num_speces = 3
     #
     self.initial_pop = config.get("initial_pop", _DEFAULT_INIT_POP)
     self.Tmax = config.get("Tmax", 200)

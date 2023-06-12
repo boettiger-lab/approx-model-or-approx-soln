@@ -49,4 +49,19 @@ class parameters:
     }
     for key, val in aux.items():
       print(f"{key}: {val:.3f}, ", end="", flush=True)
-    
+      
+
+@dataclass
+class parameters_oneSp(parameters):
+  def __init__(self):
+    self.sigma = 0.1
+    self.params = {
+    "r": np.float32(1.0),
+    "K": np.float32(1.0),
+    "betaZ": np.float32(0.1),
+    "v0": np.float32(0.3),
+    }
+    self.reset_params = self.params
+  
+  def init_state(self):
+    return np.array([0.7], dtype=np.float32)

@@ -25,6 +25,7 @@ _datacode_to_growth_fn = {
   "YABIOTIC": growth_functions.y_abiotic_growth,
   "ZABIOTIC": growth_functions.z_abiotic_growth,
   "COUPLFLUC": growth_functions.coupling_fluctuation_growth,
+  "ONESP": growth_functions.single_species_growth,
 }
 
 def create_env(

@@ -34,8 +34,12 @@ def generate_esc_episodes_1fish(env, grid_nr=101, repetitions=100, only_max_time
   # define parllel loop and execute
   parallel = [simulate_max_t_1fish.remote(env, i, repetitions) for i in esc_choices]
   x = ray.get(parallel) # list of tuples of final point, history
-
-  cols = ["t", "rep", "esc", "act", "reward", "X", "Y", "Z"]
+  
+  if env.num_species == 3:
+    cols = ["t", "rep", "esc", "act", "reward", "X", "Y", "Z"]
+  else: # assume 1 species as default
+    cols = ["t", "rep", "esc", "act", "reward", "X"]
+    
   X = list(map(list, zip(*x))) # [[final points], [histories]]
   df_max_times = pd.DataFrame(np.vstack(X[0]), columns = cols) # X[0] = [f. pts.]
   df = pd.DataFrame(np.vstack(X[1]), columns = cols) # X[1] = [histories]
