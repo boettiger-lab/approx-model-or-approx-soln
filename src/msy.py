@@ -1,70 +1,52 @@
-from envs import fish_tipping, growth_functions
+from envs import oneSpecies, two_three_fishing, growth_functions
+from msy_fns import find_msy_1fish
+from train_fns import create_env
+from parameters import parameters_oneSp, parameters
+from eval_util import values_at_max_t
 
+from plotnine import ggplot, geom_bar, geom_point, geom_line, aes
 import gymnasium as gym
 import pandas as pd
 import numpy as np
 import ray
+import os
 
-@ray.remote
-def simulate(env, action):
-  df = []
-  for rep in range(30):
-    episode_reward = 0
-    observation, _ = env.reset()
-    for t in range(env.Tmax):
-      df.append(np.append([t, rep, action, episode_reward], observation))
-      observation, reward, terminated, done, info = env.step(action)
-      episode_reward += reward
-      if terminated:
-        break
-  return(df)
+REPS = 100
+MSY_GRID_SIZE = 51
+ENVCODE = "1FISHERY"
+DATACODE = "DEFAULT"
+FLUCTUATING = False
+DATAPATH = os.path.join("../data/results_data", ENVCODE, DATACODE)
+ENV_CLASS = two_three_fishing.oneThreeFishing #oneSpecies.singleSp
 
-config = {}
-config["growth_fn"] = growth_functions.v0_drift_growth
-config["fluctuating"] = True
-env = fish_tipping.three_sp(
-    config = config
+parameter_obj = parameters() #parameters_oneSp()
+
+env = create_env(
+  env_class = ENV_CLASS, 
+  parameter_obj=parameter_obj, 
+  datacode = "DEFAULT", 
+  fluctuating=False, 
+  training=True,
 )
 
-
-_DATACODE = "V0DRIFT"
-env.training = False
-actions = np.linspace(0,0.2,101)
-
-# define parllel loop and execute
-parallel = [simulate.remote(env, i) for i in actions]
-df = ray.get(parallel)
-
-# convert to data.frame & write to csv
-cols = ["t", "rep", "action", "reward", "X", "Y", "Z"]
-df = pd.DataFrame(np.vstack(df), columns = cols)
-
-df2 = (
-  df
-  .loc[df.t == df.t.max()]
-  .groupby(["action"])
-  .agg({"reward": "mean"})
+best, msy_df = find_msy_1fish(
+  env, grid_nr=MSY_GRID_SIZE, repetitions=REPS,
 )
-print(df2)
+msy_df = values_at_max_t(msy_df)
 
-tmp = (df[df.t == max(df.t)]
- .groupby('action', as_index=False)
- .agg({'reward': 'mean'})
- )
-best = tmp[tmp.reward == tmp.reward.max()]
 print(best)
+print(msy_df.columns)
+print(msy_df.head(20))
+msy_df.to_csv(os.path.join(DATAPATH, "msy.csv.xz"))
 
-# kinda slow to compress
-# df2.to_csv(f"../data/{_DATACODE}/msy.csv.xz", index=False)
-
-## Plot averages 
-from plotnine import ggplot, geom_point, aes, geom_line, facet_wrap, geom_path
-
-df3 = (df[df.action == best.action.values[0]]
-       .melt(id_vars=["t", "action", "reward", "rep"])
-       )
-
-opt_msy_plot = ggplot(df3[df3.rep == 4.0], aes("t", "value", color="variable")) + geom_line()
-opt_msy_plot.save(path = f"../data/{_DATACODE}", filename = "opt_msy_plot.png")
-
-
+msy_rew_hist = (
+  ggplot(data=msy_df, mapping=aes(x='rep',weight='reward')) 
+  +geom_bar()
+)
+msy_rew_hist.save(os.path.join(DATAPATH,"msy_rew_hist.png"))
+#
+msy_t_hist = (
+  ggplot(data=msy_df, mapping=aes(x='rep',weight='t')) 
+  +geom_bar()
+)
+msy_t_hist.save(os.path.join(DATAPATH,"msy_t_hist.png"))

@@ -65,3 +65,5 @@ class parameters_oneSp(parameters):
   
   def init_state(self):
     return np.array([0.7], dtype=np.float32)
+  
+  

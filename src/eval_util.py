@@ -117,9 +117,10 @@ def evaluate_policy(
   bound = 4,
   ):
   """ ranges in large [0,bound] 'population space' (0,4 in practice) """
+  nr_gridpoints_to_eval = 51
   # X - policy
   x_policy = []
-  for x in np.linspace(0,1,100):
+  for x in np.linspace(0,1,nr_gridpoints_to_eval):
     for yz in it.product(
       np.linspace(*range_Y,5), 
       np.linspace(*range_Z,5), 
@@ -136,7 +137,7 @@ def evaluate_policy(
   
   # Y - policy
   y_policy = []
-  for y in np.linspace(0,1,100):
+  for y in np.linspace(0,1,nr_gridpoints_to_eval):
     for xz in it.product(
       np.linspace(*range_X,5), 
       np.linspace(*range_Z,5), 
@@ -154,7 +155,7 @@ def evaluate_policy(
       
   # Z - policy
   z_policy = []
-  for z in np.linspace(0,1,100):
+  for z in np.linspace(0,1,nr_gridpoints_to_eval):
     for xy in it.product(
       np.linspace(*range_X,5), 
       np.linspace(*range_Y,5), 
@@ -199,6 +200,7 @@ def state_policy_plot(agent, env, path_and_filename = None):
   
   return pd.concat([x_policy_df, y_policy_df, z_policy_df])
 
+
 # Interpolate policy
 
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -216,10 +218,12 @@ def GaussianProcessPolicy(policy_df, length_scale=10, noise_level=0.1):
     1.0 * RBF(length_scale = length_scale) 
     + WhiteKernel(noise_level=noise_level)
     )
+  print("Fitting Gaussian Process...")
   gpp = (
     GaussianProcessRegressor(kernel=kernel, random_state=0)
     .fit(predictors, targets)
     )
+  print("Done fitting Gaussian Process...")
   return gpp
 
 
@@ -479,7 +483,7 @@ def episode_plots_1species(df, *, path_and_filename = "path_plots.png"):
     df2.loc[
       (df2.variable == "reward")
     ].groupby(["rep"]), 
-    aes("t", "value")
+    aes("t", "value", color="variable")
   ) + geom_line()
   
   
@@ -514,6 +518,56 @@ def state_policy_plot_1fish(agent, env, path_and_filename = None):
   
   return pd.concat([x_policy_df, y_policy_df, z_policy_df])
 
+def gpp_policy_plot_1fish(gpp, env, path_and_filename = None):
+  x_policy_df, y_policy_df, z_policy_df = evaluate_gpp_policy_in_popular_windows_1fish(gpp, env)
+  
+  x_act_plt1 = ggplot(x_policy_df, aes("X", "act", color = "Y")) + geom_point(shape=".")
+  x_act_pltz = ggplot(x_policy_df, aes("X", "act", color = "Z")) + geom_point(shape=".")
+
+  y_act_plt = ggplot(y_policy_df, aes("Y", "act", color = "X")) + geom_point(shape=".")
+  z_act_plt = ggplot(z_policy_df, aes("Z", "act", color = "X")) + geom_point(shape=".")
+  
+  pw_x1 = pw.load_ggplot(x_act_plt1, figsize = (3,2))
+  pw_x2 = pw.load_ggplot(x_act_pltz, figsize = (3,2))
+  
+  pw_y = pw.load_ggplot(y_act_plt, figsize = (3,2))
+  pw_z = pw.load_ggplot(z_act_plt, figsize = (3,2))
+  
+  the_plot = (pw_x1 / pw_x2) | (pw_y / pw_z)
+  
+  if path_and_filename is not None:
+    the_plot.savefig(path_and_filename)
+  
+  return pd.concat([x_policy_df, y_policy_df, z_policy_df])
+
+def gpp_policy_plot_2fish(gpp, env, path_and_filename = None):
+  x_policy_df, y_policy_df, z_policy_df = evaluate_gpp_policy_in_popular_windows_2fish(gpp, env)
+  
+  x_act_plt1 = ggplot(x_policy_df, aes("X", "act_x", color = "Y")) + geom_point(shape=".")
+  x_act_plt2 = ggplot(x_policy_df, aes("X", "act_y", color = "Y")) + geom_point(shape=".")
+  
+  y_act_plt1 = ggplot(y_policy_df, aes("Y", "act_x", color = "X")) + geom_point(shape=".")
+  y_act_plt2 = ggplot(y_policy_df, aes("Y", "act_y", color = "X")) + geom_point(shape=".")
+  
+  x_act_pltz = ggplot(x_policy_df, aes("X", "act_x", color = "Z")) + geom_point(shape=".")
+  y_act_pltz = ggplot(y_policy_df, aes("Y", "act_y", color = "Z")) + geom_point(shape=".")
+  
+  pw_x1 = pw.load_ggplot(x_act_plt1, figsize = (3,2))
+  pw_x2 = pw.load_ggplot(x_act_plt2, figsize = (3,2))
+  
+  pw_y1 = pw.load_ggplot(y_act_plt1, figsize = (3,2))
+  pw_y2 = pw.load_ggplot(y_act_plt2, figsize = (3,2))
+  
+  pw_z1 = pw.load_ggplot(x_act_pltz, figsize = (3,2))
+  pw_z2 = pw.load_ggplot(y_act_pltz, figsize = (3,2))
+  
+  the_plot = (pw_x1 / pw_x2) | (pw_y1 / pw_y2) | (pw_z1 / pw_z2)
+  
+  if path_and_filename is not None:
+    the_plot.savefig(path_and_filename)
+  
+  return pd.concat([x_policy_df, y_policy_df, z_policy_df])
+
 def state_policy_plot_1species(agent, env, path_and_filename = None):
   import os
   path, filename = os.path.split(path_and_filename)
@@ -533,6 +587,24 @@ def state_policy_plot_1species(agent, env, path_and_filename = None):
   
   return policy_df
 
+def gpp_policy_plot_1species(gpp, env, path_and_filename = None):
+  import os
+  path, filename = os.path.split(path_and_filename)
+  gpp_policy_df = pd.DataFrame(
+    [
+      [X, max(gpp.predict([[X]])[0], 0)]  # forces positivity (anyway clipped in env) 
+      for X in np.linspace(0, 1, int(101))
+    ],
+    columns = ["X", "action"],
+  )
+
+  gpp_act_plt = ggplot(gpp_policy_df, aes("X", "action")) + geom_point(shape=".")
+  
+  if path_and_filename is not None:
+    gpp_act_plt.save(path=path, filename=filename)
+  
+  return gpp_policy_df
+
 def evaluate_policy_1fish(
   agent, 
   range_X = (0,1), 
@@ -542,8 +614,9 @@ def evaluate_policy_1fish(
   ):
   """ ranges in large [0,bound] 'population space' (0,4 in practice) """
   # X - policy
+  nr_points = 51
   x_policy = []
-  for x in np.linspace(0,1,100):
+  for x in np.linspace(0,1,nr_points):
     for yz in it.product(
       np.linspace(*range_Y,5), 
       np.linspace(*range_Z,5), 
@@ -560,7 +633,7 @@ def evaluate_policy_1fish(
   
   # Y - policy
   y_policy = []
-  for y in np.linspace(0,1,100):
+  for y in np.linspace(0,1,nr_points):
     for xz in it.product(
       np.linspace(*range_X,5), 
       np.linspace(*range_Z,5), 
@@ -578,7 +651,7 @@ def evaluate_policy_1fish(
       
   # Z - policy
   z_policy = []
-  for z in np.linspace(0,1,100):
+  for z in np.linspace(0,1,nr_points):
     for xy in it.product(
       np.linspace(*range_X,5), 
       np.linspace(*range_Y,5), 
@@ -587,6 +660,130 @@ def evaluate_policy_1fish(
       observation = pop/bound
       action = agent.compute_single_action(observation)
       z_policy.append([*pop, *action])
+  
+  z_policy_df = pd.DataFrame(
+    z_policy,
+    columns = ["X", "Y", "Z", "act"]
+  )
+  
+  return x_policy_df, y_policy_df, z_policy_df
+
+def evaluate_gpp_policy_2fish(
+  gpp, 
+  range_X = (0,1), 
+  range_Y = (0,1), 
+  range_Z = (0,1),
+  bound = 4,
+  ):
+  """ ranges in large [0,bound] 'population space' (0,4 in practice) """
+  # X - policy
+  x_policy = []
+  for x in np.linspace(0,1,100):
+    for yz in it.product(
+      np.linspace(*range_Y,5), 
+      np.linspace(*range_Z,5), 
+      ):
+      pop = np.array([x, *yz], dtype = np.float32)
+      observation = pop/bound
+      action = [max(gpp.predict([pop])[0][0], 0), max(gpp.predict([pop])[0][1], 0)]
+      x_policy.append([*pop, *action])
+  
+  x_policy_df = pd.DataFrame(
+    x_policy,
+    columns = ["X", "Y", "Z", "act_x", "act_y"]
+  )
+  
+  # Y - policy
+  y_policy = []
+  for y in np.linspace(0,1,100):
+    for xz in it.product(
+      np.linspace(*range_X,5), 
+      np.linspace(*range_Z,5), 
+      ):
+      x, z = xz
+      pop = np.array([x, y, z], dtype = np.float32)
+      observation = pop/bound
+      action = [max(gpp.predict([pop])[0][0], 0), max(gpp.predict([pop])[0][1], 0)]
+      y_policy.append([*pop, *action])
+  
+  y_policy_df = pd.DataFrame(
+    y_policy,
+    columns = ["X", "Y", "Z", "act_x", "act_y"]
+  )
+      
+  # Z - policy
+  z_policy = []
+  for z in np.linspace(0,1,100):
+    for xy in it.product(
+      np.linspace(*range_X,5), 
+      np.linspace(*range_Y,5), 
+      ):
+      pop = np.array([*xy, z], dtype = np.float32)
+      observation = pop/bound
+      action = [max(gpp.predict([pop])[0][0], 0), max(gpp.predict([pop])[0][1], 0)]
+      z_policy.append([*pop, *action])
+  
+  z_policy_df = pd.DataFrame(
+    z_policy,
+    columns = ["X", "Y", "Z", "act_x", "act_y"]
+  )
+  
+  return x_policy_df, y_policy_df, z_policy_df
+
+def evaluate_gpp_policy_1fish(
+  gpp, 
+  range_X = (0,1), 
+  range_Y = (0,1), 
+  range_Z = (0,1),
+  bound = 4,
+  ):
+  """ ranges in large [0,bound] 'population space' (0,4 in practice) """
+  # X - policy
+  x_policy = []
+  for x in np.linspace(0,1,100):
+    for yz in it.product(
+      np.linspace(*range_Y,5), 
+      np.linspace(*range_Z,5), 
+      ):
+      pop = np.array([x, *yz], dtype = np.float32)
+      observation = pop/bound
+      action = max(gpp.predict([pop])[0], 0)
+      x_policy.append([*pop, action])
+  
+  x_policy_df = pd.DataFrame(
+    x_policy,
+    columns = ["X", "Y", "Z", "act"]
+  )
+  
+  # Y - policy
+  y_policy = []
+  for y in np.linspace(0,1,100):
+    for xz in it.product(
+      np.linspace(*range_X,5), 
+      np.linspace(*range_Z,5), 
+      ):
+      x, z = xz
+      pop = np.array([x, y, z], dtype = np.float32)
+      observation = pop/bound
+      action = max(gpp.predict([pop])[0], 0)
+      y_policy.append([*pop, action])
+  
+  y_policy_df = pd.DataFrame(
+    y_policy,
+    columns = ["X", "Y", "Z", "act"]
+  )
+      
+  # Z - policy
+  z_policy = []
+  for z in np.linspace(0,1,100):
+    for xy in it.product(
+      np.linspace(*range_X,5), 
+      np.linspace(*range_Y,5), 
+      ):
+      pop = np.array([*xy, z], dtype = np.float32)
+      observation = pop/bound
+      action = max(gpp.predict([pop])[0], 0)
+      z_policy.append([*pop, action])
   
   z_policy_df = pd.DataFrame(
     z_policy,
@@ -620,6 +817,64 @@ def evaluate_policy_in_popular_windows_1fish(agent, env):
   
   return evaluate_policy_1fish(
   agent, 
+  range_X = (X_window_start, X_window_start + popular_x_size), 
+  range_Y = (Y_window_start, Y_window_start + popular_y_size), 
+  range_Z = (Z_window_start, Z_window_start + popular_z_size)
+  )
+  
+def evaluate_gpp_policy_in_popular_windows_1fish(gpp, env):
+  # generate episodes
+  df = generate_gpp_episodes_1fish(gpp, env)
+  
+  # popular ranges:
+  popular_x_size, popular_x_window_dict = (
+    popular_ranges(df, var="X")
+  )
+  X_window_start = list(popular_x_window_dict.keys())[0] # dicts weren't the right choice
+  #
+  popular_y_size, popular_y_window_dict = (
+    popular_ranges(df, var="Y")
+  )
+  Y_window_start = list(popular_y_window_dict.keys())[0]
+  #
+  popular_z_size, popular_z_window_dict = (
+    popular_ranges(df, var="Z")
+  )
+  Z_window_start = list(popular_z_window_dict.keys())[0]
+  
+  ## All of these are in population space [0, env.bound] (=[0,4] for practical purposes)
+  
+  return evaluate_gpp_policy_1fish(
+  gpp, 
+  range_X = (X_window_start, X_window_start + popular_x_size), 
+  range_Y = (Y_window_start, Y_window_start + popular_y_size), 
+  range_Z = (Z_window_start, Z_window_start + popular_z_size)
+  )
+  
+def evaluate_gpp_policy_in_popular_windows_2fish(gpp, env):
+  # generate episodes
+  df = generate_gpp_episodes(gpp, env)
+  
+  # popular ranges:
+  popular_x_size, popular_x_window_dict = (
+    popular_ranges(df, var="X")
+  )
+  X_window_start = list(popular_x_window_dict.keys())[0] # dicts weren't the right choice
+  #
+  popular_y_size, popular_y_window_dict = (
+    popular_ranges(df, var="Y")
+  )
+  Y_window_start = list(popular_y_window_dict.keys())[0]
+  #
+  popular_z_size, popular_z_window_dict = (
+    popular_ranges(df, var="Z")
+  )
+  Z_window_start = list(popular_z_window_dict.keys())[0]
+  
+  ## All of these are in population space [0, env.bound] (=[0,4] for practical purposes)
+  
+  return evaluate_gpp_policy_2fish(
+  gpp, 
   range_X = (X_window_start, X_window_start + popular_x_size), 
   range_Y = (Y_window_start, Y_window_start + popular_y_size), 
   range_Z = (Z_window_start, Z_window_start + popular_z_size)

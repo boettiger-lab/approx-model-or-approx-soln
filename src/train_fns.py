@@ -50,7 +50,7 @@ def create_env(
 	config["growth_fn"] = _datacode_to_growth_fn[datacode]
 	config["fluctuating"] = fluctuating
 	config["training"] = training
-	config["initial_pop"] = parameters.init_state()
+	config["initial_pop"] = parameter_obj.init_state()
 	env = env_class(
 	    config = config
 	)

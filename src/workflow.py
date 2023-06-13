@@ -10,12 +10,16 @@ from eval_util import (
   GaussianProcessPolicy, generate_gpp_episodes,
   generate_episodes_1fish, episode_plots_1fish, state_policy_plot_1fish,
   GaussianProcessPolicy_1fish, generate_gpp_episodes_1fish, 
+  gpp_policy_plot_1fish, gpp_policy_plot_2fish,
+  
 )
+from msy_fns import find_msy_2fish, find_msy_1fish
 
 import matplotlib.pyplot as plt
 import os
 import seaborn as sns
 import pandas as pd
+import numpy as np
 from plotnine import (
   ggplot, geom_point, aes, geom_line, facet_wrap, geom_path, geom_bar, geom_histogram
 )
@@ -30,14 +34,14 @@ Data-code list:
 '''
 
 # globals
-NAME_MODIFIER = ""
-ITERATIONS = 200
+NAME_MODIFIER = "V1_REPLICATE"
+ITERATIONS = 300
 REPS = 100
 ESC_GRID_SIZE = 51
-DATACODE = "KLIMIT_RXDRIFT"
-FLUCTUATING = True
-ENVCODE = "2FISHERY"
-DATAPATH = os.path.join("../data/results_data", ENVCODE, DATACODE)
+DATACODE = "DEFAULT"
+FLUCTUATING = False
+ENVCODE = "1FISHERY"
+DATAPATH = os.path.join("../data/results_data", ENVCODE, DATACODE, NAME_MODIFIER)
 ENVCODE_TO_ENV = {
   "1FISHERY": two_three_fishing.oneThreeFishing,
   "2FISHERY": two_three_fishing.twoThreeFishing,
@@ -45,11 +49,6 @@ ENVCODE_TO_ENV = {
 ENV_CLASS = ENVCODE_TO_ENV[ENVCODE]
 
 os.makedirs(DATAPATH, exist_ok=True)
-
-def what_to_do(workflow_choice):
-  _ = ray.get(
-    [workflow_choice.remote() for _ in range(1)]
-  )
 
 
 # escapement
@@ -76,12 +75,18 @@ def workflow_twoFishery():
   
   # uncontrolled
   generate_uncontrolled_timeseries_plot(
-    env, path_and_filename=f"{DATAPATH}/uncontrolled_timeseries.png", T=200, reps=1
+    env, path_and_filename=os.path.join(DATAPATH, "uncontrolled_timeseries.png"), T=200, reps=1
   )
-  esc_filename = f"{DATAPATH}/esc_{REPS}.csv.xz"
+  
+  # escapement
+  esc_filename = os.path.join(DATAPATH, f"esc_{REPS}.csv.xz")
   if os.path.exists(esc_filename):
     print("Reading escapement...")
     esc_df = pd.read_csv(esc_filename)
+    print(
+      values_at_max_t(esc_df)
+      .agg({'reward':['mean', 'std']})
+    )
   else:
     print("Running escapement...")
     best_esc, esc_df = find_best_esc(env, grid_nr=ESC_GRID_SIZE, repetitions=REPS)
@@ -89,11 +94,27 @@ def workflow_twoFishery():
     esc_df.to_csv(esc_filename)
   print("Escapement done!")
   
+  # msy
+  msy_filename = os.path.join(DATAPATH, f"msy_{REPS}.csv.xz")
+  if os.path.exists(msy_filename):
+    print("Reading msy...")
+    msy_df = pd.read_csv(msy_filename)
+    print(
+      values_at_max_t(msy_df)
+      .agg({'reward':['mean', 'std']})
+    )
+  else:
+    print("Running msy...")
+    best_msy, msy_df = find_msy_2fish(env, grid_nr=ESC_GRID_SIZE, repetitions=REPS)
+    print(best_msy)
+    msy_df.to_csv(msy_filename)
+  print("MSY done!")
+  
   # train agent and generate data
   agent = train_agent(agent, iterations=ITERATIONS, path_to_checkpoint="cache")
   print("Finished training RL agent!")
   ppo_df = generate_episodes(agent, env, reps = REPS)
-  ppo_df.to_csv(f"{DATAPATH}/ppo{ITERATIONS}.csv.xz", index = False)
+  ppo_df.to_csv(os.path.join(DATAPATH,f"ppo{ITERATIONS}.csv.xz"), index = False)
 
 
   #esc_df, ppo_df = workflow(env, agent)
@@ -103,8 +124,10 @@ def workflow_twoFishery():
   
   ## state policy plots
   
-  policy_df = state_policy_plot(agent, env, path_and_filename= f"{DATAPATH}/ppo{ITERATIONS}-pol.png")
-  policy_df.to_csv(f"{DATAPATH}/ppo{ITERATIONS}_policy_data.csv.xz")
+  policy_df = state_policy_plot(
+    agent, env, path_and_filename= os.path.join(DATAPATH,f"ppo{ITERATIONS}-pol.png")
+  )
+  policy_df.to_csv(os.path.join(DATAPATH,f"ppo{ITERATIONS}_policy_data.csv.xz"))
   
   
   ## Gaussian Process Smoothing:
@@ -112,18 +135,25 @@ def workflow_twoFishery():
   gpp = GaussianProcessPolicy(policy_df)
   print("Finished fitting GP!")
   gpp_df =  generate_gpp_episodes(gpp, env, reps=REPS)
-  gpp_df.to_csv(f"{DATAPATH}/ppo{ITERATIONS}_GPP.csv.xz", index = False)
+  gpp_df.to_csv(os.path.join(DATAPATH,f"ppo{ITERATIONS}_GPP.csv.xz"), index = False)
+  
+  gpp_policy_df = gpp_policy_plot_2fish(
+    gpp, env, path_and_filename = os.path.join(DATAPATH,f"gpp{ITERATIONS}-pol.png")
+  )
+  gpp_policy_df.to_csv(os.path.join(DATAPATH,f"gpp{ITERATIONS}_policy_data.csv.xz"))
   
   ## data wrangling
+  msy_max_t = values_at_max_t(msy_df, group="rep")
   ppo_max_t = values_at_max_t(ppo_df, group="rep")
   gpp_max_t = values_at_max_t(gpp_df, group="rep")
   esc_max_t = values_at_max_t(esc_df, group="rep")
+  msy_max_t['strategy']='CMort'
+  esc_max_t['strategy']='CEsc'
   ppo_max_t['strategy']='PPO'
   gpp_max_t['strategy']='PPO+GP'
-  esc_max_t['strategy']='CEsc'
-  tot_max_t = pd.concat([esc_max_t, ppo_max_t, gpp_max_t])
+  tot_max_t = pd.concat([msy_max_t, esc_max_t, ppo_max_t, gpp_max_t])
   
-  tot_max_t.to_csv(f"{DATAPATH}/comparison_{ITERATIONS}.csv.xz")
+  tot_max_t.to_csv(os.path.join(DATAPATH,f"comparison_{ITERATIONS}.csv.xz"))
   print("Done with data generation, finishing up on plots...")
   
   
@@ -137,7 +167,7 @@ def workflow_twoFishery():
     y='strategy',
   )
   fig = ax.get_figure()
-  fig.savefig(f"{DATAPATH}/rew_violin_plot_{ITERATIONS}.png", dpi=500)
+  fig.savefig(os.path.join(DATAPATH, f"rew_violin_plot_{ITERATIONS}.png"), dpi=500)
   
   ## reward and time histograms
   
@@ -146,50 +176,63 @@ def workflow_twoFishery():
     ggplot(data=ppo_max_t, mapping=aes(x='rep',weight='reward')) 
     +geom_bar()
   )
-  ppo_rew_hist.save(f"{DATAPATH}/ppo{ITERATIONS}_rew_hist.png")
+  ppo_rew_hist.save(os.path.join(DATAPATH,f"ppo{ITERATIONS}_rew_hist.png"))
   #
   ppo_t_hist = (
     ggplot(data=ppo_max_t, mapping=aes(x='rep',weight='t')) 
     +geom_bar()
   )
-  ppo_t_hist.save(f"{DATAPATH}/ppo{ITERATIONS}_t_hist.png")
+  ppo_t_hist.save(os.path.join(DATAPATH,f"ppo{ITERATIONS}_t_hist.png"))
   
   # GPP
   gpp_rew_hist = (
     ggplot(data=gpp_max_t, mapping=aes(x='rep',weight='reward')) 
     +geom_bar()
   )
-  gpp_rew_hist.save(f"{DATAPATH}/gpp{ITERATIONS}_rew_hist.png")
+  gpp_rew_hist.save(os.path.join(DATAPATH,f"gpp{ITERATIONS}_rew_hist.png"))
   #
   gpp_t_hist = (
     ggplot(data=gpp_max_t, mapping=aes(x='rep',weight='t')) 
     +geom_bar()
   )
-  gpp_t_hist.save(f"{DATAPATH}/gpp{ITERATIONS}_t_hist.png")
+  gpp_t_hist.save(os.path.join(DATAPATH,f"gpp{ITERATIONS}_t_hist.png"))
   
   # ESC
   esc_rew_hist = (
     ggplot(data=esc_max_t, mapping=aes(x='rep',weight='reward')) 
     +geom_bar()
   )
-  esc_rew_hist.save(f"{DATAPATH}/esc_rew_hist.png")
+  esc_rew_hist.save(os.path.join(DATAPATH,"esc_rew_hist.png"))
   #
   esc_t_hist = (
     ggplot(data=esc_max_t, mapping=aes(x='rep',weight='t')) 
     +geom_bar()
   )
-  esc_t_hist.save(f"{DATAPATH}/esc_t_hist.png")
+  esc_t_hist.save(os.path.join(DATAPATH,"esc_t_hist.png"))
+  
+  # MSY
+  msy_rew_hist = (
+    ggplot(data=msy_max_t, mapping=aes(x='rep',weight='reward')) 
+    +geom_bar()
+  )
+  msy_rew_hist.save(os.path.join(DATAPATH,"msy_rew_hist.png"))
+  #
+  msy_t_hist = (
+    ggplot(data=msy_max_t, mapping=aes(x='rep',weight='t')) 
+    +geom_bar()
+  )
+  msy_t_hist.save(os.path.join(DATAPATH,"msy_t_hist.png"))
   
   ## episode timeseries
   
   for i in range(3):
     episode_plots(
       ppo_df.loc[ppo_df.rep == i], 
-      path_and_filename = f"{DATAPATH}/ppo{ITERATIONS}-eps-{i}.png"
+      path_and_filename = os.path.join(DATAPATH,f"ppo{ITERATIONS}-eps-{i}.png")
     )
     episode_plots(
       gpp_df.loc[gpp_df.rep == i], 
-      path_and_filename = f"{DATAPATH}/gpp{ITERATIONS}-eps-{i}.png"
+      path_and_filename = os.path.join(DATAPATH,f"gpp{ITERATIONS}-eps-{i}.png")
     )
     #esc_path = esc_df.melt(id_vars=["t", "rep", "reward", "act_x", "act_y"])
     #opt_esc_plot = ggplot(esc_path[esc_df.rep == i], aes("t", "value", color="variable")) + geom_line()
@@ -202,6 +245,24 @@ def workflow_oneFishery():
   # define problem
   env_class = ENV_CLASS
   parameters_obj = parameters()
+  parameters_obj.params = {
+    "r_x": np.float32(1.0),
+    "r_y": np.float32(1.0),
+    "K_x": np.float32(1.0),
+    "K_y": np.float32(1.0),
+    "beta": np.float32(0.5),
+    "v0":  np.float32(0.2),
+    "D": np.float32(1.1),
+    "tau_yx": np.float32(0.0),
+    "tau_xy": np.float32(0.0),
+    "cV": np.float32(0.5),
+    "f": np.float32(0.1),
+    "dH": np.float32(0.1),
+    "alpha": np.float32(1),
+    "sigma_x": np.float32(parameters_obj.sigma),
+    "sigma_y": np.float32(parameters_obj.sigma),
+    "sigma_z": np.float32(parameters_obj.sigma)
+    }
   
   # create agent
   agent = create_agent(
@@ -220,9 +281,11 @@ def workflow_oneFishery():
   
   # uncontrolled
   generate_uncontrolled_timeseries_plot(
-    env, path_and_filename=f"{DATAPATH}/uncontrolled_timeseries.png", T=200, reps=1
+    env, path_and_filename=os.path.join(DATAPATH,"uncontrolled_timeseries.png"), T=200, reps=1
   )
-  esc_filename = f"{DATAPATH}/esc_{REPS}.csv.xz"
+  
+  # Escapement
+  esc_filename = os.path.join(DATAPATH,f"esc_{REPS}.csv.xz")
   if os.path.exists(esc_filename):
     print("Reading escapement...")
     esc_df = pd.read_csv(esc_filename)
@@ -233,11 +296,28 @@ def workflow_oneFishery():
     esc_df.to_csv(esc_filename)
   print("Escapement done!")
   
+  
+  # msy
+  msy_filename = os.path.join(DATAPATH,f"msy_{REPS}.csv.xz")
+  if os.path.exists(msy_filename):
+    print("Reading msy...")
+    msy_df = pd.read_csv(msy_filename)
+    print(
+      values_at_max_t(msy_df)
+      .agg({'reward':['mean', 'std']})
+    )
+  else:
+    print("Running msy...")
+    best_msy, msy_df = find_msy_1fish(env, grid_nr=ESC_GRID_SIZE, repetitions=REPS)
+    print(best_msy)
+    msy_df.to_csv(msy_filename)
+  print("MSY done!")
+  
   # train agent and generate data
   agent = train_agent(agent, iterations=ITERATIONS, path_to_checkpoint="cache")
   print("Finished training RL agent!")
   ppo_df = generate_episodes_1fish(agent, env, reps = REPS)
-  ppo_df.to_csv(f"{DATAPATH}/ppo{ITERATIONS}.csv.xz", index = False)
+  ppo_df.to_csv(os.path.join(DATAPATH,f"ppo{ITERATIONS}.csv.xz"), index = False)
 
 
   #esc_df, ppo_df = workflow(env, agent)
@@ -247,8 +327,10 @@ def workflow_oneFishery():
   
   ## state policy plots
   
-  policy_df = state_policy_plot_1fish(agent, env, path_and_filename= f"{DATAPATH}/ppo{ITERATIONS}-pol.png")
-  policy_df.to_csv(f"{DATAPATH}/ppo{ITERATIONS}_policy_data.csv.xz")
+  policy_df = state_policy_plot_1fish(
+    agent, env, path_and_filename= os.path.join(DATAPATH,f"ppo{ITERATIONS}-pol.png")
+  )
+  policy_df.to_csv(os.path.join(DATAPATH,f"ppo{ITERATIONS}_policy_data.csv.xz"))
   
   
   ## Gaussian Process Smoothing:
@@ -256,18 +338,25 @@ def workflow_oneFishery():
   gpp = GaussianProcessPolicy_1fish(policy_df)
   print("Finished fitting GP!")
   gpp_df =  generate_gpp_episodes_1fish(gpp, env, reps=REPS)
-  gpp_df.to_csv(f"{DATAPATH}/ppo{ITERATIONS}_GPP.csv.xz", index = False)
+  gpp_df.to_csv(os.path.join(DATAPATH,f"ppo{ITERATIONS}_GPP.csv.xz"), index = False)
+  
+  gpp_policy_df = gpp_policy_plot_1fish(
+    gpp, env, path_and_filename = os.path.join(DATAPATH,f"gpp{ITERATIONS}-pol.png")
+  )
+  gpp_policy_df.to_csv(os.path.join(DATAPATH,f"gpp{ITERATIONS}_policy_data.csv.xz"))
   
   ## data wrangling
+  msy_max_t = values_at_max_t(msy_df, group="rep")
+  esc_max_t = values_at_max_t(esc_df, group="rep")
   ppo_max_t = values_at_max_t(ppo_df, group="rep")
   gpp_max_t = values_at_max_t(gpp_df, group="rep")
-  esc_max_t = values_at_max_t(esc_df, group="rep")
   ppo_max_t['strategy']='PPO'
   gpp_max_t['strategy']='PPO+GP'
   esc_max_t['strategy']='CEsc'
-  tot_max_t = pd.concat([esc_max_t, ppo_max_t, gpp_max_t])
+  msy_max_t['strategy']='CMort'
+  tot_max_t = pd.concat([msy_max_t, esc_max_t, ppo_max_t, gpp_max_t])
   
-  tot_max_t.to_csv(f"{DATAPATH}/comparison_{ITERATIONS}.csv.xz")
+  tot_max_t.to_csv(os.path.join(DATAPATH,f"comparison_{ITERATIONS}.csv.xz"))
   print("Done with data generation, finishing up on plots...")
   
   
@@ -281,7 +370,7 @@ def workflow_oneFishery():
     y='strategy',
   )
   fig = ax.get_figure()
-  fig.savefig(f"{DATAPATH}/rew_violin_plot_{ITERATIONS}.png", dpi=500)
+  fig.savefig(os.path.join(DATAPATH,f"rew_violin_plot_{ITERATIONS}.png"), dpi=500)
   
   ## reward and time histograms
   
@@ -290,50 +379,63 @@ def workflow_oneFishery():
     ggplot(data=ppo_max_t, mapping=aes(x='rep',weight='reward')) 
     +geom_bar()
   )
-  ppo_rew_hist.save(f"{DATAPATH}/ppo{ITERATIONS}_rew_hist.png")
+  ppo_rew_hist.save(os.path.join(DATAPATH,f"ppo{ITERATIONS}_rew_hist.png"))
   #
   ppo_t_hist = (
     ggplot(data=ppo_max_t, mapping=aes(x='rep',weight='t')) 
     +geom_bar()
   )
-  ppo_t_hist.save(f"{DATAPATH}/ppo{ITERATIONS}_t_hist.png")
+  ppo_t_hist.save(os.path.join(DATAPATH,f"ppo{ITERATIONS}_t_hist.png"))
   
   # GPP
   gpp_rew_hist = (
     ggplot(data=gpp_max_t, mapping=aes(x='rep',weight='reward')) 
     +geom_bar()
   )
-  gpp_rew_hist.save(f"{DATAPATH}/gpp{ITERATIONS}_rew_hist.png")
+  gpp_rew_hist.save(os.path.join(DATAPATH,f"gpp{ITERATIONS}_rew_hist.png"))
   #
   gpp_t_hist = (
     ggplot(data=gpp_max_t, mapping=aes(x='rep',weight='t')) 
     +geom_bar()
   )
-  gpp_t_hist.save(f"{DATAPATH}/gpp{ITERATIONS}_t_hist.png")
+  gpp_t_hist.save(os.path.join(DATAPATH,f"gpp{ITERATIONS}_t_hist.png"))
   
   # ESC
   esc_rew_hist = (
     ggplot(data=esc_max_t, mapping=aes(x='rep',weight='reward')) 
     +geom_bar()
   )
-  esc_rew_hist.save(f"{DATAPATH}/esc_rew_hist.png")
+  esc_rew_hist.save(os.path.join(DATAPATH,"esc_rew_hist.png"))
   #
   esc_t_hist = (
     ggplot(data=esc_max_t, mapping=aes(x='rep',weight='t')) 
     +geom_bar()
   )
-  esc_t_hist.save(f"{DATAPATH}/esc_t_hist.png")
+  esc_t_hist.save(os.path.join(DATAPATH,"esc_t_hist.png"))
+  
+  # ESC
+  msy_rew_hist = (
+    ggplot(data=msy_max_t, mapping=aes(x='rep',weight='reward')) 
+    +geom_bar()
+  )
+  msy_rew_hist.save(os.path.join(DATAPATH,"msy_rew_hist.png"))
+  #
+  msy_t_hist = (
+    ggplot(data=msy_max_t, mapping=aes(x='rep',weight='t')) 
+    +geom_bar()
+  )
+  msy_t_hist.save(os.path.join(DATAPATH,"msy_t_hist.png"))
   
   ## episode timeseries
   
   for i in range(3):
     episode_plots_1fish(
       ppo_df.loc[ppo_df.rep == i], 
-      path_and_filename = f"{DATAPATH}/ppo{ITERATIONS}-eps-{i}.png"
+      path_and_filename = os.path.join(DATAPATH,f"ppo{ITERATIONS}-eps-{i}.png")
     )
     episode_plots_1fish(
       gpp_df.loc[gpp_df.rep == i], 
-      path_and_filename = f"{DATAPATH}/gpp{ITERATIONS}-eps-{i}.png"
+      path_and_filename = os.path.join(DATAPATH,f"gpp{ITERATIONS}-eps-{i}.png")
     )
     #esc_path = esc_df.melt(id_vars=["t", "rep", "reward", "act_x", "act_y"])
     #opt_esc_plot = ggplot(esc_path[esc_df.rep == i], aes("t", "value", color="variable")) + geom_line()
@@ -341,6 +443,14 @@ def workflow_oneFishery():
 
   return None
 
+def what_to_do(envcode):
+  envcode_to_workflow = {
+    "1FISHERY": workflow_oneFishery, 
+    "2FISHERY": workflow_twoFishery
+  }
+  _ = ray.get(
+    [envcode_to_workflow[envcode].remote() for _ in range(1)]
+  )
 
 # run the thing
-what_to_do(workflow_choice=workflow_twoFishery)
+what_to_do(envcode=ENVCODE)
