@@ -471,9 +471,9 @@ The policy function $\pi$ often lives in a high or even infinite-dimensional spa
 This makes it unfeasible to directly optimize $\pi$.
 In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions.\footnote{
 Policies are, in general, functions from state space to policy space.
-In our case, these are real-valued functions on a cube $\pi:[0,2]^{\times 3}\to \mathbb{R}_+$.
+In our paper, these are $\pi:[0,1]^{\times 3}\to \mathbb{R}_+$ for the single fishery case, and $\pi:[0,1]^{\times 3}\to \mathbb{R}_+^2$ for two fisheries.
 The space of all such functions is highly singular, spanning a \emph{non-separable Hilbert space}.
-Even restricting ourselves to continuous policy functions, we end up with a set of policies which span the infinite dimensional space $L^2([0,2]^{\times3})$.
+Even restricting ourselves to continuous policy functions, we end up with a set of policies which span the infinite dimensional space $L^2([0,1]^{\times3})$.
 One way to avoid optimizing over an infinite dimensional ambient space is to discretize state space into a set of bins.
 This approach runs into tractability problems: First, the dimension of policy space scales exponentially with the number of species.
 Second, even for a fixed number of species (e.g., 3), the dimension optimized over can be prohibitively large---for example if one uses 1000 bins for each population in a three-species model, the overall number of parameters being optimized over is $10^9$.
@@ -519,12 +519,20 @@ This context provides a motivation for this paper.
 Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
 This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
 
+Model-free DRL provides, moreover, a framework within which agents can be trained to be generally competent over a *variety* of different models.
+This could more faithfully capture the ubiquitous uncertainty around ecosystem models.
+The aforementioned framework---known as *curriculum learning*---is considerably more intensive on computational resources than the ‘‘vanilla’’ DRL methods we have used in this paper.\footnote{
+All our agents were trained in a local server with two commercial GPUs. 
+The training time was between 30 minutes and one hour in each case.
+}
+Due to the increased computational requirements of this framework, we have left the exploration in this direction for future work.
+
 
 # Methods
 
 \textbf{Training a DRL agent.}
 We trained a DRL agent parametrized by a neural network $\theta$ with two hidden, 64-neuron, layers.
-The state space used was a cube $[0,2]^{\times 3}$, while the policies explored mapped states $N_t$ to a single number, $M_X(N_t) = \pi_\theta(N_t)$, the harvest mortality on species $X$ at that timestep.
+The state space used was a cube $[0,1]^{\times 3}$, while the policies explored mapped states $N_t$ to a single number, $M_X(N_t) = \pi_\theta(N_t)$, the harvest mortality on species $X$ at that timestep.
 Each episode in the training and in the evaluation stages was at most 200 time steps long.
 Episodes were ended early in case of a ‘‘near-extinction event,’’ a moment in which any of the populations dipped below a threshold value, i.e.,
 \begin{align}
@@ -536,18 +544,18 @@ Episodes were ended early in case of a ‘‘near-extinction event,’’ a mome
 \end{align}
 The reward function had two componenets:
 First, at each time step the harvest $h_t$ was received as a reward.
-Second, if the episode ended early (say, at time-step $t$) because of a near-extinction event, a negative reward of $-50/t$ was awarded.
-The constant 50 was chosen so as to select against highly extractive policies in the early stages of training, and thus guide the agent towards sustainable policies.
+Second, if the episode ended early (say, at time-step $t$) because of a near-extinction event, a negative reward of $-100/t$ was awarded.
+The constant 100 was chosen so as to select against highly extractive policies in the early stages of training, and thus guide the agent towards sustainable policies.
 This technique, falling under the ‘‘umbrella’’ category of *reward shaping*, is commonly used -- alongside hyper-parameter tuning and state space normalization -- to improve the speed of training by avoiding badly-performing local optima in the gradient ascent algorithm.
 
-Thus, we normalized state space (to be contained in a cube of length 2) and engaged in reward shaping in order to optimize our agent's learning.
+Thus, we normalized state space (to be contained in a cube of length 1) and engaged in reward shaping in order to optimize our agent's learning.
 We did not need to tune hyper-parameters for this goal, however.
 
 We used the Ray framework\footnote{\url{https://docs.ray.io/}} for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters.
-The agent was trained for 200 iterations of the PPO optimization step.
+The agent was trained for 300 iterations of the PPO optimization step.
 
 \textbf{Tuning the constant mortality strategy.}
-A grid of 100 mortality rates was laid in the interval $[0, 0.1]$.
+A grid of 100 mortality rates was laid in the interval $[0, 0.5]$.
 For each one of these rates, say $M$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
 At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $MX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
 The optimal mortality rate was the value $M^*$ for which the mean episode reward was maximal.
