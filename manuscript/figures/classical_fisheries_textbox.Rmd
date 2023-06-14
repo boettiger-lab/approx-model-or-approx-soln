@@ -6,7 +6,10 @@ output:
 
 \begin{tcolorbox}[parbox=false,colback=red!5!white,colframe=red!75!black,title=\large Text Box 1: Classical approaches to sustainable fisheries]
 
-There are several existing approaches that have been used to manage fisheries, including \textbf{escapement}, control rules associated with \textbf{maximum sustainable yield (MSY)}, among others. We collectively refer to these as $classical$, and will compare their performance to RL-based management strategies. While often complex models of the ecosystem are used to estimate the size of fish population of interest, these classical strategies derive an optimal harvest policy using a simple model for the system dynamics. Across these strategies, setting the harvest quota has the shared aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population, $X$. 
+There are several existing approaches that have been used to manage fisheries, most prominently including \textbf{constant escapement policies} and \textbf{constant mortality policies}. 
+We collectively refer to these as $classical$, and will compare their performance to RL-based management strategies. 
+While often complex models of the ecosystem are used to estimate the size of fish population of interest, these classical strategies derive an optimal harvest policy using a simple model for the system dynamics. 
+Across these strategies, setting the harvest quota has the shared aspect of reducing the complex dynamics of the fishery ecosystem to a single equation governing the harvested population, $X$. 
 
 A common example is the surplus production model that assumes logistic population growth in the absence of exploitation (Gordon, 1954; Schaefer, 1954):
 
@@ -14,27 +17,39 @@ A common example is the surplus production model that assumes logistic populatio
 X_{t+1} - X_t = r X_t( 1 - X_t / K) - h_t = L(X_t) - h_t
 \end{equation*}
 
-The interaction between $X$ and its environment is summarized to two parameters, the maximum intrinsic growth rate $r$, and the carrying capacity $K$. In the equation above, $h_t$ is the $harvest$ at time step $t$. The goal is to choose the harvest policy $h:X_t\mapsto h_t$, such that long-term profits are maximized.
+The interaction between $X$ and its environment is summarized to two parameters, the maximum intrinsic growth rate $r$, and the carrying capacity $K$. In the equation above, $h_t$ is the $harvest$ at time step $t$. The goal is to choose the harvest policy $h:X_t\mapsto h_t$, such that long-term catch is maximized.
 
-An advantage of one dimensional approaches is that the optimal policy is intuitive and often known exactly. For example, in the logistic equation pointed out above, the maximum growth rate occurs at a population size $X = K/2$. The optimizer is an \textbf{escapement} policy, which corresponds to a harvest, $h_t$, that keeps the system at its optimal growth rate as much as possible:
-
+An advantage of one dimensional approaches is that the optimal policy is intuitive and often known exactly. 
+For example, in the logistic equation pointed out above, the maximum growth rate occurs at a population size $X = K/2$. 
+The optimizer is an \textbf{escapement} policy, which corresponds to a harvest, $h_t$, that keeps the system at its optimal growth rate as much as possible:
 \begin{equation*}
   h_t = \begin{cases}
-    X_t - K/2, \qquad &\text{if } X_t > K/2\\
-    0, \qquad &\text{else.}
+    X_t - a, \qquad &\text{if } X_t > a\\
+    0, \qquad &\text{else,}
   \end{cases}
 \end{equation*}
+where $a$ is the stock size at which growth is maximized.
+For example, in the logistic growth example above, $a=K/2$.
 
-Escapement policies, or more generally $bang$ $bang$ policies, tend to be the optimal solution for these types of control problems. A drawback of these solutions in the fishery context, is the possible presence of several time steps with zero harvest. To mend this, certain suboptimal solutions have been constructed for fishery management.
+This type of \emph{bang-bang} policy tends to be the optimal solution for these types of control problems. 
+A drawback of these solutions in the fishery context, is the possible presence of several time steps with zero harvest. To mend this, certain suboptimal solutions have been constructed for fishery management.
 
-One ubiquitous solution, often called \textbf{maximum sustainable yield (MSY)}, provides biological reference points that can be simply calculated from the surplus production model parameters. The population size at the maximum growth rate, $X = K/2$, is approached asymptotically from any positive initial state $X_0 \in (0,K)$, under a constant mortality $M_{MSY}=r/2$ policy. At equilibrium, this produces the maximum sustainable yield: 
-
+One ubiquitous solution is based on a constant mortality policy:
+\begin{equation*}
+  h_t = aX_t,
+\end{equation*}
+for some constant $a$.
+The policy with optimal value of $a$ is known as a \emph{maximum sustainable yield (MSY)} policy.
+In the logistic example above, this optimum mortality rate is $a=rK/4$. 
+Under this policy, the stock size at the maximum growth rate $X_{MSY} = K/2$ is approached asymptotically from any positive initial state $X_0 \in (0,K)$.
+Thus, in equilibrium the MSY policy tends to match the results of constant escapement, namely, having the harvest rate be the maximum sustainable yield of the model: 
 \begin{equation*}
 MSY = h(X_{MSY}) = rK/4.
 \end{equation*}
+That is, at the MSY biomass, $X_{MSY}$, the logistic growth of $X$ is cancelled exactly by the harvest. 
 
-That is, at the MSY biomass, $X_{MSY}$, the logistic growth of $X$ is cancelled exactly by the harvest. This \textbf{MSY constant mortality} rule fixes the drawback in the escapement policy by having $h(X)>0$ for all $X>0$. It, however, has its own drawbacks, as it is particularly sensitive to misestimates of the parameter $r$.
-
+This MSY policy fixes the drawback of the escapement policy---$h(X)>0$ for all $X>0$.
+It, however, has its own drawbacks, as it is particularly sensitive to misestimates of the parameter $r$.
 Due to this, similar but more conservative policies are often applied where the constant rate of fishing mortality is $< M_{MSY}$. This control rule consists on reducing the inclination of the line defined by $h(X)$ using a prefactor $\alpha$ in $h(X) = \alpha\cdot rX/2$. Plausible examples are $\alpha = 0.8$ or $0.9$; here we examine an \textbf{80\% MSY constant mortality} policy.
 
 \end{tcolorbox}
