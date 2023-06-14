@@ -338,8 +338,8 @@ Consider the following three species recruitment model which generalizes eq. \eq
 \begin{align}
 \label{eq:3d model}
 \begin{split}
-  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t,\\
-  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t,\\
+  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_{X,t},\\
+  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_{Y,t},\\
   \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
 \end{split}
 \end{align}
@@ -352,10 +352,17 @@ A maximum predation rate $\beta$ and a predation rate half-maximum biomass $c$ s
 A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
 Finally, a death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
 
+As mentioned in the introduction, we consider two harvesting scenarios: one where only $X$ is harvested (i.e. $h_{Y,t}=0$), and one where both $X$ and $Y$ are harvested.
+For most of our paper, parameters used in this model will be given as in eq. \eqref{eq:param vals}.
+In the time-varying model, however, we use the following drift on the growth rate of $X$:
+\begin{equation*}
+  r_X = r_X(t) = \max(1-t/200, 1/2).
+\end{equation*}
+
 This model generalizes eq. \eqref{eq:may} in the following sense:
 If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} becomes
 \begin{align*}
-  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, H;\ \beta, c) - h_t,\\
+  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, H;\ \beta, c),\\
   \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, H;\ \beta, c),\\
   Z_t &= H.
 \end{align*}
@@ -363,14 +370,6 @@ The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving acc
 
 As can be expected, the dynamics of eq. \eqref{eq:3d model} are significantly more complex than those of eq. \eqref{eq:may}.
 Here, a fixed point analysis provides a less intuitive picture of the dynamics---it no longer necessarily alternates in a tipping manner between two stable points.
-
-For most of our paper, parameters used in this model will be given as in eq. \eqref{eq:param vals}.
-In this paper we do not set out to provide a realistic model of any given fishery, but rather to show that the DRL approach may be applicable to a broad variety of plausible fish recruitment models.
-Because of this, we also provide a *stability analysis*, where we perturb the parameter values randomly.
-Finally, in the time-varying model, we use the following drift on the growth rate of $X$:
-\begin{equation*}
-  r_X = r_X(t) = \max(1-t/200, 1/2).
-\end{equation*}
 
 ## Stochastic dynamics
 
