@@ -168,7 +168,7 @@ Much effort has been spent grappling with the complexity of our natural world in
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
  But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
 While simplified models have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
-For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [@riahi2017shared].
+For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of seven emissions marker scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
 Similar combinations of rich process models and highly simplified decision models (often not even given the status of 'model') are common.
@@ -228,8 +228,17 @@ knitr::include_graphics("figures/conceptual.png")
 ```
 
 <!--NEED some kind of map paragraph here saying what's ahead, what we show  -->
-In this article, we compare the performance of a DRL solution to that of a management strategy evaluation across potential 'constant mortality' policies.\footnote{A repository with all the relevant code to reproduce our results may be found at \url{https://github.com/boettiger-lab/approx-model-or-approx-soln} in the ‘‘code’’ subdirectory. The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.} 
-We consider the problem of devising harvest strategies in a three species ecosystem (Figure 1B).
+In this article, we compare the performance of a DRL solution to that of classical management strategies (see Textbox 1).\footnote{A repository with all the relevant code to reproduce our results may be found at \url{https://github.com/boettiger-lab/approx-model-or-approx-soln} in the ‘‘src’’ subdirectory. 
+The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.} 
+We consider the problem of devising harvest strategies in a for a series of ecosystem models (Figure **TBD**):
+*1) one species, one fishery:* a simple single-species recruitment model based on [@may77];
+*2) three species, one fishery:* a three-species generalization of model *1)*, where one of the species is harvested;
+*3) three species, two fisheries:* the same three-species model as above but with two harvested species;\footnote{
+As we prepared this manuscript we became aware of [@nicolalove] which considers an ecological control problem with a similar mathematical formulation, but using an analytical calculus-based approach.
+}
+*4) three species, two fisheries, parameter variation:* a three-species model of which two are harvested, as above, with a time-varying parameter.
+This last model is meant to be a toy model of climate change's effect on the system.
+
 We show that, somewhat surprisingly, the DRL policy closely resembles a *bang-bang* solution (see Text Box 1).
 Bang-bang solutions are known to be optimal for a variety of single-species models, however, there is no a-priori reason why they should be optimal for higher-dimensional systems.
 This way, the DRL agent discovers and exploits, as it were, an effective simplification of the control problem.
