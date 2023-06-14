@@ -238,16 +238,31 @@ As we prepared this manuscript we became aware of [@nicolalove] which considers 
 }
 *4) three species, two fisheries, parameter variation:* a three-species model of which two are harvested, as above, with a time-varying parameter.
 This last model is meant to be a toy model of climate change's effect on the system.
+Across all of these scenarios, two goals are balanced in the decision process: maximizing long-term catch and preventing stock sizes to fall below some a-priori threshold.
+
+Regarding control for these 4 models, we show that: *1)* while all approaches match in performance in the single species deterministic model, even mild stochasticity plummets the performance of MSY relative to constant escapement. 
+Moreover, DRL recovers the optimal constant escapement policy.
+*2)* In the three species, single fishery model, all management strategies perform similarly.
+*3)* In the three species, two fisheries model DRL outperforms both classical strategies, with MSY surprisingly performing significantly better than constant escapement.
+In particular, we observe that DRL strategies are more sensitive to stochastic variations of the system which allows it to adaptively manage the system to prevent population collapses below the threshold.
+*4)* In the three species, two fisheries model with parametric time-variation, the performance gap between DRL and MSY is broadened.
+In this case, as in *3)*, constant escapement strategies perform significantly worse than DRL and MSY.
+
+Our findings paint a picture of how a single-species optimal management strategy may loose performance rather dramatically when controlling a more complex ecosystem.
+Moreover, rather unintuitively, management strategies, such as MSY, known to be suboptimal and unsustainable in the single-species can turn out to even outperform the aforementioned single-species optimal strategy (e.g. constant escapement).
+Finally, within this regime of complex, possibly varying, ecosystems, we show that DRL consistently finds a policy which effectively either matches the best classical strategy, or outperforms it.
+We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms constant escapement.
 
 We show that, somewhat surprisingly, the DRL policy closely resembles a *bang-bang* solution (see Text Box 1).
 Bang-bang solutions are known to be optimal for a variety of single-species models, however, there is no a-priori reason why they should be optimal for higher-dimensional systems.
 This way, the DRL agent discovers and exploits, as it were, an effective simplification of the control problem.
 We provide some intuition as to how this simplification arises from the dynamics of the system, but leave a more rigorous characterization of this phenomenon for future work.
 
-The DRL policy drives an oscillation process in the system and, in this way, maintains the long-term sustainability of fishing.
-In contrast, constant mortality policies overfish at low populations and underfish (relative to the DRL solution) at high populations.
-This leads to a tradeoff when leveraging constant mortality strategies: higher constant mortality rates lead to high profitability at the expense of a higher probability of overfishing to extinction, while lower constant mortality rates attain stability at the expense of profit.
-
+We notice that both classical management strategies are faced with a tradeoff---optimal classical strategies accept a rather large fraction of episodes ending with a population crash, whose negative reward is counteracted with a higher economic output.\footnote{
+In our mathematical formulation of the decision problem, we have assumed for simplicity that the fishing effort cost is zero and that fish price is stable over time.
+This way, we equate economic output with harvested biomass.
+}
+Conversely, more conservative suboptimal classical strategies (e.g. with a higher constant escapement value) lead to lower total reward on average.
 The DRL approach side-steps this tradeoff by optimizing over a more complex family of possible policies—policies parametrized by a neural network, as opposed to policies labeled by a single parameter (the mortality rate).
 We thus observe that the DRL solution leads to a higher profitability *and* stability as compared to constant mortality policies. 
 
