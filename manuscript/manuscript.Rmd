@@ -253,11 +253,6 @@ Moreover, rather unintuitively, management strategies, such as MSY, known to be 
 Finally, within this regime of complex, possibly varying, ecosystems, we show that DRL consistently finds a policy which effectively either matches the best classical strategy, or outperforms it.
 We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms constant escapement.
 
-We show that, somewhat surprisingly, the DRL policy closely resembles a *bang-bang* solution (see Text Box 1).
-Bang-bang solutions are known to be optimal for a variety of single-species models, however, there is no a-priori reason why they should be optimal for higher-dimensional systems.
-This way, the DRL agent discovers and exploits, as it were, an effective simplification of the control problem.
-We provide some intuition as to how this simplification arises from the dynamics of the system, but leave a more rigorous characterization of this phenomenon for future work.
-
 We notice that both classical management strategies are faced with a tradeoff---optimal classical strategies accept a rather large fraction of episodes ending with a population crash, whose negative reward is counteracted with a higher economic output.\footnote{
 In our mathematical formulation of the decision problem, we have assumed for simplicity that the fishing effort cost is zero and that fish price is stable over time.
 This way, we equate economic output with harvested biomass.
