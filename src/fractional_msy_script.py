@@ -17,7 +17,7 @@ parameter_obj_3sp = parameters()
 parameter_obj_1sp = parameters_oneSp()
 
 # choosing env to evaluate / corresponding data location
-scenario = 1sp1fish
+scenario = _1sp1fish
 env_class = oneSpecies.singleSp
 fname = os.path.join(*scenario, "msy_100.csv.xz")
 DATACODE = "ONESP"
