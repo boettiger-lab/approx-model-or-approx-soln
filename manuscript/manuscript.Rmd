@@ -532,7 +532,7 @@ Due to the increased computational requirements of this framework, we have left 
 
 \textbf{The Environment.}
 As seen in Fig. **TBD CONCEPTUAL**, we consider four different models of the ecosystem with which the fishery interacts, each of this is called an *environment*, alluding to the environment in an RL setting.
-To recap, these four environments are a single-species growth model \eqref{eq:may77} for a harvested species; a three-species model \eqref{eq:3d} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
+To recap, these four environments are a single-species growth model \eqref{eq:may77} for a harvested species; a three-species model \eqref{eq:3d model stoch} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
 
 The policies explored were functions from states $N_t$ to a single number, $M_X(N_t) = \pi_\theta(N_t)$, in the single fishery case.
 In the two-fishery case, policies lead to two-dimensional actions: $(M_X(N_t), M_Y(N_t)) = \pi_\theta(N_t)$.
@@ -555,7 +555,7 @@ Second, if the episode ended early (say, at time-step $t$) because of a near-ext
 This reward function balances the extractive motivation of the fishery with conservation goals that go beyond the scope of long-term sustainable harvests.
 
 \textbf{Training a DRL agent.}
-We trained a DRL agent parametrized by a neural network $\theta$ with two hidden, 64-neuron, layers, on a local server with 2 commercial GPUs.
+We trained a DRL agent parametrized by a neural network with two hidden, 64-neuron, layers, on a local server with 2 commercial GPUs.
 We used the Ray framework\footnote{\url{https://docs.ray.io/}} for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters.
 In particular, no hyperparameter tuning was performed.
 The agent was trained for 300 iterations of the PPO optimization step.
@@ -567,16 +567,14 @@ We used simulation data to derive a bound on the population sizes typically obse
 
 
 \textbf{Tuning the constant mortality strategy.}
-A grid of 100 mortality rates was laid in the interval $[0, 0.5]$.
-For each one of these rates, say $M$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
-At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $MX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
-The optimal mortality rate was the value $M^*$ for which the mean episode reward was maximal.
-We additionally evaluated a more conservative strategy where a mortality of $0.8 M^*$ instead is used.
-
+A grid of 101 mortality rates was laid in the interval $[0, 0.5]$ as possible mortality values in the single-fishery cases.
+Due to the high memory usage in the two-fishery case, a slightly coarser $51\times51$ grid was set in the square $[0,0.5]^2$ instead.
+Since the approach for tuning is completely analogous for all scenarios considered, here we focus on the ‘‘3 species, 1 fishery’’ case.
+For each one of these choices of a constant mortality rate, say $M_X$, we simulated 100 episodes based on \eqref{eq:3d model stoch}:
+At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $M_X X_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
+The optimal mortality rate was the value $M_X^*$ for which the mean episode reward was maximal.
 The result of the tuning procedure is shown in Fig. \ref{fig:tuning}. 
-There, we see that the optimal value $M^*$ lies in an area with high episode reward variance.
-We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this variance is the presence of episodes with early endings.
-Thus, the value $0.8 M^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
+
 
 ```{r}
 #| label: tuning
