@@ -17,11 +17,11 @@ parameter_obj_3sp = parameters()
 parameter_obj_1sp = parameters_oneSp()
 
 # choosing env to evaluate / corresponding data location
-scenario = _1sp1fish
-parameter_obj = parameter_obj_1sp
-env_class = oneSpecies.singleSp
+scenario = _3sp2fish
+parameter_obj = parameter_obj_3sp
+env_class = two_three_fishing.twoThreeFishing #oneSpecies.singleSp
 fname = os.path.join(*scenario, "msy_100.csv.xz")
-DATACODE = "ONESP"
+DATACODE = "DEFAULT"
 
 env = create_env(
   env_class, 
@@ -32,14 +32,17 @@ env = create_env(
 )
 
 
-msy_frac_df, _ = csv_to_frac_msy_1fish(
-  env, fname, fraction=0.8, repetitions=100
+msy_frac_df, _ = csv_to_frac_msy_2fish(
+  env, fname, fraction=0.8, repetitions=100,
 )
 del _
 
-cols = ["t", "rep", "mortality", "act", "reward", "X", "Y", "Z"] # assume 1 species as default
-if env.num_species == 1:
+cols = ["t", "rep", "mortality_x", "mortality_y", "act_x", "act_y", "reward", "X", "Y", "Z"] # assume _3sp2fish by default
+if scenario == _1sp1fish:
   cols = ["t", "rep", "mortality", "act", "reward", "X"]
+if scenario == _3sp1fish:
+  cols = ["t", "rep", "mortality", "act", "reward", "X", "Y", "Z"]
+  
   
 msy_frac_df = pd.DataFrame(msy_frac_df, columns=cols)
 
