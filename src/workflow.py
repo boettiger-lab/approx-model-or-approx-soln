@@ -11,7 +11,6 @@ from eval_util import (
   generate_episodes_1fish, episode_plots_1fish, state_policy_plot_1fish,
   GaussianProcessPolicy_1fish, generate_gpp_episodes_1fish, 
   gpp_policy_plot_1fish, gpp_policy_plot_2fish,
-  
 )
 from msy_fns import find_msy_2fish, find_msy_1fish
 
@@ -34,13 +33,13 @@ Data-code list:
 '''
 
 # globals
-NAME_MODIFIER = "V1_REPLICATE"
+NAME_MODIFIER = "approx_1D1D_tipping"
 ITERATIONS = 300
 REPS = 100
 ESC_GRID_SIZE = 51
 DATACODE = "DEFAULT"
 FLUCTUATING = False
-ENVCODE = "1FISHERY"
+ENVCODE = "2FISHERY"
 DATAPATH = os.path.join("../data/results_data", ENVCODE, DATACODE, NAME_MODIFIER)
 ENVCODE_TO_ENV = {
   "1FISHERY": two_three_fishing.oneThreeFishing,
@@ -245,24 +244,6 @@ def workflow_oneFishery():
   # define problem
   env_class = ENV_CLASS
   parameters_obj = parameters()
-  parameters_obj.params = {
-    "r_x": np.float32(1.0),
-    "r_y": np.float32(1.0),
-    "K_x": np.float32(1.0),
-    "K_y": np.float32(1.0),
-    "beta": np.float32(0.5),
-    "v0":  np.float32(0.2),
-    "D": np.float32(1.1),
-    "tau_yx": np.float32(0.0),
-    "tau_xy": np.float32(0.0),
-    "cV": np.float32(0.5),
-    "f": np.float32(0.1),
-    "dH": np.float32(0.1),
-    "alpha": np.float32(1),
-    "sigma_x": np.float32(parameters_obj.sigma),
-    "sigma_y": np.float32(parameters_obj.sigma),
-    "sigma_z": np.float32(parameters_obj.sigma)
-    }
   
   # create agent
   agent = create_agent(

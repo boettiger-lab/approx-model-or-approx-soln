@@ -382,6 +382,7 @@ def generate_gpp_episodes_1fish(gpp, env, reps=50):
     population = env.population()
     for t in range(env.Tmax):
       action = gpp.predict([population])[0]
+      action = max(action, 0)
       #print(f"pop = {population}")
       #print(f"action = {action}")
       esc = population[0] * (1 - action)

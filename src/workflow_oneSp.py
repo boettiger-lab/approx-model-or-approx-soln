@@ -19,14 +19,15 @@ from plotnine import (
   ggplot, geom_point, aes, geom_line, facet_wrap, geom_path, geom_bar, geom_histogram
 )
 import ray
+import numpy as np
 
 # globals
-ITERATIONS = 80
+ITERATIONS = 100
 REPS = 100
 ESC_GRID_SIZE = 101
 DATACODE = "ONESP"
 FLUCTUATING = False
-DATAPATH = os.path.join("../data/results_data", DATACODE)
+DATAPATH = os.path.join("../data/results_data", DATACODE, "Tipping-higher-beta")
 ENV_CLASS = oneSpecies.singleSp
 
 os.makedirs(DATAPATH, exist_ok=True)
@@ -35,7 +36,14 @@ os.makedirs(DATAPATH, exist_ok=True)
 def workflow_oneSpecies():
   # define problem
   parameters_obj = parameters_oneSp()
-  
+  parameters_obj.params = {
+    "r": np.float32(1.0),
+    "K": np.float32(1.0),
+    "betaZ": np.float32(0.23),
+    "v0": np.float32(0.1),
+    "sigma": np.float32(0.1),
+    }
+
   # create agent
   agent = create_agent(
     env_class = ENV_CLASS,
