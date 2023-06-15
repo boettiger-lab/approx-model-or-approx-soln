@@ -546,7 +546,8 @@ Episodes were ended early in case of a ‘‘near-extinction event,’’ a mome
   Z \leq Z_{\text{thresh.}}.
 \end{align}
 For a realistic fishery model, this threshold value could represent a population value beyond which drastic ecological consequences may ensue, e.g. a tipping point.
-In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90% population decrease from its ‘‘natural’’ level.
+In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from its ‘‘natural’’ level.
+This roughly represents a near-extinction event.
 
 The reward function had two componenets:
 First, at each time step the harvest $h_t$ was received as a reward.
