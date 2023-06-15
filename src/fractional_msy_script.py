@@ -53,6 +53,6 @@ rew_hist = (
   ggplot(data=msy_frac_df, mapping=aes(x='rep',weight='reward')) 
   +geom_bar()
 )
-msy_frac_df.save(
+rew_hist.save(
   os.path.join(*scenario, "frac_0-8_msy_rewards.png")
 )
