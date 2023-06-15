@@ -23,11 +23,11 @@ fname = os.path.join(*scenario, "msy_100.csv.xz")
 DATACODE = "ONESP"
 
 env = create_env(
-  env_class = env_class, 
+  env_class, 
   parameter_obj, 
   datacode = DATACODE, 
   fluctuating=False, 
-  training=True
+  training=True,
 )
 
 
