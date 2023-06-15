@@ -37,6 +37,12 @@ msy_frac_df, _ = csv_to_frac_msy_1fish(
 )
 del _
 
+cols = ["t", "rep", "mortality", "act", "reward", "X", "Y", "Z"] # assume 1 species as default
+if env.num_species == 1:
+  cols = ["t", "rep", "mortality", "act", "reward", "X"]
+  
+msy_frac_df = pd.DataFrame(msy_frac_df, columns=cols)
+
 msy_frac_df.to_csv(
   os.path.join(*scenario, "frac_0-8_msy.csv.xz")
 )
