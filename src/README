@@ -1,0 +1,43 @@
+To train an agent simply run "python workflow.py" or  "python workflow_oneSp.py"
+from the terminal while on the /src/ subdirectory. The options inside those scripts
+allow one to choose
+
+Structure of the code:
+
+  Main scripts:
+
+  workflow.py, workflow_oneSp.py:
+    Scripts that train a DRL agent, a constant mortality policy and a constant escapement policy.
+    workflow.py is used for three species model cases (including the single fishery, two fishery, and time-varying cases),
+    workflow_oneSp.py is used for the one species model.
+  jiggle_workflow.py:
+    Script to perform the stability analysis
+
+  Class files:
+
+  envs/twoThreeFishing.py, envs/oneSpecies.py:
+    Classes RL environments (envs) for the three-species and single-species models respectively. The former includes
+    env classes for the single-fishery and two-fishery cases.
+  parameters.py
+    Includes a class of objects that contain all the dynamical parameters of models. There are two classes in this file:
+    - parameters() parametrizes the three-species model
+    - parameters_oneSp() parametrizes the single-species model
+
+  Function files:
+
+    eval_util.py: Data generation.
+      Generating simulated data under DRL and classical policies, interpolating policies, plotting results.
+    msy_fns.py: Functions used to optimize a constant mortality policy (i.e. find the MSY).
+    one_fishery_esc_fns.py: Functions used to optimize a constant escapement policy in the single-fishery cases
+    two_fishery_esc_fns.py: Functions used to optimize a constant escapement policy in the two-fishery cases
+    uncontrolled_fns.py: Functions used to generate and plot the natural dynamics of the system (with no harvest)
+    envs/growth_fns.py: a collection of growth functions (i.e. dynamical recruitment models) that define the actual
+                        dynamical model used in policy optimization.
+
+  Supporting scripts:
+
+    esc_heatmap.py: generates a heatmap of the constant escapement strategy for different
+                    values of costant escapement in the two fishery case.
+    esc_oneSp_performance.py: plots the performance of constant escapement strategies for
+                    several values of constant escapement in the single fishery case.
+    delete_cache.py: deletes all DRL policies saved in the 'cache' subdirectory
