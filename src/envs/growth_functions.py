@@ -8,7 +8,7 @@ import numpy as np
 def single_species_growth(pop, parameters):
   X = pop[0]
   p = parameters
-  pop[0] += p["r"] * X * (1 - X / p["K"]) - p["betaZ"] * X / (X**2 + p["v0"]**2)
+  pop[0] += p["r"] * X * (1 - X / p["K"]) - p["betaZ"] * X**2 / (X**2 + p["v0"]**2) + p["sigma"] * np.random.normal() * X
   pop = pop.astype(np.float32)
   return pop
 

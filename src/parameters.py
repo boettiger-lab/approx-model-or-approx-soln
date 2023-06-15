@@ -60,6 +60,7 @@ class parameters_oneSp(parameters):
     "K": np.float32(1.0),
     "betaZ": np.float32(0.1),
     "v0": np.float32(0.3),
+    "sigma": np.float32(0.1),
     }
     self.reset_params = self.params
   
