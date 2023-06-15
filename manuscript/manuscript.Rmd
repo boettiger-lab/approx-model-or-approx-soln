@@ -354,10 +354,11 @@ Finally, a death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
 
 As mentioned in the introduction, we consider two harvesting scenarios: one where only $X$ is harvested (i.e. $h_{Y,t}=0$), and one where both $X$ and $Y$ are harvested.
 For most of our paper, parameters used in this model will be given as in eq. \eqref{eq:param vals}.
-In the time-varying model, however, we use the following drift on the growth rate of $X$:
-\begin{equation*}
+In the time-varying model, moreover, we use the following drift on the growth rate of $X$:
+\begin{equation}
+  \label{eq:rx(t)}
   r_X = r_X(t) = \max(1-t/200, 1/2).
-\end{equation*}
+\end{equation}
 
 This model generalizes eq. \eqref{eq:may} in the following sense:
 If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} becomes
@@ -565,6 +566,14 @@ The state space used was normalized case-by-case as follows:
 *1)* for the single species model, a line segment $[0,1]$, *2)* for all three-species models, a cute $[0,1]^{\times 3}$.
 We used simulation data to derive a bound on the population sizes typically observed, and thus be able to normalize states to a finite volume.
 
+Policies obtained from the PPO algorithm can be ‘‘noisy’’ as their optimization algorithm is randomized (see, e.g. App. \textbf{TBD} for visualizations of these policies).
+We perform some interpolation using a Gaussian process regressor in order to de-noise these policies.
+Specifically, we use the *GaussianProcessRegressor* object of the *sklearn* Python library with a kernel given by
+\begin{align*}
+  \text{RBF}(\text{length scale = 10}) + \text{WhiteNosie}(\text{noise level = 0.1}).
+\end{align*}
+The length scale and noise level values of this kernel were chosen arbitrarily---no hyperparameter tuning was needed to produce satisfactory interpolation, as will be shown in the results section.
+
 
 \textbf{Tuning the constant mortality strategy.}
 A grid of 101 mortality rates was laid in the interval $[0, 0.5]$ as possible mortality values in the single-fishery cases.
@@ -633,24 +642,50 @@ lines <- p + stat_function(fun = linear_f_gen(0.009)) +
 (rmsy | lines) + plot_annotation(tag_levels = c('A'))
 ```
 
+\textbf{Tuning the constant escapement strategy.}
+This tuning procedure was analogous to that of the constant mortality strategy just summarized.
+Namely, \textbf{TBD}.
+
 \textbf{Parameter values used.}
-The model's dynamic parameters were chosen as follows
+The single-species model's (eq. \eqref{eq:may77}) dynamic parameters were chosen as
+\begin{align}
+\label{eq:1d param vals}
+r = K = 1, \beta = 0.25, c = 0.1.
+\end{align}
+Here, the values of $\beta$ and $c$ are chosen as to make the system be roughly close to its tipping point.
+
+The three-species model's (eq. \eqref{eq:3d model stoch}) dynamic parameters were chosen as follows
 \begin{align}
 \label{eq:param vals}
 \begin{split}
-  r_X = K_X = r_Y = K_Y = 1, \quad \beta = 0.3, \quad c = 0.1\\
-  c_{XY} = 0.5,\quad f = 0.15,\quad D = 1.1, \quad d_Z = 0.135.
+  r_X = K_X = r_Y = K_Y = 1, \quad \beta = 0.3, \quad c = 0.3\\
+  c_{XY} = 0.1,\quad f = 0.1,\quad D = 1.1, \quad d_Z = 0.1.
 \end{split}
 \end{align}
 Moreover, the variances for the stochastic terms were chosen as
 $$
   \sigma^2(\eta_{X,t}) = \sigma^2(\eta_{Y,t}) = \sigma^2(\eta_{Z,t}) = 0.05.
 $$
-The threshold values used to determine an early episode end were chosen as
-$$
-  X_{\text{thresh.}} = 0.08,\quad Y_{\text{thresh.}} = Z_{\text{thresh.}} = 10^{-4},
-$$
-where the higher value of $X_{\text{thresh.}}$ helped select for more sustainable fishing strategies.
+In the case with a time-varying $r_X$ parameter, we used $r_X(t)$ given as in eq. \eqref{eq:rx(t)} and all other parameters as given in eq. \eqref{eq:param vals}.
+
+The values of $c$ and $\beta$ in the three-species model are slightly different than their values in the one-species model.
+These values were chosen heuristically: 
+We observed that choosing the lower value of $c=0.1$ in this case would lead to quick near-extinction events even without a harvest.
+Moreover, $\beta$ was slightly increased simply to put more predation pressure on the $X$ and $Y$ populations and make them slightly more fragile.
+
+\textbf{Stability analysis.}
+To ensure that our results do not strongly depend on our parameter choices, we performed a stability analysis.
+Here, we perturbed parameters randomly and measured the difference in performance between our DRL-based methods and the constant escapement strategy.
+We observed that the difference in performance is maintained for even relatively high noise strengths.
+For simplicity we only perform stability analysis on the ‘‘3 species, 2 fisheries and a time varying parameter’’ case. 
+
+More specifically, for each parametric noise strength $\sigma_{\text{param.}}$ choice in $[0.04, 0.08, \dots, 0.2]$, we executed the following procedure:
+Sample 100 choices of perturbed parameter values, where the perturbation is as follows---each parameter $P$ is perturbed to $(1+g_P)P$ where $g_P$ is a Gaussian random variable with variance $\sigma_{\text{param.}}^2$.
+For each of these parameter choices, tune the constant escapement strategy and train the DRL model on the corresponding model.
+Measure the average reward difference between strategies for each of these parameter choice samples.
+Average this difference over the 100 samples.
+The stability results are displayed in Fig. \textbf{TBD}.
+
 
 # Results
 
