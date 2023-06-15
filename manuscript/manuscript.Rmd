@@ -559,8 +559,9 @@ This reward function balances the extractive motivation of the fishery with cons
 We trained a DRL agent parametrized by a neural network with two hidden, 64-neuron, layers, on a local server with 2 commercial GPUs.
 We used the Ray framework\footnote{\url{https://docs.ray.io/}} for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters.
 In particular, no hyperparameter tuning was performed.
-The agent was trained for 300 iterations of the PPO optimization step.
+The agent was trained for 300 iterations of the PPO optimization step for the three-species cases.
 The total training time was on the order of 30 minutes to 1 hour.
+For the single-species model, the training iterations were scaled down to 100 and the training time was around 10 minutes.
 
 The state space used was normalized case-by-case as follows: 
 *1)* for the single species model, a line segment $[0,1]$, *2)* for all three-species models, a cute $[0,1]^{\times 3}$.
