@@ -59,23 +59,23 @@ environment we desire for the control problem in broad strokes:
 Data-code list. These codes are searchable in the envs/growth_fns.py document in 
 order to find the source code for the growth function.
 
-"DEFAULT", Default 3-species model as presented in the manuscript (no time-varying 
-    parameters).
-"RXDRIFT", As DEFAULT, but with a time-varying r_X parameter
-"V0DRIFT", As DEFAULT, but with a time-varying v0 parameter (this parameter is 
-    called 'c' in manuscript, sorry)
-"DDRIFT", As DEFAULT, but with a time-varying D parameter
-"KLIMIT", Alternative non-time-varying model. Here DEFAULT's X-Y Lotka-Volterra competition 
-    term is replaced by reduction on X's and Y'x carrying capacity
-"KLIMIT_RXDRIFT", As KLIMIT, but with a time-varying r_X parameter
-"BETADRIFT", As DEFAULT, but with a time-varying beta parameter
-"CVDRIFT", As DEFAULT, but with a time-varying X-Y Lotka-Volterra competition parameter, 
-    c_V (this parameter is called 'c_XY' in manuscript, sorry). 
-"YABIOTIC", Similar to DEFAULT, but Y population is set to vary sinusoidally irrespective
-    of the X and Z values.
-"ZABIOTIC", Similar to YABIOTIC, but it is Z varying sinusoidally now.
-"COUPLFLUC", As DEFAULT but with sinusoidally varying v_0 parameter (this parameter
-    is called 'c' in manuscript, sorry)
+DEFAULT        - Default 3-species model as presented in the manuscript (no time-varying 
+                 parameters).
+RXDRIFT        - As DEFAULT, but with a time-varying r_X parameter
+V0DRIFT        - As DEFAULT, but with a time-varying v0 parameter (this parameter is 
+                 called 'c' in manuscript, sorry)
+DDRIFT         - As DEFAULT, but with a time-varying D parameter
+KLIMIT         - Alternative non-time-varying model. Here DEFAULT's X-Y Lotka-Volterra competition 
+                 term is replaced by reduction on X's and Y'x carrying capacity
+KLIMIT_RXDRIFT - As KLIMIT, but with a time-varying r_X parameter
+BETADRIFT      - As DEFAULT, but with a time-varying beta parameter
+CVDRIFT        - As DEFAULT, but with a time-varying X-Y Lotka-Volterra competition parameter, 
+                 c_V (this parameter is called 'c_XY' in manuscript, sorry). 
+YABIOTIC       - Similar to DEFAULT, but Y population is set to vary sinusoidally irrespective
+                 of the X and Z values.
+ZABIOTIC       - Similar to YABIOTIC, but it is Z varying sinusoidally now.
+COUPLFLUC      - As DEFAULT but with sinusoidally varying v_0 parameter (this parameter
+                 is called 'c' in manuscript, sorry)
 '''
 
 # globals
@@ -96,7 +96,7 @@ ENV_CLASS = ENVCODE_TO_ENV[ENVCODE]
 os.makedirs(DATAPATH, exist_ok=True)
 
 
-# escapement
+# three species, two of which harvested
 @ray.remote(num_gpus=1, num_cpus=20)
 def workflow_twoFishery():
   # define problem
@@ -285,6 +285,7 @@ def workflow_twoFishery():
 
   return None
 
+# three species, one of which harvested
 @ray.remote(num_gpus=1, num_cpus=20)
 def workflow_oneFishery():
   # define problem
