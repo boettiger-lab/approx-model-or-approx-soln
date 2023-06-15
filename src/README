@@ -1,6 +1,7 @@
 To train an agent simply run "python workflow.py" or  "python workflow_oneSp.py"
 from the terminal while on the /src/ subdirectory. The options inside those scripts
-allow one to choose
+allow one to specify the dynamical model desired and the number of fisheries (i.e.
+the number of harvested species).
 
 Structure of the code:
 

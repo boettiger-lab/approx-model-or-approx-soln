@@ -24,16 +24,62 @@ from plotnine import (
 )
 import ray
 
-'''
-Data-code list:
+"""
+Script used to produce and evaluate policies on a three-species system.
+Global variables (in all caps at the top of the code) can be used to set the
+environment we desire for the control problem in broad strokes:
+  
+  - ENVCODE ( = '1FISHERY' or '2FISHERY') is used to encode how many fisheries
+      our problem has. 1FISHERY defaults to population X being harvested, while
+      2FISHERY defaults to populations X and Y being harvested.
+  - DATACODE ( = to any option displayed below in the Data-code list) is used
+      to choose which growth function is used as the system's 'natural' (i.e. unharvested) 
+      dynamics
+  - NAME_MODIFIER: optionally may be set to modify the subdirectory in which data and
+      plots are saved
+  - ITERATIONS: number of iterations over which the DRL agent is trained
+  - REPS: number of replicate samples used to optimize and evaluate constant escapement
+      and constant mortality strategies. Also number of replicate samples used to
+      evaluate DRL policies.
+  - ESC_GRID_SIZE:
+      if ENVCODE == 1FISHERY: number of choices of constant escapement values 
+        on [0, 1] used to evaluate and optimize the strategy. (Resp., number
+        of choices of const. mortality values on [0, 0.5] used to evaluate
+        and optimize the strategy.)
+      if ENVCODE == 2FISHERY: similar to above, but now a 2D grid of 
+        ESC_GRID_SIZE x ESC_GRID_SIZE points is laid on [0, 1]^2 (resp.
+        [0, 0.5]^2). These are the possible choices of X-escapement and Y-escapement
+        (resp. X-mortality and Y-mortality) used to optimize and evaluate the
+        cosntant escapement (resp. constant mortality) strategy.
+  - DATAPATH: not to be changed. It is the directory where data and plots are saved.
+        
+"""
 
-"DEFAULT","RXDRIFT","V0DRIFT","DDRIFT","KLIMIT",
-"KLIMIT_RXDRIFT","BETADRIFT","CVDRIFT","YABIOTIC",
-"ZABIOTIC","COUPLFLUC",
+'''
+Data-code list. These codes are searchable in the envs/growth_fns.py document in 
+order to find the source code for the growth function.
+
+"DEFAULT", Default 3-species model as presented in the manuscript (no time-varying 
+    parameters).
+"RXDRIFT", As DEFAULT, but with a time-varying r_X parameter
+"V0DRIFT", As DEFAULT, but with a time-varying v0 parameter (this parameter is 
+    called 'c' in manuscript, sorry)
+"DDRIFT", As DEFAULT, but with a time-varying D parameter
+"KLIMIT", Alternative non-time-varying model. Here DEFAULT's X-Y Lotka-Volterra competition 
+    term is replaced by reduction on X's and Y'x carrying capacity
+"KLIMIT_RXDRIFT", As KLIMIT, but with a time-varying r_X parameter
+"BETADRIFT", As DEFAULT, but with a time-varying beta parameter
+"CVDRIFT", As DEFAULT, but with a time-varying X-Y Lotka-Volterra competition parameter, 
+    c_V (this parameter is called 'c_XY' in manuscript, sorry). 
+"YABIOTIC", Similar to DEFAULT, but Y population is set to vary sinusoidally irrespective
+    of the X and Z values.
+"ZABIOTIC", Similar to YABIOTIC, but it is Z varying sinusoidally now.
+"COUPLFLUC", As DEFAULT but with sinusoidally varying v_0 parameter (this parameter
+    is called 'c' in manuscript, sorry)
 '''
 
 # globals
-NAME_MODIFIER = "approx_1D1D_tipping"
+NAME_MODIFIER = ""
 ITERATIONS = 300
 REPS = 100
 ESC_GRID_SIZE = 51
