@@ -382,7 +382,7 @@ def workflow_oneFishery():
   gpp_max_t['strategy']='PPO+GP'
   esc_max_t['strategy']='CEsc'
   msy_max_t['strategy']='CMort'
-  tot_max_t = pd.concat([msy_max_t, esc_max_t, ppo_max_t, gpp_max_t])
+  tot_max_t = pd.concat([esc_max_t, msy_max_t, ppo_max_t, gpp_max_t])
   
   tot_max_t.to_csv(os.path.join(DATAPATH,f"comparison_{ITERATIONS}.csv.xz"))
   print("Done with data generation, finishing up on plots...")
