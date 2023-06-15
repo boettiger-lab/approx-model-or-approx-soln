@@ -8,9 +8,9 @@ from train_fns import create_env
 from parameters import parameters, parameters_oneSp
 from msy_fns import csv_to_frac_msy_1fish, csv_to_frac_msy_2fish
 
-_1sp1fish = ["data", "results_data", "ONESP", "high_beta"]
-_3sp1fish = ["data", "results_data", "1FISHERY", "DEFAULT"]
-_3sp2fish = ["data", "results_data", "2FISHERY", "DEFAULT"]
+_1sp1fish = ["..", "data", "results_data", "ONESP", "high_beta"]
+_3sp1fish = ["..", "data", "results_data", "1FISHERY", "DEFAULT"]
+_3sp2fish = ["..", "data", "results_data", "2FISHERY", "DEFAULT"]
 _3sp2fish_timevar = ["data", "results_data", "2FISHERY", "RXDRIFT"]
 
 parameter_obj_3sp = parameters()
