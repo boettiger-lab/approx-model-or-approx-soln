@@ -11,28 +11,34 @@ from msy_fns import csv_to_frac_msy_1fish, csv_to_frac_msy_2fish
 _1sp1fish = ["..", "data", "results_data", "ONESP", "high_beta"]
 _3sp1fish = ["..", "data", "results_data", "1FISHERY", "DEFAULT"]
 _3sp2fish = ["..", "data", "results_data", "2FISHERY", "DEFAULT"]
-_3sp2fish_timevar = ["data", "results_data", "2FISHERY", "RXDRIFT"]
+_3sp2fish_timevar = ["..", "data", "results_data", "2FISHERY", "RXDRIFT"]
 
 parameter_obj_3sp = parameters()
 parameter_obj_1sp = parameters_oneSp()
 
+""" envs: two_three_fishing.twoThreeFishing two_three_fishing.oneThreeFishing oneSpecies.singleSp"""
+""" fns: csv_to_frac_msy_1fish csv_to_frac_msy_2fish """
+
 # choosing env to evaluate / corresponding data location
-scenario = _3sp2fish
+scenario = _3sp2fish_timevar
 parameter_obj = parameter_obj_3sp
-env_class = two_three_fishing.twoThreeFishing #oneSpecies.singleSp
+env_class = two_three_fishing.twoThreeFishing
+DATACODE = "RXDRIFT"
+FLUCTUATING = True
+function_to_use = csv_to_frac_msy_2fish
+
 fname = os.path.join(*scenario, "msy_100.csv.xz")
-DATACODE = "DEFAULT"
 
 env = create_env(
   env_class, 
   parameter_obj, 
   datacode = DATACODE, 
-  fluctuating=False, 
+  fluctuating=FLUCTUATING, 
   training=True,
 )
 
 for fraction in [0.8, 0.9, 0.95, 1]:
-  msy_frac_df, _ = csv_to_frac_msy_2fish(
+  msy_frac_df, _ = function_to_use(
     env, fname, fraction=fraction, repetitions=100,
   )
   del _
