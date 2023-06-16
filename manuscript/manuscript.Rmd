@@ -533,12 +533,14 @@ Due to the increased computational requirements of this framework, we have left 
 
 \textbf{The Environment.}
 As seen in Fig. **TBD CONCEPTUAL**, we consider four different models of the ecosystem with which the fishery interacts, each of this is called an *environment*, alluding to the environment in an RL setting.
-To recap, these four environments are a single-species growth model \eqref{eq:may77} for a harvested species; a three-species model \eqref{eq:3d model stoch} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
+To recap, these four environments are a single-species growth model \eqref{eq:may} for a harvested species; a three-species model \eqref{eq:3d model stoch} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
 
-The policies explored were functions from states $N_t$ to a single number, $M_X(N_t) = \pi_\theta(N_t)$, in the single fishery case.
-In the two-fishery case, policies lead to two-dimensional actions: $(M_X(N_t), M_Y(N_t)) = \pi_\theta(N_t)$.
-Each episode in the training and in the evaluation stages was at most 200 time steps long.
-Episodes were ended early in case of a ‘‘near-extinction event,’’ a moment in which any of the populations dipped below a threshold value, i.e.,
+The policies explored were functions from states $N_t$ to either a single number $M_X(N_t) = \pi_\theta(N_t)$, or a pair of numbers $(M_X(N_t), M_Y(N_t)) = \pi_\theta(N_t)$ depending on the environment considered.
+\textbf{Probably a table showing the different combinations of species and fishery numbers would be good, possibly giving these ‘scenarios’ names.}
+
+Our goal is to evaluate the performance of different policy strategies over a specified window of time.
+We have chosen this window to be 200 timesteps, where each discrete time-step represents the dynamical evolution of the system over a year.
+_Episodes_ begin at timestep zero and are controlled by the policy and the system's natural evolution until either the maximum timespan is reached, or until a ‘‘near-extinction event’’ occurs---that is, until any of the populations go below a given threshold,
 \begin{align}
   \label{eq:thresh}
   X_t \leq X_{\text{thresh.}},\quad
@@ -546,14 +548,13 @@ Episodes were ended early in case of a ‘‘near-extinction event,’’ a mome
   \text{or,}\quad
   Z \leq Z_{\text{thresh.}}.
 \end{align}
-For a realistic fishery model, this threshold value could represent a population value beyond which drastic ecological consequences may ensue, e.g. a tipping point.
 In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from its ‘‘natural’’ level.
-This roughly represents a near-extinction event.
 
-The reward function had two componenets:
-First, at each time step the harvest $h_t$ was received as a reward.
-Second, if the episode ended early (say, at time-step $t$) because of a near-extinction event, a negative reward of $-100/t$ was awarded.
+The reward function defining our policy optimization problem has two componenets:
+The first is economical: the total biomass harvested over an episode.
+The second seeks to reflect conservation goals: if a near-extinction event occurs, the episode is ended early and a negative reward of $-100/t$ was awarded.
 This reward function balances the extractive motivation of the fishery with conservation goals that go beyond the scope of long-term sustainable harvests.
+
 
 \textbf{Training a DRL agent.}
 We trained a DRL agent parametrized by a neural network with two hidden, 64-neuron, layers, on a local server with 2 commercial GPUs.
