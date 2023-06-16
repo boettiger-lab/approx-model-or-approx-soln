@@ -31,31 +31,42 @@ env = create_env(
   training=True,
 )
 
-
-msy_frac_df, _ = csv_to_frac_msy_2fish(
-  env, fname, fraction=0.8, repetitions=100,
-)
-del _
-
-cols = ["t", "rep", "mortality_x", "mortality_y", "act_x", "act_y", "reward", "X", "Y", "Z"] # assume _3sp2fish by default
-if scenario == _1sp1fish:
-  cols = ["t", "rep", "mortality", "act", "reward", "X"]
-if scenario == _3sp1fish:
-  cols = ["t", "rep", "mortality", "act", "reward", "X", "Y", "Z"]
+for fraction in [0.8, 0.9, 0.95, 1]:
+  msy_frac_df, _ = csv_to_frac_msy_2fish(
+    env, fname, fraction=fraction, repetitions=100,
+  )
+  del _
   
+  cols = ["t", "rep", "mortality_x", "mortality_y", "act_x", "act_y", "reward", "X", "Y", "Z"] # assume _3sp2fish by default
+  if scenario == _1sp1fish:
+    cols = ["t", "rep", "mortality", "act", "reward", "X"]
+  if scenario == _3sp1fish:
+    cols = ["t", "rep", "mortality", "act", "reward", "X", "Y", "Z"]
+    
+    
+  msy_frac_df = pd.DataFrame(msy_frac_df, columns=cols)
+  msy_frac_df['reward_std'] = msy_frac_df['reward']
+  df_finished_eps = msy_frac_df[msy_frac_df.t == 200]
+  frac_max_t = len(df_finished_eps.index)/len(msy_frac_df.index)
   
-msy_frac_df = pd.DataFrame(msy_frac_df, columns=cols)
-
-msy_frac_df.to_csv(
-  os.path.join(*scenario, "frac_0-8_msy.csv.xz")
-)
-
-# plots
-
-rew_hist = (
-  ggplot(data=msy_frac_df, mapping=aes(x='rep',weight='reward')) 
-  +geom_bar()
-)
-rew_hist.save(
-  os.path.join(*scenario, "frac_0-8_msy_rewards.png")
-)
+  print(f"""fraction = {fraction}
+  
+  {msy_frac_df.agg({'reward':'mean', 'reward_std':'std'})}
+  
+  fraction ep len == 200: {frac_max_t}
+  
+  """)
+  
+  msy_frac_df.to_csv(
+    os.path.join(*scenario, f"frac_{fraction}_msy.csv.xz")
+  )
+  
+  # plots
+  
+  rew_hist = (
+    ggplot(data=msy_frac_df, mapping=aes(x='rep',weight='reward')) 
+    +geom_bar()
+  )
+  rew_hist.save(
+    os.path.join(*scenario, f"frac_{fraction}_msy_rewards.png")
+  )

@@ -1,0 +1,28 @@
+fraction = 0.8
+
+reward                 53.537638
+reward_std             3.383693
+raction ep len == 200: 0.99
+
+
+fraction = 0.9
+
+reward                  60.183457
+reward_std              7.325760
+fraction ep len == 200: 0.94
+
+
+fraction = 0.95
+
+reward                  61.124003
+reward_std              11.041741
+fraction ep len == 200: 0.91
+
+
+fraction = 1
+
+reward                  61.343347
+reward_std              14.403433
+fraction ep len == 200: 0.76
+
+

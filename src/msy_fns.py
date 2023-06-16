@@ -136,11 +136,11 @@ def find_msy_2fish(env, grid_nr=51, repetitions=100):
 	
 """ fraction-of-msy const mortality simulation """
 
-def frac_msy_1fish(env, msy, *, fraction=0.8, repetitions = 100):
+def frac_msy_1fish(env, msy, fraction=0.8, repetitions = 100):
   return ray.get(msy_max_t_1fish.remote(env, fraction * msy, repetitions=repetitions))
 
-def frac_msy_2fish(env, msy_x, msy_y, *, fraction=0.8, repetitions = 100):
-  return ray.get(msy_max_t_1fish.remote(env, fraction * msy_x, fraction * msy_y, repetitions=repetitions))
+def frac_msy_2fish(env, msy_x, msy_y, fraction=0.8, repetitions = 100):
+  return ray.get(msy_max_t.remote(env, fraction * msy_x, fraction * msy_y, repetitions=repetitions))
 
 # in practice I'll have to access the files I already made with the saved data
 def csv_to_frac_msy_1fish(env, fname, fraction=0.8, repetitions = 100):
