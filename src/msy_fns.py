@@ -152,7 +152,6 @@ def csv_to_frac_msy_2fish(env, fname, fraction=0.8, repetitions = 100):
   df = pd.read_csv(fname)
   msy_x = df.mortality_x[0]
   msy_y = df.mortality_y[0]
-  print(msy_x, "\n\n")
   return frac_msy_2fish(env, msy_x, msy_y, fraction=fraction, repetitions=repetitions)
   
 
