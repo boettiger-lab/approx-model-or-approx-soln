@@ -684,14 +684,29 @@ For simplicity we only perform stability analysis on the ‘‘3 species, 2 fish
 More specifically, for each parametric noise strength $\sigma_{\text{param.}}$ choice in $[0.04, 0.08, \dots, 0.2]$, we executed the following procedure:
 Sample 100 choices of perturbed parameter values, where the perturbation is as follows---each parameter $P$ is perturbed to $(1+g_P)P$ where $g_P$ is a Gaussian random variable with variance $\sigma_{\text{param.}}^2$.
 For each of these parameter choices, tune the constant escapement strategy and train the DRL model on the corresponding model.
-Measure the average reward difference between strategies for each of these parameter choice samples.
-Average this difference over the 100 samples.
+Measure the average reward difference between strategies for each of these parameter choice samples using 100 replicate evaluation episodes.
+Take the mean of this average difference over the 100 perturbed parameter samples.
 The stability results are displayed in Fig. \textbf{TBD}.
 
 
 # Results
 
-We evaluated each of the three control approaches (MSY constant mortality, 80% MSY constant mortality and DRL) by running 50 episodes using the respective control rule.
+We evaluated each of the four control approaches considered -- MSY constant mortality, optimal constant escapement, PPO, and Gaussian process interpolation of the latter -- on each of the four scenarios examined (see Sec. TBD).
+Furthermore, we characterized the trade-off between economic output and sustainability faced by constant mortality policies.
+This was done by evaluating constant mortality policies with a fraction of the optimal mortality rate (specifically, 80%, 90% and 95%).
+All evaluations were based on 100 replicate episodes for each 
+
+We will visualize the results concerning the last scenario considered (‘‘3 species, 2 of which harvested, and a time-varying parameter’’) in this section, leaving the other cases for the appendix.
+This is the most complex scenario considered and where our results show the most compelling advantage of DRL methods with respect to classical strategies.
+
+Our main result is summarized in Fig. **TBD** which displays the total reward distributions for the policy obtained through each strategy.
+Here we note two surprising things:
+First, optimal constant escapement performs considerably worse than not only DRL-based methods, but also than MSY.
+This conceptually shows how one-dimensional intuitions on ecological control may loose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
+Second, we see that classical strategies have relatively spread out reward distributions as compared to DRL methods.
+
+## Old results (to be copy-pasted above)
+
 In Fig. \ref{fig:timeseries} we show the time series of one such repetition.
 The left panel uses an MSY constant mortality control $M^*X$, the middle panel uses $0.8 M^* X$, while the right panel is controlled by the trained DRL agent.
 We see that that optimal constant mortality control leads to a near-extinction event at around $t=150$.
