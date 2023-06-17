@@ -357,7 +357,11 @@ For most of our paper, parameters used in this model will be given as in eq. \eq
 In the time-varying model, moreover, we use the following drift on the growth rate of $X$:
 \begin{equation}
   \label{eq:rx(t)}
-  r_X = r_X(t) = \max(1-t/200, 1/2).
+  r_X = r_X(t) = 
+  \begin{cases}
+    1-t/200, \quad & t \leq 100,\\
+    1/2, \quad & t > 100
+  \end{cases}
 \end{equation}
 
 This model generalizes eq. \eqref{eq:may} in the following sense:
