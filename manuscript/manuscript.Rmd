@@ -705,6 +705,39 @@ First, optimal constant escapement performs considerably worse than not only DRL
 This conceptually shows how one-dimensional intuitions on ecological control may loose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
 Second, we see that classical strategies have relatively spread out reward distributions as compared to DRL methods.
 
+To assess what is the culprit for the classical strategies' low performance with respect to the DRL-based strategies, we plot the duration of each of the 100 evaluation episodes, for each of the strategies.
+We see that early episode ends are a rather likely explanation for the wideness of constant escapement's wide reward distribution.
+The constant mortality strategy is also observed to lead to near-extinction events rather often, but in this case the episode lengths tend to be concentrated at higher values relative to the constant escapement case.
+
+We examine the trade-off between profit and sustainability faced by classical strategies in Fig. **TBD**.
+Here, two quantities are plotted: the fraction of evaluation episodes of maximal length (i.e. episodes with no near-extinction events) is and the average reward obtained.
+On the x-axis we have several sub-optimal constant mortality strategies that err on the conservative side: e.g. the policy labeled ‘‘80% MSY’’ has the form
+\begin{align*}
+  \pi: (X_t, Y_t, Z_t)\mapsto (0.8 M_X^*.\ 0.8 M_Y^*),
+\end{align*}
+where $(M_X^*,\ M_Y^*)$ is the optimal constat mortality strategy.
+We see that sufficiently conservative policies attain high sustainability, but only at a high price in terms of profit.\footnote{
+As noted before, here we equate economic profit with biomass caught.
+This is done as an approximation to convey the conceptual message more clearly, and we do not expect our results to significantly change if, e.g., ‘‘effort cost’’ is included in the reward function.
+When we refer to ‘‘large differences’’ in profit, or ‘‘paying dearly,’’ we mean that the ratio between average rewards is considerable---e.g. a 15\% loss in profit.
+}
+
+One problem that is often encountered when using machine learning methods is the interpretability of the output of these methods.
+In our case, the output is a policy function parametrized by a neural network $\theta$:
+\begin{align*}
+  \pi_\theta: N_t \mapsto (M_X(N_t), M_Y(N_t)),
+\end{align*}
+where $N_t=(X_t,Y_t,Z_t)$ is the state of the system at time $t$, and where $M_X$ and $M_Y$ are the mortalities due to harvest during that time-step.
+Here we visualize this policy function and provide an interpretation for it.
+Given its high dimension, it is not possible to fully display how the policy function obtained ‘‘looks like’’---we thus project it down to certain relevant axes.
+The result of this procedure is shown in Fig. **TBD**.
+In that figure, the shape of the optimal escapement strategy is provided for comparison.
+
+Moreover, in an attempt to further understand the relationship between the different management strategies considered, Fig. **TBD** presents the time-series of a representative episode for each strategy.
+Here we see a pattern that arises throughout the entire dataset---early episode ends are largely due to near-extinctions of $Z$.
+
+
+
 ## Old results (to be copy-pasted above)
 
 In Fig. \ref{fig:timeseries} we show the time series of one such repetition.
