@@ -736,6 +736,9 @@ In that figure, the shape of the optimal escapement strategy is provided for com
 Moreover, in an attempt to further understand the relationship between the different management strategies considered, Fig. **TBD** presents the time-series of a representative episode for each strategy.
 Here we see a pattern that arises throughout the entire dataset---early episode ends are largely due to near-extinctions of $Z$.
 
+## Stability analysis
+
+In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values.
 
 
 ## Old results (to be copy-pasted above)
