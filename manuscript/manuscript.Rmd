@@ -282,40 +282,20 @@ The term $M_X X_t$ is the total $X$ harvest at time $t$.
 This formulation of stock recruitment as a discrete finite difference process is common among fisheries, as opposed to continuous time formulations which involve instantaneous growth rates.
 This growth rate simplifies e.g. the possibly seasonal nature of reproduction (which would need to be accounted for in a realistic continuous-time model) by simply considering the total recruitment experienced by the population over a full year.
 
+The fishing efforts are the *control variables* of our problem---these may be set by the manager at each time-step to specified values.
+We make two further simplifying assumptions on the control problem:
+*1. Full observation:* the manager is able to accurately measure $N_t$ and use that measurement to inform their decision.
+*2. Perfect execution:* the action chosen by the manager is implemented perfectly (i.e., there is no noise affecting the actual value of the fishing efforts).
+In future work, we intend to relax these assumptions to get more realistic management scenarios.
+
 One of the models we consider is a single-species classical model of ecological tipping points.
 The other three models are all three-species models with similar dynamics---differing by the amount of species that are harvested, and whether the parameters of the model are fixed or time-dependent.
-Following this logic, the first subsection will be dedicated to the single-species model and the second
+Following this logic, the first subsection will be dedicated to the single-species model and the second will focus on the three-species models.
 
-
-# Mathematical models of fisheries (old)
-
-In this section we introduce the models describing the population dynamics of fisheries.
-In general, the class of models that appear in this context are *first order finite difference equations* (potentially stochastic difference equations).
-For $n$ species, these models have the general form
-\begin{align}
-  \label{eq:general model}
-  \begin{split}
-    \Delta X_t &= f_X(N_t) - M_X X_t\\
-    \Delta Y_t &= f_Y(N_t) - M_Y Y_t\\
-    \Delta Z_t &= f_Z(N_t) - M_Z Z_t\\
-    &\dots
-  \end{split}
-\end{align}
-where $N_t = (X_t,\ Y_t,\ Z_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $\Delta X_t := X_{t+1} - X_t$, and where $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions.
-Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting the $i$-th species (sometimes this is referred to as *fishing effort*).
-
-The term $M_X X_t$ is the total $X$ harvest at time $t$.
-This formulation of stock recruitment as a discrete finite difference process is common among fisheries, as opposed to continuous time formulations which involve instantaneous growth rates.
-This growth rate simplifies e.g. the possibly seasonal nature of reproduction (which would need to be accounted for in a realistic continuous-time model) by simply considering the total recruitment experienced by the population over a full year.
-
-In the rest of this section we will focus our discussion the ‘‘natural’’ dynamics of the system, i.e. the dynamics of the system under zero fishing effort.
-
-
-## A single species model
+## The single species model
 
 Optimal control policies for fisheries are frequently based on 1-dimensional models, $n=1$, as described in $Text$ $Box$ $1$.
 The most familiar model of $f(X)$ is that of *logistic growth*, for which
-
 \begin{align}
   \label{eq:logistic}
   f(X_t) = r X_t\big(1 - X_t / K \big) =: L(X_t;\ r, K).
@@ -326,15 +306,16 @@ One particularly important aspect that has garnered much attention is the potent
 A seminal example of such dynamics was introduced in [@may77], using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
 \begin{align}
   \label{eq:may}
-  f_{\text{May}}(X_t)
-  := L(X_t;\ r, K) - \frac{\beta H X_t^2}{c^2 + X_t^2}.
+  \Delta X_t
+  = L(X_t;\ r, K) - \frac{\beta H X_t^2}{c^2 + X_t^2} + \eta_{X,t} - M_X X_t.
 \end{align}
 In the following, we will denote
 \begin{align*}
   F(X_t,H;\ \beta,c) := \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align*}
 
-The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal predation rate $\beta$, and the predation rate half-maximum biomass $c$.
+The model has six parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal predation rate $\beta$, the predation rate half-maximum biomass $c$, and the variance $\sigma_X^2$ of $\eta_{X,t}$. 
+(Here and in the following we will center our random variables at zero.)
 
 Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{fig:may}).
 Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $X_t$ of the system, these two attractors separated by an unstable fixed point.
@@ -344,8 +325,7 @@ This also creates the phenomenon of *hysteresis*, where returning $H$ to its ori
 
 ```{r}
 #| label: may
-#| fig.cap: "The fixed point diagram for the model associated to $f_{\\text{May}}$ as a function of varying the parameter $\\beta H$.
-#| That is, these are the zeroes of the function $f_{\\text{May}}$. 
+#| fig.cap: "The fixed point diagram for model (TBD) as a function of varying the parameter $\\beta H$, assuming zero noise.
 #| Stable fixed points (also known as attractors) are plotted using a solid line, while the unstable fixed point is shown as a dotted line."
 #| out.width: "6.5in"
 
@@ -361,18 +341,19 @@ Second, that if the evolution of $X_t$ is *stochastic*, then, even at values of 
 <!-- Briefly motivate reason to consider 3d model, adding competition and predation processes -->
 
 
-## A three species model
+## The three species models
 
-Consider the following three species recruitment model which generalizes eq. \eqref{eq:may}:
+We consider three models of a three-species fishery ecosystem.
+These are all closely related---in fact, their natural dynamics (i.e. dynamics under zero harvest) is given by the same equations:
 \begin{align}
 \label{eq:3d model}
 \begin{split}
-  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_{X,t},\\
-  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_{Y,t},\\
-  \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
+  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{X,t},\\
+  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{Y,t},\\
+  \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
 \end{split}
 \end{align}
-It contains three populations, the state at time $t$ is $(X_t, Y_t, Z_t)$. 
+The three species modelled are $X$, $Y$ and $Z$.
 Species $Z$ preys on both $X$ and $Y$, while the latter two compete for resources.
 There are ten parameters in this model: 
 The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and $Y$.
@@ -381,17 +362,28 @@ A maximum predation rate $\beta$ and a predation rate half-maximum biomass $c$ s
 A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
 Finally, a death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
 
-As mentioned in the introduction, we consider two harvesting scenarios: one where only $X$ is harvested (i.e. $h_{Y,t}=0$), and one where both $X$ and $Y$ are harvested.
-For most of our paper, parameters used in this model will be given as in eq. \eqref{eq:param vals}.
-In the time-varying model, moreover, we use the following drift on the growth rate of $X$:
+The three models will branch off of eq. \eqref{eq:3d model} in the following way.
+*1. Three species, one fishery:* in this first model, only $X$ is harvested, that is we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
+All parameters here are constant.
+*2. Three species, two fisheries:* as the previous case but with $X$ and $Y$ being harvested. 
+In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
+Finally, *3. Three species, two fiseries, time-variation:* in this model we allow for the harvest of $X$ and $Y$, as in the previous model, but now we include a time dependent parameter:
 \begin{equation}
   \label{eq:rx(t)}
   r_X = r_X(t) = 
   \begin{cases}
     1-t/200, \quad & t \leq 100,\\
-    1/2, \quad & t > 100
+    1/2, \quad & t > 100.
   \end{cases}
 \end{equation}
+This is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
+In future work we intend to capture more realistic models of the effects of climate change, but for this exploratory work we have chosen this simple expression for the sake of conceptual clarity.
+
+## Old 3 species text (to be copy-pased)
+
+As mentioned in the introduction, we consider two harvesting scenarios: one where only $X$ is harvested (i.e. $h_{Y,t}=0$), and one where both $X$ and $Y$ are harvested.
+For most of our paper, parameters used in this model will be given as in eq. \eqref{eq:param vals}.
+In the time-varying model, moreover, we use the following drift on the growth rate of $X$:
 
 This model generalizes eq. \eqref{eq:may} in the following sense:
 If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} becomes
