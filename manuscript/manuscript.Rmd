@@ -261,10 +261,35 @@ Conversely, more conservative suboptimal classical strategies (e.g. with a highe
 The DRL approach side-steps this tradeoff by optimizing over a more complex family of possible policies—policies parametrized by a neural network, as opposed to policies labeled by a single parameter (the mortality rate).
 We thus observe that the DRL solution leads to a higher profitability *and* stability as compared to constant mortality policies. 
 
+# Mathematical models of fisheries considered
 
-# Mathematical models of fisheries
+Here we introduce the four mathematical models of fisheries for which we compare different management strategies.
+In general, the class of models that appear in this context are *stochastic, first order, finite difference equations*.
+For $n$ species, these models have the general form
+\begin{align}
+  \label{eq:general model}
+  \begin{split}
+    \Delta X_t &= f_X(N_t) + \eta_{X,t} - M_X X_t\\
+    \Delta Y_t &= f_Y(N_t) + \eta_{Y,t} - M_Y Y_t\\
+    \Delta Z_t &= f_Z(N_t) + \eta_{Z,t} - M_Z Z_t\\
+    &\dots
+  \end{split}
+\end{align}
+where $N_t = (X_t,\ Y_t,\ Z_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $\Delta X_t := X_{t+1} - X_t$, $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions, and where $\eta_{i,t}$ are Gaussian random variables.
+Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting the $i$-th species (sometimes this is referred to as *fishing effort*).
 
-In this section we introduce some models describing the population dynamics of fisheries.
+The term $M_X X_t$ is the total $X$ harvest at time $t$.
+This formulation of stock recruitment as a discrete finite difference process is common among fisheries, as opposed to continuous time formulations which involve instantaneous growth rates.
+This growth rate simplifies e.g. the possibly seasonal nature of reproduction (which would need to be accounted for in a realistic continuous-time model) by simply considering the total recruitment experienced by the population over a full year.
+
+One of the models we consider is a single-species classical model of ecological tipping points.
+The other three models are all three-species models with similar dynamics---differing by the amount of species that are harvested, and whether the parameters of the model are fixed or time-dependent.
+Following this logic, the first subsection will be dedicated to the single-species model and the second
+
+
+# Mathematical models of fisheries (old)
+
+In this section we introduce the models describing the population dynamics of fisheries.
 In general, the class of models that appear in this context are *first order finite difference equations* (potentially stochastic difference equations).
 For $n$ species, these models have the general form
 \begin{align}
@@ -272,14 +297,19 @@ For $n$ species, these models have the general form
   \begin{split}
     \Delta X_t &= f_X(N_t) - M_X X_t\\
     \Delta Y_t &= f_Y(N_t) - M_Y Y_t\\
+    \Delta Z_t &= f_Z(N_t) - M_Z Z_t\\
     &\dots
   \end{split}
 \end{align}
-where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $\Delta X_t := X_{t+1} - X_t$, $\Delta Y_t := Y_{t+1} - Y_t$, and where $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions.
-Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting (sometimes referred to as *fishing effort*).
-Thus, the term $M_X X_t$ is the total $X$ harvest at time $t$.
+where $N_t = (X_t,\ Y_t,\ Z_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $\Delta X_t := X_{t+1} - X_t$, and where $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions.
+Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting the $i$-th species (sometimes this is referred to as *fishing effort*).
+
+The term $M_X X_t$ is the total $X$ harvest at time $t$.
 This formulation of stock recruitment as a discrete finite difference process is common among fisheries, as opposed to continuous time formulations which involve instantaneous growth rates.
 This growth rate simplifies e.g. the possibly seasonal nature of reproduction (which would need to be accounted for in a realistic continuous-time model) by simply considering the total recruitment experienced by the population over a full year.
+
+In the rest of this section we will focus our discussion the ‘‘natural’’ dynamics of the system, i.e. the dynamics of the system under zero fishing effort.
+
 
 ## A single species model
 
@@ -294,13 +324,12 @@ The most familiar model of $f(X)$ is that of *logistic growth*, for which
 Real world ecological systems are obviously far more complicated than this simple model suggests.
 One particularly important aspect that has garnered much attention is the potential for the kind of highly non-linear functions that can support dynamics such as alternative stable states and hysteresis.
 A seminal example of such dynamics was introduced in [@may77], using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
-
 \begin{align}
   \label{eq:may}
   f_{\text{May}}(X_t)
-  := L(X_t;\ r, K) - F(X_t, H; \beta,c),
+  := L(X_t;\ r, K) - \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align}
-where,
+In the following, we will denote
 \begin{align*}
   F(X_t,H;\ \beta,c) := \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align*}
