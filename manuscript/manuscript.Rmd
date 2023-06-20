@@ -367,7 +367,7 @@ Eqs. \eqref{eq:3d model} are a generalization of the single-species model \eqref
 \begin{align*}
   c_{XY} = d = f = \sigma_Z = 0.
 \end{align*}
-In our simulations, we use $c_{XY} = d = f = \sigma_Z = 0.1$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
+In our simulations, we use $c_{XY} = d = f = 0.1$ and $\sigma_Z=0.05$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
 Put differently, we are in a regime where, just by examining parameters, it would seem that the single-species model is a reasonable approximation.
 **Is this clear? Should I maybe erase these last sentences?**
 
