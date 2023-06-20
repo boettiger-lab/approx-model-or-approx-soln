@@ -355,15 +355,24 @@ These are all closely related---in fact, their natural dynamics (i.e. dynamics u
 \end{align}
 The three species modelled are $X$, $Y$ and $Z$.
 Species $Z$ preys on both $X$ and $Y$, while the latter two compete for resources.
-There are ten parameters in this model: 
+There are thirteen parameters in this model: 
 The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and $Y$.
 A parameter $c_{XY}$ mediating a Lotka-Volterra competition between $X$ and $Y$.
 A maximum predation rate $\beta$ and a predation rate half-maximum biomass $c$ specifying how $Z$ forages on $X$ and $Y$.
 A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
-Finally, a death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
+A death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
+Finally, the noise variances $\sigma_X$, $\sigma_Y$ and $\sigma_Z$.
+
+Eqs. \eqref{eq:3d model} are a generalization of the single-species model \eqref{eq:may}: this can be seen by setting 
+\begin{align*}
+  c_{XY} = d = f = \sigma_Z = 0.
+\end{align*}
+In our simulations, we use $c_{XY} = d = f = \sigma_Z = 0.1$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
+Put differently, we are in a regime where, just by examining parameters, it would seem that the single-species model is a reasonable approximation.
+**Is this clear? Should I maybe erase these last sentences?**
 
 The three models will branch off of eq. \eqref{eq:3d model} in the following way.
-*1. Three species, one fishery:* in this first model, only $X$ is harvested, that is we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
+*1. Three species, one fishery:* in this first model, only $X$ is harvested, that is, in the notation of eq. \eqref{eq:general model}, we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
 All parameters here are constant.
 *2. Three species, two fisheries:* as the previous case but with $X$ and $Y$ being harvested. 
 In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
@@ -378,53 +387,6 @@ Finally, *3. Three species, two fiseries, time-variation:* in this model we allo
 \end{equation}
 This is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
 In future work we intend to capture more realistic models of the effects of climate change, but for this exploratory work we have chosen this simple expression for the sake of conceptual clarity.
-
-## Old 3 species text (to be copy-pased)
-
-As mentioned in the introduction, we consider two harvesting scenarios: one where only $X$ is harvested (i.e. $h_{Y,t}=0$), and one where both $X$ and $Y$ are harvested.
-For most of our paper, parameters used in this model will be given as in eq. \eqref{eq:param vals}.
-In the time-varying model, moreover, we use the following drift on the growth rate of $X$:
-
-This model generalizes eq. \eqref{eq:may} in the following sense:
-If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} becomes
-\begin{align*}
-  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, H;\ \beta, c),\\
-  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, H;\ \beta, c),\\
-  Z_t &= H.
-\end{align*}
-The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving according to \eqref{eq:may}.
-
-As can be expected, the dynamics of eq. \eqref{eq:3d model} are significantly more complex than those of eq. \eqref{eq:may}.
-Here, a fixed point analysis provides a less intuitive picture of the dynamics---it no longer necessarily alternates in a tipping manner between two stable points.
-
-## Stochastic dynamics
-
-We have, up to now, presented eqs. \eqref{eq:may} and \eqref{eq:3d model} as *deterministic* dynamical models for the sake of clarity.
-In practice, we will consider a stochastic contribution to these dynamics.
-This way, instead of eq. \eqref{eq:3d model}, we consider the problem of harvesting the following stochastic model:
-<!--
-\begin{align}
-  \label{eq:may stoch}
-  \Delta X_t
-  = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t + \eta_t,
-\end{align}
-where $\{\eta_t\}_t$ are independent Gaussian variables with zero mean.
-The variance $\sigma^2$ of $\eta_t$ is an additional parameter of the model.
-
-Similarly, we use the following dynamical model in place of eq. \eqref{eq:3d model}-->
-\begin{align}
-  \label{eq:3d model stoch}
-  \begin{split}
-    \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t + \eta_{X,t},\\
-    \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{Y,t},\\
-    \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
-\end{split}
-\end{align}
-Here, $\{\eta_{i,t}\}$ is a set of independent Gaussian variables centered at zero with variances, respectively, $\sigma_X^2$, $\sigma_Y^2$ and $\sigma_Z^2$.
-
-
-
-
 
 # Reinforcement learning {#sec:RL}
 
@@ -444,10 +406,11 @@ For our use case, the environment will be a computational model of the populatio
 At each time step, the agent observes the state $S$ and enacts some harvest---reducing $X_t$ to $X_t - M_X(N_t)\cdot X_t$, and, in the two-fishery scenario, also reducing $Y_t$ to $Y_t - M_Y(N_t)\cdot Y_t$.
 Here the fish mortality-rates-from-harvest (i.e. $M_X=M_X(N_t)$ and $M_Y=M_Y(N_t)$), are the agent's action at time $t$. 
 This secures a reward of $M_X(N_t)X$ in the single fishery case, and in the two-fishery case the reward is $M_X(N_t)X + M_Y(N_t)Y$.
-After this harvest portion of the time step, the environment changes according to its natural dynamics given by \eqref{eq:3d model stoch}.
+After this harvest portion of the time step, the environment changes according to its natural dynamics given by \eqref{eq:3d model}.
 
 As mentioned, this discretized time framework allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
 This approximation is commonly used in fisheries for species with annual reproductive cycles (see e.g. [@mangel2006theoretical], Chap. 6).
+The division of the time-step into two parts (harvest and dynamics) happening sequentially is performed for all control methods evaluated, not only RL-based approaches.
 
 ## Mathematical framework for RL
 
@@ -671,13 +634,18 @@ lines <- p + stat_function(fun = linear_f_gen(0.009)) +
 
 \textbf{Tuning the constant escapement strategy.}
 This tuning procedure was analogous to that of the constant mortality strategy just summarized.
-Namely, \textbf{TBD}.
+Namely:
+A grid of 101 constant escapement values was laid out on the interval $[0,1]$ for the single-fishery models (resp. a $51\times 51$ grid on $[0,1]^2$ for two-fishery models).
+These grids were the possible constant escapement values optimized over (in the two fishery case, these were $(\text{esc}_X,\ \text{esc}_Y)$ pairs).
+That is, each grid point represents a constant escapement policy.
+We used each of these policies to manage 100 replicate episodes.
+The optimal policy was the policy with the highest average reward obtained.
 
 \textbf{Parameter values used.}
 The single-species model's (eq. \eqref{eq:may}) dynamic parameters were chosen as
 \begin{align}
 \label{eq:1d param vals}
-r = K = 1, \beta = 0.25, c = 0.1.
+r = K = 1,\quad \beta = 0.25,\quad c = 0.1.
 \end{align}
 Here, the values of $\beta$ and $c$ are chosen as to make the system be roughly close to its tipping point.
 
