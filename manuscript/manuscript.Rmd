@@ -96,10 +96,25 @@ knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE,
                       warning = FALSE, fig.height=5, fig.width=7.5)
 library(tidyverse)
 library(patchwork)
+library(ggplot2)
 ```
 
 ```{r}
+# read data
+#frac_msy_8 <- read_csv("manuscript_data/0.8msy.csv.xz")
+#frac_msy_9 <- read_csv("manuscript_data/0.9msy.csv.xz")
+#frac_msy_95 <- read_csv("manuscript_data/0.95msy.csv.xz")
+#frac_msy_100 <- read_csv("manuscript_data/1msy.csv.xz")
+frac_msy <- read_csv("manuscript_data/frac_msy_summaries.csv.xz")
 
+main_summaries <- read_csv("manuscript_data/comparison_3-2-var_300.csv.xz") %>%
+  mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
+  arrange(strategy)
+
+esc_ends <- read_csv("manuscript_data/esc_ends_100.csv.xz")
+msy_ends <- read_csv("manuscript_data/msy_ends_100.csv.xz")
+ppo_ends <- read_csv("manuscript_data/ppo300_ends.csv.xz")
+gpp_ends <- read_csv("manuscript_data/gpp300_ends.csv.xz")
 ```
 
 <!--
@@ -592,6 +607,19 @@ Here we note two surprising things:
 First, optimal constant escapement performs considerably worse than not only DRL-based methods, but also than MSY.
 This conceptually shows how one-dimensional intuitions on ecological control may loose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
 Second, we see that classical strategies have relatively spread out reward distributions as compared to DRL methods.
+
+```{r}
+#| label: main
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| out.width: "6in"
+main_summaries %>% 
+  ggplot() +
+  geom_violin(mapping = aes(x=reward,y=strategy,fill = strategy)) +
+  geom_boxplot(aes(x=reward,y=strategy, fill = strategy), width = 0.1, color = 'black', alpha=0.2)+
+  theme(
+    legend.position="none"
+  )
+```
 
 To assess what is the culprit for the classical strategies' low performance with respect to the DRL-based strategies, we plot the duration of each of the 100 evaluation episodes of each strategy.
 We see that early episode ends are a rather likely explanation for the wideness of constant escapement's wide reward distribution.
