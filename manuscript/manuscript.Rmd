@@ -508,6 +508,11 @@ Specifically, we use the *GaussianProcessRegressor* object of the *sklearn* Pyth
 \begin{align*}
   \text{RBF}(\text{length scale = 10}) + \text{WhiteNosie}(\text{noise level = 0.1}).
 \end{align*}
+This interpolation method is applied to scatter data of the PPO policy evaluated on 3 different grids:
+One $51\times 51 \times 5$, one $51\times 5 \times 51$ and one $5\times 51 \times 51$ grid on $(X,Y,Z)$ states.\footnote{
+The raw dataset is found at \textbf{TBD} in the repository with the source code and data linked above.
+Scatter plots visualizing this policy are shown in App. \textbf{TBD}.
+}
 The length scale and noise level values of this kernel were chosen arbitrarily---no hyperparameter tuning was needed to produce satisfactory interpolation, as will be shown in the results section.
 
 
@@ -650,16 +655,12 @@ The constant mortality policy at $0.8 M^*$ is already conservative enough to sup
 There, the population levels are maintained roughly in a stationary state.
 Finally, the DRL time series shows an oscillatory behavior, with a slight dephase between the $Y$ and $Z$ curves, while the $X$ oscillations are roughly anticorrelated with $Z$.
 
-
-
 This time series is representative of the patterns observed in the data (see App. A.1).
 The episode reward and episode length statistics are shown in Fig. \ref{fig:rew_len_fig}.
 There, we highlight two things:
 First, that the tendency towards early episode ends is fixed by the conservative approach of fishing at 80% of the MSY mortality rate.
 (In App. A.2 we discuss and evaluate other policies using a fixed-percentage of the MSY mortality rate.)
 Second, that while the conservative 80% approach has a stable behavior, it consistently produces smaller harvests than a DRL generated policy.
-
-
 
 To understand the DRL-derived policy, Fig. \ref{fig:action-X} depicts the harvest as a function of $X$.
 Specifically, for each point $(x,y,z)$ visited by one of the aforementioned 50 evaluation episodes, we evaluate the harvest collected by the DRL agent and we subsequently plot the scatter data as a function of the projection $x$ onto the $X$ axis.
