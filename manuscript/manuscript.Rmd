@@ -601,7 +601,7 @@ We examine the trade-off between profit and sustainability faced by classical st
 Here, two quantities are plotted: the fraction of evaluation episodes of maximal length (i.e. episodes with no near-extinction events) is and the average reward obtained.
 On the x-axis we have several sub-optimal constant mortality strategies that err on the conservative side: e.g. the policy labeled ‘‘80% MSY’’ has the form
 \begin{align*}
-  \pi: (X_t, Y_t, Z_t)\mapsto (0.8 M_X^*.\ 0.8 M_Y^*),
+  \pi: (X_t, Y_t, Z_t)\mapsto (0.8 M_X^*,\ 0.8 M_Y^*),
 \end{align*}
 where $(M_X^*,\ M_Y^*)$ is the optimal constat mortality strategy.
 We see that sufficiently conservative policies attain high sustainability, but only at a high price in terms of profit.\footnote{
