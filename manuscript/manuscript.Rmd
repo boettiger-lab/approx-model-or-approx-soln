@@ -727,7 +727,7 @@ In our case, the output is a policy function parametrized by a neural network $\
   \pi_\theta: N_t \mapsto (M_X(N_t), M_Y(N_t)),
 \end{align*}
 where $N_t=(X_t,Y_t,Z_t)$ is the state of the system at time $t$, and where $M_X$ and $M_Y$ are the mortalities due to harvest during that time-step.
-Moreover, in the case of our ‘‘PPO+GP’’ management strategy, we sample $\pi_\theta$ on a grid of points $G={(X_i, Y_i, Z_i)}_i$ and use a Gaussian process to interpolate $\pi_\theta$, i.e.
+Moreover, in the case of our ‘‘PPO+GP’’ management strategy, we sample $\pi_\theta$ on a grid of points $G=\{(X_i, Y_i, Z_i)\}_i$ and use a Gaussian process to interpolate $\pi_\theta$, i.e.
 \begin{align}
   \pi_{\text{PPO+GP}} = \text{Gaussian process interpolation of } \pi_\theta|_G.
 \end{align}
