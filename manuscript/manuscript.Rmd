@@ -755,11 +755,18 @@ Here, the key difference is that the escapement value for each of the fished spe
 This can be seen as a color gradients in the plots of $(X, M_X)$ and $(Y, M_Y)$, where the gradient corresponds to differing values of $Z$.
 Moreover, this can be seen as an anti-correlation in the plot of $(X, M_Y)$---for optimal constant escapement, $M_Y$ is uncorrelated to $X$.
 
-The sensitivity of the policy to, e.g., the values of $Z$ can be seen in the sample time series displayed in Fig. **TBD**.
+This sensitivity of the policy to, for instance, the values of $Z$ can be seen in the sample time series displayed in Fig. \ref{fig:gpp-ep}.
 Here, we can see that species $Z$ becomes endangered due to harvesting for all management strategies.
 The DRL-based strategy, however, is sensitive to the values of $Z$ and can respond accordingly by scaling the fishing effort with the value of $Z$.
-In particular, the policy responds to periods of low values of $Z$ by restricting fishing on $X$ and $Y$, thus promoting $Z$'s growth.
+In particular, the policy responds to the period of diminishing values of $Z$ near the end of the episode, by restricting fishing on $X$ and $Y$, thus promoting $Z$'s growth.
 This pattern is rather common among the whole dataset---early episode ends are largely due to near-extinctions of $Z$ for all management strategies.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.33]{figures/timeseries-gpp.jpeg}
+  \caption{Time-series of an episode managed with $\pi_{\text{PPO+GP}}$. Here we plot the state of the system on the bottom panel, and the actions taken (fishing efforts on $X$ and $Y$---respectively $M_X$ and $M_Y$) on the top panel.}
+  \label{fig:gpp-ep}
+\end{figure}
 
 ## Recovering constant escapement for a single species
 
