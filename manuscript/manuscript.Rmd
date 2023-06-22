@@ -772,15 +772,31 @@ This pattern is rather common among the whole dataset---early episode ends are l
 
 While the optimal control for our single-species model \eqref{eq:may} can not be easily proven to be constant escapement (since the right-hand side of that equation is not concave), from experience we can expect for constant escapement to either be optimal or near-optimal.
 We give evidence for this intuition by showing that our DRL method recovers a constant escapement solution when trained.
-These results are shown in Fig. TBD.
+These results are shown in Fig. \ref{fig:1sp-pol}
+Here we show both the output PPO policy, and its Gaussian process interpolation.
+This helps build an intuition about the relationship between our ‘‘PPO’’ and ‘‘PPO+GP’’ management strategies.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.25]{figures/1sp-policy.jpeg}
+  \caption{TBD.}
+  \label{fig:1sp-pol}
+\end{figure}
 
 ## Stability analysis
 
 In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values.
 
-Our main result in this respect is Fig. **TBD**.
+Our main result in this respect is Fig. \ref{fig:stability}.
 There, we plot the *median episode reward difference* between the two DRL-based methods we considered, and the optimal constant escapement strategy.
 This figure shows that, for a wide range of parameter values, DRL-based strategies can have a considerable advantage over an optimized constant escapement policy (the single-species optimal solution).
+
+\begin{figure}
+  \centering
+  \includegraphics{figures/jiggle_v1.png}
+  \caption{TBD.}
+  \label{fig:stability}
+\end{figure}
 
 ## Old results (to be copy-pasted above)
 
