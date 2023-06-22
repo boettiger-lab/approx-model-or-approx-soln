@@ -594,7 +594,7 @@ The stability results are displayed in Fig. \textbf{TBD}.
 
 # Results
 
-We evaluated each of the four control approaches considered -- MSY constant mortality, optimal constant escapement, PPO, and Gaussian process interpolation of the latter -- on each of the four scenarios examined (see Sec. TBD).
+We evaluated each of the four control approaches considered -- MSY constant mortality, optimal constant escapement, PPO, and Gaussian process interpolation of the latter -- on each of the four scenarios examined (see Sec. 3).
 Furthermore, we characterized the trade-off between economic output and sustainability faced by constant mortality policies.
 This was done by evaluating constant mortality policies with a fraction of the optimal mortality rate (specifically, 80%, 90% and 95%).
 All evaluations were based on 100 replicate episodes. 
@@ -602,7 +602,7 @@ All evaluations were based on 100 replicate episodes.
 We will visualize the results concerning the last scenario considered (‘‘3 species, 2 of which harvested, and a time-varying parameter’’) in this section, leaving the other cases for the appendix.
 This is the most complex scenario considered and where our results show the most compelling advantage of DRL methods with respect to classical strategies.
 
-Our main result is summarized in Fig. **TBD** which displays the total reward distributions for the policy obtained through each strategy.
+Our main result is summarized in Fig. \ref{fig:main} which displays the total reward distributions for the policy obtained through each strategy.
 Here we note two surprising things:
 First, optimal constant escapement performs considerably worse than not only DRL-based methods, but also than MSY.
 This conceptually shows how one-dimensional intuitions on ecological control may loose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
@@ -621,11 +621,73 @@ main_summaries %>%
   )
 ```
 
-To assess what is the culprit for the classical strategies' low performance with respect to the DRL-based strategies, we plot the duration of each of the 100 evaluation episodes of each strategy.
+To assess what is the culprit for the classical strategies' low performance with respect to the DRL-based strategies, we plot the duration of each of the 100 evaluation episodes of each strategy in Fig. \ref{fig:ephistograms}.
 We see that early episode ends are a rather likely explanation for the wideness of constant escapement's wide reward distribution.
 The constant mortality strategy is also observed to lead to near-extinction events rather often, but in this case the episode lengths tend to be concentrated at higher values relative to the constant escapement case.
 
-We examine the trade-off between profit and sustainability faced by classical strategies in Fig. **TBD**.
+```{r}
+#| label: ephistograms
+#| fig.cap: "Hisotgrams of episode lengths and rewards for the four different management strategies considered. Only the first 50 evaluation episodes (from a total of 100) were included, for ease of visualization."
+#| out.width: "6in"
+esc_len <- esc_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = t)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="ep. duration")
+msy_len <- msy_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = t)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="ep. duration")
+ppo_len <- ppo_ends %>%
+  filter(rep<50) %>%
+  ggplot(mapping = aes(x = rep, y = t)) +
+  geom_col() +
+  labs(x="repetition", y="ep. duration")
+gpp_len <- gpp_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = t)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="ep. reward")
+
+esc_rew <- esc_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = reward)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="ep. reward")
+msy_rew <- msy_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = reward)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="ep. reward")
+ppo_rew <- ppo_ends %>%
+  filter(rep<50) %>%
+  ggplot(mapping = aes(x = rep, y = reward)) +
+  geom_col() +
+  labs(x="repetition", y="ep. reward")
+gpp_rew <- gpp_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = reward)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="ep. duration")
+
+(esc_len | msy_len | ppo_len | gpp_len) / (esc_rew | msy_rew | ppo_rew | gpp_rew)
+```
+
+We examine the trade-off between profit and sustainability faced by the constant mortality strategy in Fig. \ref{fig:fracmsy}.
+We expect a similar and, possibly, more pronounced effect for the constant escapement strategy but do not analyze this case here.
 Here, two quantities are plotted: the fraction of evaluation episodes of maximal length (i.e. episodes with no near-extinction events) is and the average reward obtained.
 On the x-axis we have several sub-optimal constant mortality strategies that err on the conservative side: e.g. the policy labeled ‘‘80% MSY’’ has the form
 \begin{align*}
@@ -637,6 +699,29 @@ As noted before, here we equate economic profit with biomass caught.
 This is done as an approximation to convey the conceptual message more clearly, and we do not expect our results to significantly change if, e.g., ‘‘effort cost’’ is included in the reward function.
 When we refer to ‘‘large differences’’ in profit, or ‘‘paying dearly,’’ we mean that the ratio between average rewards is considerable---e.g. a 15\% loss in profit.
 }
+
+```{r}
+#| label: fracmsy
+#| fig.cap: "TBD"
+#| out.width: "6in"
+frac_msy %>%
+  ggplot(aes(x=msy_fraction)) + 
+  geom_line(aes(y=reward)) +
+  geom_errorbar(aes(ymin=reward-reward_std, ymax=reward+reward_std), width=.01,
+                 position=position_dodge(0.05)) +
+  geom_line(aes(y=num_full_eps)) +
+  geom_point(aes(y=reward)) + 
+  geom_point(aes(y=num_full_eps)) + 
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "% full-length eps",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.+20, name="Mean ep. reward")
+  )+
+  labs(x="% MSY constant mortality")
+```
 
 One problem that is often encountered when using machine learning methods is the interpretability of the output of these methods.
 In our case, the output is a policy function parametrized by a neural network $\theta$:
