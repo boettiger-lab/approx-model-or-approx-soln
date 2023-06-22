@@ -604,7 +604,7 @@ r = K = 1,\quad \beta = 0.25,\quad c = 0.1.
 \end{align}
 Here, the values of $\beta$ and $c$ are chosen as to make the system be roughly close to its tipping point.
 
-The three-species model's (eq. \eqref{eq:3d model stoch}) dynamic parameters were chosen as follows
+The three-species model's (eq. \eqref{eq:3d model}) dynamic parameters were chosen as follows
 \begin{align}
 \label{eq:param vals}
 \begin{split}
