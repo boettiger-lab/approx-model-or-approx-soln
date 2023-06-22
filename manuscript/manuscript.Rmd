@@ -821,6 +821,13 @@ These results are shown in Fig. \ref{fig:1sp-pol}
 Here we show both the output PPO policy, and its Gaussian process interpolation.
 This helps build an intuition about the relationship between our ‘‘PPO’’ and ‘‘PPO+GP’’ management strategies.
 
+There is a presence of certain high-mortality points at low $X$ values in the PPO policy (which in turn generates a rising fishing mortality for $X$ values below a certain threshold in the PPO+GP policy).
+This is likely due to experience of near-extinctions early on in the training process---where, given an impending extinction, it is more rewardful to fish intensively. 
+These ‘‘jitters’’ are likely not fully erased through the optimization algorithm since near-extinction events become extremely rare after only a few training iterations.
+This way, the agent does not further explore that region of state space to generate new experience.
+We believe the most important aspect of the constant escapement policy reproduced by PPO is the fact that there is some sufficiently-wide window below the threshold of the policy (i.e. below the optimal escapement value), on which no fishing is performed.
+That is, there exists some sufficiently large $\varepsilon$ such that, if $X_{\text{thresh.}}$ is the optimal escapement value of the system, then $\pi_{PPO}(X)=0$ for all $X\in[X_{\text{thresh.}}-\varepsilon,\ X_{\text{thresh.}}]$.
+
 \begin{figure}
   \centering
   \includegraphics[scale=0.25]{figures/1sp-policy.jpeg}
