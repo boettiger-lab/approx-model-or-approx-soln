@@ -169,6 +169,7 @@ Here, though, we will focus on the issue of opacity and interpretability raised 
 In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
 In general, one can only assess the performance of these black box methods relative to alternatives.
 
+<!--
 ```{r}
 #| label: conceptual
 #| echo: FALSE
@@ -187,11 +188,33 @@ In general, one can only assess the performance of these black box methods relat
  
 knitr::include_graphics("figures/conceptual.png")
 ```
+-->
+
+```{r}
+#| label: conceptual-v2
+#| echo: FALSE
+#| message: FALSE
+#| fig.align: 'center'
+#| fig.cap:  'An experimental-design type of visualization of the management scenarios considered in this paper. 
+#| On the x-axis are four different fishery management problems: a single species model, and three three-species models.
+#| From left to right, the latter are: three species out of which one, X, is harvested, and all parameters are constant in time; 
+#| three species out of which two, X and Y, are harvested and all parameters are constant in time;
+#| and finally three species out of which two, X and Y, are harvested and one parameter depends on time. 
+#| We represent the latter’s time-dependence with a clock next to the X variable, and we intend to use it as an example of a possible simplified model for the effects of climate change.
+#| On the y-axis we have different management strategies with which one may control each of the models. 
+#| On the bottom we have the constant mortality strategy (CMort), where one optimizes over constant fishing effort strategies.
+#| Above that is the constant escapement strategy (CEsc), based on calling off all fishing below a certain threshold population value.
+#| Finally, on top we have DRL-based strategies where policies are in general functions of the full state of the system, and they are parametrized by a neural network.'
+#| out.width: '6.5in' 
+#| fig.pos: 'H'
+ 
+knitr::include_graphics("figures/conceptual-v2.jpeg")
+```
 
 <!--NEED some kind of map paragraph here saying what's ahead, what we show  -->
 In this article, we compare the performance of a DRL solution to that of classical management strategies (see Textbox 1).\footnote{A repository with all the relevant code to reproduce our results may be found at \url{https://github.com/boettiger-lab/approx-model-or-approx-soln} in the ‘‘src’’ subdirectory. 
 The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.} 
-We consider the problem of devising harvest strategies in a for a series of ecosystem models (Figure **TBD**):
+We consider the problem of devising harvest strategies in a for a series of ecosystem models (Figure \ref{fig:conceptual-v2}):
 *1) one species, one fishery:* a simple single-species recruitment model based on [@may77];
 *2) three species, one fishery:* a three-species generalization of model *1)*, where one of the species is harvested;
 *3) three species, two fisheries:* the same three-species model as above but with two harvested species;\footnote{
