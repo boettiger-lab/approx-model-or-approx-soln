@@ -351,13 +351,14 @@ Eqs. \eqref{eq:3d model} are a generalization of the single-species model \eqref
 \begin{align*}
   c_{XY} = d = f = \sigma_Z = 0.
 \end{align*}
-In our simulations, we use $c_{XY} = d = f = 0.1$ and $\sigma_Z=0.05$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
+Throughout most of our paper, we use the parameter values given in eq. \eqref{eq:param vals}.
+In particular, $c_{XY} = d = f = 0.1$ and $\sigma_Z=0.05$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
 Put differently, we are in a regime where, just by examining parameters, it would seem that the single-species model is a reasonable approximation.
-**Is this clear? Should I maybe erase these last sentences?**
+**Is this actually true? Should I maybe erase these last sentences?**
 
 The three models will branch off of eq. \eqref{eq:3d model} in the following way.
 *1. Three species, one fishery:* in this first model, only $X$ is harvested, that is, in the notation of eq. \eqref{eq:general model}, we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
-All parameters here are constant.
+All parameters here are constant, with values given by \eqref{eq:param vals}.
 *2. Three species, two fisheries:* as the previous case but with $X$ and $Y$ being harvested. 
 In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
 Finally, *3. Three species, two fiseries, time-variation:* in this model we allow for the harvest of $X$ and $Y$, as in the previous model, but now we include a time dependent parameter:
@@ -369,8 +370,12 @@ Finally, *3. Three species, two fiseries, time-variation:* in this model we allo
     1/2, \quad & t > 100.
   \end{cases}
 \end{equation}
-This is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
-In future work we intend to capture more realistic models of the effects of climate change, but for this exploratory work we have chosen this simple expression for the sake of conceptual clarity.
+All other parameters are fixed by eq. \eqref{eq:param vals}.
+
+Eq. \eqref{eq:rx(t)} is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
+In future work we intend to test the DRL framework in realistic models of particular fisheries.
+As a part of that effort, we will attempt capture more detailed models of the effects of climate change.
+For this exploratory work we have chosen this simple expression, however, for the sake of conceptual clarity.
 
 # Reinforcement learning {#sec:RL}
 
