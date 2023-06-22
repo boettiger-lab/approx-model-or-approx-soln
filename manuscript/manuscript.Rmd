@@ -509,9 +509,9 @@ Due to the increased computational requirements of this framework, we have left 
 # Methods
 
 \textbf{The Environment.}
-As seen in Fig. **TBD CONCEPTUAL**, we consider four different models of the ecosystem with which the fishery interacts, each of this is called an *environment*, alluding to the environment in an RL setting.
+As seen in Fig. \ref{fig:conceptual-v2}, we consider four different models of the ecosystem with which the fishery interacts, each of this is called an *environment*, alluding to the environment in an RL setting.
 We summarize these models in Table \ref{tab:models}.
-To recap, these four environments are a single-species growth model \eqref{eq:may} for a harvested species; a three-species model \eqref{eq:3d model stoch} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
+To recap, these four environments are a single-species growth model \eqref{eq:may} for a harvested species; a three-species model \eqref{eq:3d model} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
 
 The policies explored were functions from states $N_t$ to either a single number $M_X(N_t) = \pi(N_t)$, or a pair of numbers $(M_X(N_t), M_Y(N_t)) = \pi(N_t)$ depending on the environment considered.
 
@@ -527,7 +527,7 @@ The policies explored were functions from states $N_t$ to either a single number
       3 species, 2 fishery, time-varying parameters & \eqref{eq:3d model} & 3 & $X$ and $Y$ & No \\
       \hline
     \end{tabular}
-    \caption{Table of models considered in this paper. Here, \textbf{N. Sp.} is the \emph{number of species} in the model, \textbf{Harve. Sp.} is the species of the model which are harvested, and \textbf{Stationary?} refers to whether the parameters of the model have fixed values (or, on the contrary, if they vary in time). The only non-stationary case presented in the paper is where $r_X$ drifts linearly with time. In the code repository associated to the paper, we consider other possible choices of non-stationarity.}
+    \caption{Table of models considered in this paper. Here, \textbf{N. Sp.} is the \emph{number of species} in the model, \textbf{Harv. Sp.} is the species of the model which are harvested, and \textbf{Stationary?} refers to whether the parameters of the model have fixed values (or, on the contrary, if they vary in time). The only non-stationary case presented in the paper is where $r_X$ drifts linearly with time. In the code repository associated to the paper, we consider other possible choices of non-stationarity.}
     \label{tab:models}
   \end{center}
 \end{table}
