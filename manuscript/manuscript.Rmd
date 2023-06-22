@@ -727,10 +727,28 @@ In our case, the output is a policy function parametrized by a neural network $\
   \pi_\theta: N_t \mapsto (M_X(N_t), M_Y(N_t)),
 \end{align*}
 where $N_t=(X_t,Y_t,Z_t)$ is the state of the system at time $t$, and where $M_X$ and $M_Y$ are the mortalities due to harvest during that time-step.
-Here we visualize this policy function and provide an interpretation for it.
+Moreover, in the case of our ‘‘PPO+GP’’ management strategy, we sample $\pi_\theta$ on a grid of points $G={(X_i, Y_i, Z_i)}_i$ and use a Gaussian process to interpolate $\pi_\theta$, i.e.
+\begin{align}
+  \pi_{\text{PPO+GP}} = \text{Gaussian process interpolation of } \pi_\theta|_G.
+\end{align}
+This process was explained in detail in the Methods section.
+
+Here we visualize the resulting $\pi_{\text{PPO+GP}}$ policy and provide an interpretation for it.\footnote{
+A similar characterization of $\pi_\theta$ is found on the appendix. 
+Here we focus on the Gaussian process interpolation as it is smoother and, thus, easier to interpret.
+}
 Given its high dimension, it is not possible to fully display how the policy function obtained ‘‘looks like’’---we thus project it down to certain relevant axes.
-The result of this procedure is shown in Fig. **TBD**.
+The result of this procedure is shown in Fig. \ref{fig:gpp-policy}.
 In that figure, the shape of the optimal escapement strategy is provided for comparison.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.25]{figures/gpp-policy-pdf.pdf}
+  \caption{Plots of the PPO+GP policy $\pi_{\text{PPO+GP}}$ along several relevant axes. Here $M_X$ and $M_Y$ are the $X$ and $Y$ components of the policy function. The values of the plots are generated in the following way: For each variable $X$, $Y$, and $Z$, the times-eries of evaluation episodes are used to generate a window of typical values that variable attains when controlled by $\pi_{\text{PPO+GP}}$. Then, for each plot either $X$ or $Y$ was varied on $[0,1]$ along the $x$ axis, while the other variables (resp. $Y$ and $Z$, or $X$ and $Z$) were varied within the typical window computed before. The value of one of the latter two variables were visualized as color.}
+  \label{fig:gpp-policy}
+\end{figure}
+
+
 
 We notice that the DRL-derived policy has similarities to a constant escapement policy.
 Here, the key difference is that the escapement value for each of the fished species is sensitive to variations in the other populations. 
