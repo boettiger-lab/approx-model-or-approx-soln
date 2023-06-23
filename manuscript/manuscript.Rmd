@@ -860,15 +860,30 @@ Because of this, policies such as MSY have faced pushback and are believed to ha
 
 We propose an alternative approach to the problem of fishery control: to use a more expressive -- albeit more complicated -- dynamical model to guide decision making.
 Furthermore, rather than computing the optimal control policy for the model (something that is impossible in practice for complex systems) we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
-This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model stoch}) as a black box of input-output pairs.
+This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model}) as a black box of input-output pairs.
 By not relying on precise knowledge of the model's parameter values, but rather just relying on input-output statistics, model-free approaches have gained traction in a variety of control theory settings (see, e.g., [@sato2019; @ramirez2022; @zeng2019]).
 
-We compare deep reinforcement learning-based policies against optimal constant mortality policies. 
-While the latter are MSY-inspired, they are optimized in a model-free way as well: the optimal constant mortality rate is computed empirically from simulated data.
+We compare deep reinforcement learning-based policies against classical management strategies (optimal constant mortality and optimal constant escapement policies policies). 
+While the latter are inspired by the shape of optimal solutions in the single-species setting, they are optimized in a model-free way as well: e.g. the optimal constant mortality rate is computed empirically from simulated data.
 
-Because of the simplicity of the constant mortality ansatz, the optimal such policy may be easily estimated (see Figure \ref{fig:tuning}).
+Because of the simplicity of the classical policy functions, the optimal such policy may be easily estimated through a grid-search.
+This is the case since these policy functions are only specified by one or two parameters (in the single fishery, or two fishery cases).
 In contrast, DRL optimizes over the more expressive -- and more complicated -- family of policies parametrized by a neural network.
 Because of this, our DRL approach uses a variant of *gradient ascent* (the proximal policy optimization algorithm) to obtain a good candidate policy.
+
+We showed that for sufficiently complex management scenarios---with multiple harvested species and, possibly, time-varying parameters---, optimal constant escapement can perform poorly both in terms of reward (which may be used as a proxy for economic performance), as in terms of sustainability (i.e. probability of a near-extinction).
+In the case we investigated in detail, the optimal constant mortality policy surprisingly performs much better than constant escapement.
+We nonetheless observe that the constant mortality strategy is faced with a trade-off: higher sustainability is achieved for sub-optimal constant mortality rates, but only at a significant decrease in the mean episode reward.
+We expect that with increasing complexity this phenomenon might become more pronounced.
+This is because of the rigidity of classical strategies: the simplicity of their expressions, depending only on a few parameters, means that policy optimization is constrained to a rather reduced subset of the space of possible policies.
+
+For the most complicated ecosystem models we considered (those with three species, two of which are harvested) we saw a significant improvement in both average reward and sustainability when using DRL-based strategies.
+In particular, there was a stark difference in performance between both DRL-based strategies tested, and constant escapement---the optimal solution for a wide array of single-species models.
+This, in addition, within a regime of parameter space where species interaction terms about an order of magnitude smaller than the single-species logistic growth---i.e., in a regime where logistic growth could be considered a reasonable approximation of the system.
+
+
+
+# Old discussion
 
 We have shown that the DRL agent finds an approximately *bang-bang* type of solution (see Text Box 1 for the definition of bang-bang solutions and Figs. \ref{fig:action-X} and \ref{fig:state-space} for the result).
 While bang-bang solutions are known to be optimal for a wide variety of single-species fishery control problems [@hening2019; @hening2021], there is no such proof of optimality for general multi-species models.
