@@ -634,7 +634,6 @@ Sample 100 choices of perturbed parameter values, where the perturbation is as f
 For each of these parameter choices, tune the constant escapement strategy and train the DRL model on the corresponding model.
 Measure the average reward difference between strategies for each of these parameter choice samples using 100 replicate evaluation episodes.
 Take the mean of this average difference over the 100 perturbed parameter samples.
-The stability results are displayed in Fig. \textbf{TBD}.
 
 
 # Results
