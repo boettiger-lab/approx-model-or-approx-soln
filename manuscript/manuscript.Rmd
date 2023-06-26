@@ -581,10 +581,8 @@ A grid of 101 mortality rates was laid in the interval $[0, 0.5]$ as possible mo
 Due to the high memory usage in the two-fishery case, a slightly coarser $51\times51$ grid was set in the square $[0,0.5]^2$ instead.
 Since the approach for tuning is completely analogous for all scenarios considered, here we focus on the ‘‘3 species, 1 fishery’’ case.
 For each one of these choices of a constant mortality rate, say $M_X$, we simulated 100 episodes based on \eqref{eq:3d model stoch}:
-At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $M_X X_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
+At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $M_X X_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model}.
 The optimal mortality rate was the value $M_X^*$ for which the mean episode reward was maximal.
-The result of the tuning procedure is shown in Fig. \ref{fig:tuning}. 
-
 
 
 \textbf{Tuning the constant escapement strategy.}
@@ -595,6 +593,14 @@ These grids were the possible constant escapement values optimized over (in the 
 That is, each grid point represents a constant escapement policy.
 We used each of these policies to manage 100 replicate episodes.
 The optimal policy was the policy with the highest average reward obtained.
+A visualization of the tuning procedure for the ‘‘three species, two fisheries, time-varying parameter’’ model is shown in Fig. \ref{fig:tuning}. 
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{figures/esc_heatmap.png}
+  \caption{Visualization of the cosntant escapement strategy tuning procedure for the ‘‘three-species, two-fishery, time-varying parameter’’ model. There was a certain multiplicity in this tuning strategy: a ‘‘ridge of optimality’’ where policies had essentially equivalent behavior. Throughout our investigation, we tuned constant escapment in several occasions and, on each occassion, a different optimal policy along the ridge was found. The results for different policies along the ridge were in practice equivalent, with no discernible difference in performance. We highlighted the ridge with a white dotted line.}
+  \label{fig:tuning}
+\end{figure}
 
 \textbf{Parameter values used.}
 The single-species model's (eq. \eqref{eq:may}) dynamic parameters were chosen as
