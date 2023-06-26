@@ -524,7 +524,7 @@ The policies explored were functions from states $N_t$ to either a single number
       1 species, 1 fishery & \eqref{eq:may} & 1 & $X$ & Yes \\
       3 species, 1 fishery & \eqref{eq:3d model} & 3 & $X$ & Yes \\
       3 species, 2 fishery & \eqref{eq:3d model} & 3 & $X$ and $Y$ & Yes \\
-      3 species, 2 fishery, time-varying parameters & \eqref{eq:3d model} & 3 & $X$ and $Y$ & No \\
+      3 species, 2 fishery, non-stationary & \eqref{eq:3d model} & 3 & $X$ and $Y$ & No \\
       \hline
     \end{tabular}
     \caption{Table of models considered in this paper. Here, \textbf{N. Sp.} is the \emph{number of species} in the model, \textbf{Harv. Sp.} is the species of the model which are harvested, and \textbf{Stationary?} refers to whether the parameters of the model have fixed values (or, on the contrary, if they vary in time). The only non-stationary case presented in the paper is where $r_X$ drifts linearly with time. In the code repository associated to the paper, we consider other possible choices of non-stationarity.}
@@ -580,7 +580,7 @@ The length scale and noise level values of this kernel were chosen arbitrarily--
 A grid of 101 mortality rates was laid in the interval $[0, 0.5]$ as possible mortality values in the single-fishery cases.
 Due to the high memory usage in the two-fishery case, a slightly coarser $51\times51$ grid was set in the square $[0,0.5]^2$ instead.
 Since the approach for tuning is completely analogous for all scenarios considered, here we focus on the ‘‘3 species, 1 fishery’’ case.
-For each one of these choices of a constant mortality rate, say $M_X$, we simulated 100 episodes based on \eqref{eq:3d model stoch}:
+For each one of these choices of a constant mortality rate, say $M_X$, we simulated 100 episodes based on \eqref{eq:3d model}:
 At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $M_X X_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model}.
 The optimal mortality rate was the value $M_X^*$ for which the mean episode reward was maximal.
 
@@ -593,12 +593,12 @@ These grids were the possible constant escapement values optimized over (in the 
 That is, each grid point represents a constant escapement policy.
 We used each of these policies to manage 100 replicate episodes.
 The optimal policy was the policy with the highest average reward obtained.
-A visualization of the tuning procedure for the ‘‘three species, two fisheries, time-varying parameter’’ model is shown in Fig. \ref{fig:tuning}. 
+A visualization of the tuning procedure for the ‘‘three species, two fisheries, non-stationary’’ model is shown in Fig. \ref{fig:tuning}. 
 
 \begin{figure}
   \centering
   \includegraphics[scale=0.5]{figures/esc_heatmap.png}
-  \caption{Visualization of the cosntant escapement strategy tuning procedure for the ‘‘three-species, two-fishery, time-varying parameter’’ model. There was a certain multiplicity in this tuning strategy: a ‘‘ridge of optimality’’ where policies had essentially equivalent behavior. Throughout our investigation, we tuned constant escapment in several occasions and, on each occassion, a different optimal policy along the ridge was found. The results for different policies along the ridge were in practice equivalent, with no discernible difference in performance. We highlighted the ridge with a white dotted line.}
+  \caption{Visualization of the cosntant escapement strategy tuning procedure for the ‘‘three-species, two-fishery, non-stationary’’ model. There was a certain multiplicity in this tuning strategy: a ‘‘ridge of optimality’’ where policies had essentially equivalent behavior. Throughout our investigation, we tuned constant escapment in several occasions and, on each occassion, a different optimal policy along the ridge was found. The results for different policies along the ridge were in practice equivalent, with no discernible difference in performance. We highlighted the ridge with a white dotted line.}
   \label{fig:tuning}
 \end{figure}
 
