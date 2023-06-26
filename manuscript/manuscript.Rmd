@@ -562,7 +562,7 @@ The state space used was normalized case-by-case as follows:
 *1)* for the single species model, a line segment $[0,1]$, *2)* for all three-species models, a cube $[0,1]^{\times 3}$.
 We used simulation data to derive a bound on the population sizes typically observed, and thus be able to normalize states to a finite volume.
 
-Policies obtained from the PPO algorithm can be ‘‘noisy’’ as their optimization algorithm is randomized (see, e.g. App. \textbf{TBD} for visualizations of these policies).
+Policies obtained from the PPO algorithm can be ‘‘noisy’’ as their optimization algorithm is randomized (see, e.g. App. B for visualizations of the PPO policy in the ‘‘3 species, 2 fisheries, non-stationary’’ case).
 We perform some interpolation using a Gaussian process regressor in order to de-noise these policies.
 Specifically, we use the *GaussianProcessRegressor* object of the *sklearn* Python library with a kernel given by
 \begin{align*}
@@ -649,7 +649,7 @@ Furthermore, we characterized the trade-off between economic output and sustaina
 This was done by evaluating constant mortality policies with a fraction of the optimal mortality rate (specifically, 80%, 90% and 95%).
 All evaluations were based on 100 replicate episodes. 
 
-We will visualize the results concerning the last scenario considered (‘‘3 species, 2 of which harvested, and a time-varying parameter’’) in this section, leaving the other cases for the appendix.
+We will visualize the results concerning the last scenario considered (‘‘3 species, 2 of which harvested, and a time-varying parameter’’) in this section, leaving the other cases for App. A.
 This is the most complex scenario considered and where our results show the most compelling advantage of DRL methods with respect to classical strategies.
 
 Our main result is summarized in Fig. \ref{fig:main} which displays the total reward distributions for the policy obtained through each strategy.
@@ -909,7 +909,8 @@ This material is based upon work supported by the National Science Foundation un
 ## Results for stationary models
 
 In the main text we focused on the non-stationary model (‘‘three species, two fisheries, non-stationary’’ in Table 1) for the sake of space and because our results were most compelling there.
-Here we present the reward distributions for the other models considered.
+Here we present the reward distributions for the other models considered---the three stationary models, lines 1-3 in Table 1.
+
 ```{r}
 summary_32 <- read_csv("manuscript_data/comparison_3-2-const_300.csv.xz") %>%
   mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
@@ -960,6 +961,19 @@ summary_11 %>%
     legend.position="none"
   )
 ```
+
+## PPO policy function for non-stationary model
+
+In the main text, Fig. \ref{fig:gpp-policy}, we presented a visualization of the PPO+GP policy function obtained for the ‘‘three species, two fisheries, non-stationary’’ model.
+This policy function is a Gaussian process regression of scatter data of the PPO policy function.
+In Fig. \ref{fig:ppo-policy} we present a representation of this scatter data in a similar format as Fig. \ref{fig:gpp-policy}.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.35]{figures/ppo-policy.jpeg}
+  \caption{Plots of the PPO policy $\pi_{\text{PPO}}$ along several relevant axes. Here $M_X$ and $M_Y$ are the $X$ and $Y$ components of the policy function. The values of the plots are generated in the following way: For each variable $X$, $Y$, and $Z$, the time-series of evaluation episodes are used to generate a window of typical values that variable attains when controlled by $\pi_{\text{PPO}}$. Then, for each plot either $X$ or $Y$ was evaluated on 100 values in $[0,1]$ along the $x$ axis, while the other variables (resp. $Y$ and $Z$, or $X$ and $Z$) were varied within the typical window computed before. Within this window, 5 values are used. The value of one of the latter two variables were visualized as color. This scatter data was used as an input to generate $\pi_{\text{PPO+GP}}$, visualized in the main text.}
+  \label{fig:ppo-policy}
+\end{figure}
 
 ## Old appendices:
 
