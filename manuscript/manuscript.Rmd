@@ -559,7 +559,7 @@ The total training time was on the order of 30 minutes to 1 hour.
 For the single-species model, the training iterations were scaled down to 100 and the training time was around 10 minutes.
 
 The state space used was normalized case-by-case as follows: 
-*1)* for the single species model, a line segment $[0,1]$, *2)* for all three-species models, a cute $[0,1]^{\times 3}$.
+*1)* for the single species model, a line segment $[0,1]$, *2)* for all three-species models, a cube $[0,1]^{\times 3}$.
 We used simulation data to derive a bound on the population sizes typically observed, and thus be able to normalize states to a finite volume.
 
 Policies obtained from the PPO algorithm can be ‘‘noisy’’ as their optimization algorithm is randomized (see, e.g. App. \textbf{TBD} for visualizations of these policies).
