@@ -866,19 +866,27 @@ We compare deep reinforcement learning-based policies against classical manageme
 While the latter are inspired by the shape of optimal solutions in the single-species setting, they are optimized in a model-free way as well: e.g. the optimal constant mortality rate is computed empirically from simulated data.
 
 Because of the simplicity of the classical policy functions, the optimal such policy may be easily estimated through a grid-search.
-This is the case since these policy functions are only specified by one or two parameters (in the single fishery, or two fishery cases).
+This is the case since these policy functions are only specified by one or two parameters (respectively in the single fishery, or two fishery cases).
 In contrast, DRL optimizes over the more expressive -- and more complicated -- family of policies parametrized by a neural network.
 Because of this, our DRL approach uses a variant of *gradient ascent* (the proximal policy optimization algorithm) to obtain a good candidate policy.
 
-We showed that for sufficiently complex management scenarios---with multiple harvested species and, possibly, time-varying parameters---, optimal constant escapement can perform poorly both in terms of reward (which may be used as a proxy for economic performance), as in terms of sustainability (i.e. probability of a near-extinction).
-In the case we investigated in detail, the optimal constant mortality policy surprisingly performs much better than constant escapement.
-We nonetheless observe that the constant mortality strategy is faced with a trade-off: higher sustainability is achieved for sub-optimal constant mortality rates, but only at a significant decrease in the mean episode reward.
-We expect that with increasing complexity this phenomenon might become more pronounced.
-This is because of the rigidity of classical strategies: the simplicity of their expressions, depending only on a few parameters, means that policy optimization is constrained to a rather reduced subset of the space of possible policies.
+We showed that for sufficiently complex management scenarios -- with multiple harvested species and, possibly, time-varying parameters -- DRL-based management strategies perform significantly better than constant escapement.
+This with respect to both average rewards received and conservation goals.
+In this sense, an approximate solution to a more complicated and expressive model, can outperform the optimal solution of the single-species problem---even when the parameters of the single-species solution are empirically optimized.
 
-For the most complicated ecosystem models we considered (those with three species, two of which are harvested) we saw a significant improvement in both average reward and sustainability when using DRL-based strategies.
-In particular, there was a stark difference in performance between both DRL-based strategies tested, and constant escapement---the optimal solution for a wide array of single-species models.
-This, in addition, within a regime of parameter space where species interaction terms about an order of magnitude smaller than the single-species logistic growth---i.e., in a regime where logistic growth could be considered a reasonable approximation of the system.
+What is more, this DRL advantage happened within a regime of parameter space where species interaction terms were much smaller than the single-species logistic growth terms.
+Indeed, interaction parameters in \eqref{eq:3d model} are about an order of magnitude smaller than $r_X$ and $r_Y$.
+In this situation logistic growth is a reasonable approximation of the system, and thus a constant escapement solution is a plausible control strategy.
+
+We found that the optimal constant mortality policy surprisingly performs much better than constant escapement (Fig. \ref{fig:main}).
+However, it can be observed in Fig. \ref{fig:fracmsy} that the constant mortality strategy faces a trade-off: high sustainability is achieved for sub-optimal constant mortality rates, but only at a significant decrease in the mean episode reward.
+We expect that with increasing ecosystem complexity this phenomenon might become more pronounced.
+We can understand this as a consequence of the rigidity of classical strategies: the simplicity of their expressions, depending only on a few parameters, means that policy optimization is constrained to a rather reduced subset of the space of possible policies.
+
+Finally, we performed a stability analysis to ensure that the advantage of DRL-based techniques over constant escapement is a ubiquitous phenomenon and not a result of a lucky selection of parameter values.
+We found (in Fig. \ref{fig:stability}) that an advantage can be observed even for relatively high-noise perturbations of the parameters---noise with a variance of 20% of the parameter values.
+The aforementioned Figure summarizes the statistics of 100 parameter perturbations so that we may expect perturbations of up to 60% (i.e. three sigmas) in the parameter values to appear in these statistics.
+
 
 
 
