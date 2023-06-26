@@ -910,6 +910,7 @@ This material is based upon work supported by the National Science Foundation un
 
 In the main text we focused on the non-stationary model (‘‘three species, two fisheries, non-stationary’’ in Table 1) for the sake of space and because our results were most compelling there.
 Here we present the reward distributions for the other models considered---the three stationary models, lines 1-3 in Table 1.
+These results are shown in Figs. \ref{fig:main_32}, \ref{fig:main_31} and \ref{fig:main_11}.
 
 ```{r}
 summary_32 <- read_csv("manuscript_data/comparison_3-2-const_300.csv.xz") %>%
