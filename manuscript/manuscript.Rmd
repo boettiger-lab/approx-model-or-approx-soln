@@ -906,6 +906,63 @@ This material is based upon work supported by the National Science Foundation un
 
 # Appendix
 
+## Results for stationary models
+
+In the main text we focused on the non-stationary model (‘‘three species, two fisheries, non-stationary’’ in Table 1) for the sake of space and because our results were most compelling there.
+Here we present the reward distributions for the other models considered.
+```{r}
+summary_32 <- read_csv("manuscript_data/comparison_3-2-const_300.csv.xz") %>%
+  mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
+  arrange(strategy)
+summary_31 <- read_csv("manuscript_data/comparison_3-1_300.csv.xz") %>%
+  mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
+  arrange(strategy)
+summary_11 <- read_csv("manuscript_data/comparison_1-1_100.csv.xz") %>%
+  mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
+  arrange(strategy)
+```
+
+```{r}
+#| label: main_32
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘three species, two fisheries’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| out.width: "6in"
+summary_32 %>% 
+  ggplot() +
+  geom_violin(mapping = aes(x=reward,y=strategy,fill = strategy)) +
+  geom_boxplot(aes(x=reward,y=strategy, fill = strategy), width = 0.1, color = 'black', alpha=0.2)+
+  theme(
+    legend.position="none"
+  )
+```
+
+```{r}
+#| label: main_31
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘three species, one fishery’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| out.width: "6in"
+summary_31 %>% 
+  ggplot() +
+  geom_violin(mapping = aes(x=reward,y=strategy,fill = strategy)) +
+  geom_boxplot(aes(x=reward,y=strategy, fill = strategy), width = 0.1, color = 'black', alpha=0.2)+
+  theme(
+    legend.position="none"
+  )
+```
+
+```{r}
+#| label: main_11
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘one species, one fishery’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| out.width: "6in"
+summary_11 %>% 
+  ggplot() +
+  geom_violin(mapping = aes(x=reward,y=strategy,fill = strategy)) +
+  geom_boxplot(aes(x=reward,y=strategy, fill = strategy), width = 0.1, color = 'black', alpha=0.2)+
+  theme(
+    legend.position="none"
+  )
+```
+
+## Old appendices:
+
 ## Collected time series data
 
 In this appendix we provide a wider selection of time series taken from the same data set as Fig. \ref{fig:timeseries}.
