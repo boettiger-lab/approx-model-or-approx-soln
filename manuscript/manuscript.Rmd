@@ -570,8 +570,8 @@ Specifically, we use the *GaussianProcessRegressor* object of the *sklearn* Pyth
 \end{align*}
 This interpolation method is applied to scatter data of the PPO policy evaluated on 3 different grids:
 One $51\times 51 \times 5$, one $51\times 5 \times 51$ and one $5\times 51 \times 51$ grid on $(X,Y,Z)$ states.\footnote{
-The raw dataset is found at \textbf{TBD} in the repository with the source code and data linked above.
-Scatter plots visualizing this policy are shown in App. \textbf{TBD}.
+The raw dataset is found at the data/results\_data/2FISHERY/RXDRIFT subdirectory in the repository with the source code and data linked above.
+Scatter plots visualizing this policy are shown in App. B.
 }
 The length scale and noise level values of this kernel were chosen arbitrarily---no hyperparameter tuning was needed to produce satisfactory interpolation, as will be shown in the results section.
 
@@ -975,47 +975,6 @@ In Fig. \ref{fig:ppo-policy} we present a representation of this scatter data in
   \label{fig:ppo-policy}
 \end{figure}
 
-## Old appendices:
-
-## Collected time series data
-
-In this appendix we provide a wider selection of time series taken from the same data set as Fig. \ref{fig:timeseries}.
-Namely, Figs. \ref{fig:timeseries_msy}, \ref{fig:timeseries_tac} and \ref{fig:timeseries_ppo} display these time series.
-
-
-
-
-
-
-## Conservative scale-downs of MSY
-
-Here we show the performance of constant mortality policies with a fraction $\alpha$ of the MSY mortality rate (in the main text we focused on $\alpha=0.8$).
-Their performance is evaluated in Fig. \ref{fig:several-tac}.
-Notice the sharp transition in performance between $\alpha = 0.9$ and $0.95$.
-While the behaviour of the former closely mimics, e.g., the $\alpha=0.8$ policy, the performance of the latter is essentially the same as the optimal constant mortality ($\alpha=1$, see Fig. \ref{fig:rew_len_fig}).
-This points at the fact that the value of the parameter $\alpha$, although commonly chosen simply as a rule of thumb, lives on a ‘‘knife's edge,’’ small changes in this parameter may lead to drastic changes in the dynamics of the controlled system.
-What is worse: the particular scale at which this transition happens is generally dependent on the system's intrinsic dynamics.
-In reality, where fishery models and their respective parameters are subject to substantial uncertainty, this fact calls to question the purported additional safety obtained via these rules of thumb.
-
-
-
-## Optimal constant escapement policy evaluation
-
-Here we reproduce the plots from the main text for the optimal constant escapement policy to illustrate the similarity to the DRL-derived policy.
-
-Fig. \ref{fig:esc-tuning-eval} illustrates the tuning process of finding the optimal constant escapment policy (left panel, compare Fig. \ref{fig:tuning}).
-The same figure shows, in the middle panel, the reward histogram for the optimal constant escapement policy (compare Fig. \ref{fig:rew_len_fig}).
-Finally, the right panel displays the same histogram for the DRL policy (reproduced from Fig. \ref{fig:rew_len_fig}).
-We may see that the two policies lead to essentially the same reward distribution.
-
-
-
-
-Fig. \ref{fig:timeseries_esc} displays 9 time-series for episodes controlled with the optimal constant escapement policy.
-Again, this behaviour is essentially indistinguishable from the behavior of the system controlled by the DRL policy (see Fig. \ref{fig:timeseries_ppo}).
-
-This series of figures gives evidence that, in fact, the DRL agent we have trained has obtained a policy which, effectively, acts as an optimal constant escapement policy.
-Although in Fig. \ref{fig:action-X} we found some deviations from the constant escapement case (e.g. DRL was more conservative when fishing high populations), these do not seem to lead to a different dynamics.
 
 
 # References
