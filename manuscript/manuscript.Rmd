@@ -518,15 +518,19 @@ Due to the increased computational requirements of this framework, we have left 
 # Methods
 
 \textbf{The Environment.}
-As seen in Fig. \ref{fig:conceptual-v2}, we consider four different models of the ecosystem with which the fishery interacts, each of this is called an *environment*, alluding to the environment in an RL setting.
-We summarize these models in Table \ref{tab:models}.
+We considered the problem of managing four increasingly complex models (see Table \ref{tab:models}).
 To recap, these four environments are a single-species growth model \eqref{eq:may} for a harvested species; a three-species model \eqref{eq:3d model} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
 
-The policies explored were functions from states $N_t$ to either a single number $M_X(N_t) = \pi(N_t)$, or a pair of numbers $(M_X(N_t), M_Y(N_t)) = \pi(N_t)$ depending on the environment considered.
+The policies explored were functions from states $N_t$ to either a single number $M_X(N_t) = \pi(N_t)$ (for Models 1 and 2), or a pair of numbers $(M_X(N_t), M_Y(N_t)) = \pi(N_t)$ (for Models 3 and 4).
 
-Our goal is to evaluate the performance of different policy strategies over a specified window of time.
-We have chosen this window to be 200 time-steps, where each discrete time-step represents the dynamical evolution of the system over a year.
-_Episodes_ begin at time-step zero and are controlled by the policy and the system's natural evolution until either the maximum time-span is reached, or until a ‘‘near-extinction event’’ occurs---that is, until any of the populations go below a given threshold,
+Our goal was to evaluate the performance of different policy strategies over a specified window of time.
+We chose this window to be 200 time-steps, where each discrete time-step represents the dynamical evolution of the system over a year.
+Each time-step was composed of two parts: 
+First, a *harvest period* where the harvest is collected from the system (e.g. the population $X$ is reduced to $X_t\mapsto X_t - M_X(N_t) X_t$).
+Second, a *recruitment and interaction period*, where the system's state evolves according to its natural dynamics.
+
+Training and evaluating management strategies was done by simulating *episodes.* 
+An episode begins at a fixed initial state and the system is controlled with a management policy until $t=200$, or until a ‘‘near-extinction event’’ occurs---that is, until any of the populations go below a given threshold,
 \begin{align}
   \label{eq:thresh}
   X_t \leq X_{\text{thresh.}},\quad
@@ -534,12 +538,12 @@ _Episodes_ begin at time-step zero and are controlled by the policy and the syst
   \text{or,}\quad
   Z \leq Z_{\text{thresh.}}.
 \end{align}
-In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from its ‘‘natural’’ level.
+In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from their ‘‘natural’’ level.
 
-The reward function defining our policy optimization problem has two components.
-The first is economical: the total biomass harvested over an episode.
-The second seeks to reflect conservation goals: if a near-extinction event occurs at time $t$, the episode is ended early and a negative reward of $-100/t$ was awarded.
-This reward function balances the extractive motivation of the fishery with conservation goals that go beyond the scope of long-term sustainable harvests.
+The reward function defining our policy optimization problem had two components.
+The first was economical: the total biomass harvested over an episode.
+The second seeked to reflect conservation goals: if a near-extinction event occurred at time $t$, the episode was ended early and a negative reward of $-100/t$ was awarded.
+This reward function balanced the extractive motivation of the fishery with conservation goals which went beyond the scope of long-term sustainable harvests.
 
 
 \textbf{Training a DRL agent.}
@@ -551,21 +555,13 @@ The total training time was on the order of 30 minutes to 1 hour.
 For the single-species model, the training iterations were scaled down to 100 and the training time was around 10 minutes.
 
 The state space used was normalized case-by-case as follows: 
-*1)* for the single species model, a line segment $[0,1]$, *2)* for all three-species models, a cube $[0,1]^{\times 3}$.
-We used simulation data to derive a bound on the population sizes typically observed, and thus be able to normalize states to a finite volume.
+*Model 1:* a line segment $[0,1]$, 
+*Models 2-4:* a cube $[0,1]^{\times 3}$.
+We used simulated data to derive a bound on the population sizes typically observed, and thus be able to normalize states to a finite volume.
 
-Policies obtained from the PPO algorithm can be ‘‘noisy’’ as their optimization algorithm is randomized (see, e.g. App. B for visualizations of the PPO policy in the ‘‘3 species, 2 fisheries, non-stationary’’ case).
-We perform some interpolation using a Gaussian process regressor in order to de-noise these policies.
-Specifically, we use the *GaussianProcessRegressor* object of the *sklearn* Python library with a kernel given by
-\begin{align*}
-  \text{RBF}(\text{length scale = 10}) + \text{WhiteNosie}(\text{noise level = 0.1}).
-\end{align*}
-This interpolation method is applied to scatter data of the PPO policy evaluated on 3 different grids:
-One $51\times 51 \times 5$, one $51\times 5 \times 51$ and one $5\times 51 \times 51$ grid on $(X,Y,Z)$ states.\footnote{
-The raw dataset is found at the data/results\_data/2FISHERY/RXDRIFT subdirectory in the repository with the source code and data linked above.
-Scatter plots visualizing this policy are shown in App. B.
-}
-The length scale and noise level values of this kernel were chosen arbitrarily---no hyperparameter tuning was needed to produce satisfactory interpolation, as will be shown in the results section.
+Policies obtained from the PPO algorithm can be ‘‘noisy’’ as their optimization algorithm is randomized (see, e.g. App. B for a visualization of the PPO policy obtained for Model 4).
+We smoothed this policy out using a Gaussian process regressor interpolation. 
+Details for this interpolation process can be found in App. C.
 
 
 \textbf{Tuning the constant mortality strategy.}
@@ -978,6 +974,23 @@ In Fig. \ref{fig:ppo-policy} we present a representation of this scatter data in
   \caption{Plots of the PPO policy $\pi_{\text{PPO}}$ along several relevant axes. Here $M_X$ and $M_Y$ are the $X$ and $Y$ components of the policy function. The values of the plots are generated in the following way: For each variable $X$, $Y$, and $Z$, the time-series of evaluation episodes are used to generate a window of typical values that variable attains when controlled by $\pi_{\text{PPO}}$. Then, for each plot either $X$ or $Y$ was evaluated on 100 values in $[0,1]$ along the $x$ axis, while the other variables (resp. $Y$ and $Z$, or $X$ and $Z$) were varied within the typical window computed before. Within this window, 5 values are used. The value of one of the latter two variables were visualized as color. This scatter data was used as an input to generate $\pi_{\text{PPO+GP}}$, visualized in the main text.}
   \label{fig:ppo-policy}
 \end{figure}
+
+## Gaussian process interpolation
+
+Here we summarize the procedure used to interpolate the PPO policy (visualized in Fig. \ref{fig:ppo-policy}).
+We use the *GaussianProcessRegressor* object of the *sklearn* Python library with a kernel given by
+\begin{align*}
+  \text{RBF}(\text{length scale = 10}) + \text{WhiteNosie}(\text{noise level = 0.1}).
+\end{align*}
+This interpolation method is applied to scatter data of the PPO policy evaluated on 3 different grids on $(X,Y,Z)$ states:
+$G_X$, a $51\times 5 \times 5$ grid; $G_Y$, a $5\times 51 \times 5$ grid; and $G_Z$, a $5\times 5 \times 51$ grid.
+This combination of grids was used instead of a single dense grid in order to reduce the computational intensity of the interpolation procedure.
+For $G_X$, the 5 values for $Y$ and $Z$ were varied in a ‘‘popular window,’’ i.e. episode time-series data was used to determine windows of $Y$ and $Z$ values which were most likely. 
+The grids $G_Y$ and $G_Z$ were generated in a similar fashion, *mutatis mutandis*.\footnote{
+The raw dataset is found at the data/results\_data/2FISHERY/RXDRIFT sub-directory in the repository with the source code and data linked above.
+Scatter plots visualizing this policy are shown in App. B.
+}
+The length scale and noise level values of this kernel were chosen arbitrarily---no hyperparameter tuning was needed to produce satisfactory interpolation, as will be shown in the results section.
 
 
 
