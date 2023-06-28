@@ -564,29 +564,30 @@ We smoothed this policy out using a Gaussian process regressor interpolation.
 Details for this interpolation process can be found in App. C.
 
 
-\textbf{Tuning the constant mortality strategy.}
-A grid of 101 mortality rates was laid in the interval $[0, 0.5]$ as possible mortality values in the single-fishery cases.
-Due to the high memory usage in the two-fishery case, a slightly coarser $51\times51$ grid was set in the square $[0,0.5]^2$ instead.
-Since the approach for tuning is completely analogous for all scenarios considered, here we focus on the ‘‘3 species, 1 fishery’’ case.
-For each one of these choices of a constant mortality rate, say $M_X$, we simulated 100 episodes based on \eqref{eq:3d model}:
-At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $M_X X_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model}.
-The optimal mortality rate was the value $M_X^*$ for which the mean episode reward was maximal.
+\textbf{Tuning the CMort strategy.}
+In order to estimate the optimum mortality rate, we optimized over a grid of possible mortality rates.
+Namely, for Models 1 and 2, grid of 101 mortality rates was laid in the interval $[0, 0.5]$;
+for Models 3 and 4, a $51\times51$ grid was set in the square $[0,0.5]^2$.
+The latter had a slightly coarser grid due to the high memory cost of using the denser grid.
+Since the approach for tuning was completely analogous for all models evaluated, here we discuss only Model 4.
+For each one of these choices of mortality rates, say $(M_X, M_Y)$, we simulated 100 episodes based on \eqref{eq:3d model}:
+At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $M_X X_t+M_YY_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model}.
+The optimal mortality rate was the value $(M_X^*,\ M_Y^*)$ for which the mean episode reward was maximal.
 
 
-\textbf{Tuning the constant escapement strategy.}
+\textbf{Tuning the CEsc strategy.}
 This tuning procedure was analogous to that of the constant mortality strategy just summarized.
 Namely:
-A grid of 101 constant escapement values was laid out on the interval $[0,1]$ for the single-fishery models (resp. a $51\times 51$ grid on $[0,1]^2$ for two-fishery models).
-These grids were the possible constant escapement values optimized over (in the two fishery case, these were $(\text{esc}_X,\ \text{esc}_Y)$ pairs).
-That is, each grid point represents a constant escapement policy.
+A grid of 101 escapement values was laid out on the interval $[0,1]$ for Models 1 and 2; and a $51\times 51$ grid on $[0,1]^2$ was laid out for Models 3 and 4.
+Each grid point represented a CEsc policy.
 We used each of these policies to manage 100 replicate episodes.
 The optimal policy was the policy with the highest average reward obtained.
-A visualization of the tuning procedure for the ‘‘three species, two fisheries, non-stationary’’ model is shown in Fig. \ref{fig:tuning}. 
+A visualization of the tuning outcome for Model 4 is shown in Fig. \ref{fig:tuning}. 
 
 \begin{figure}
   \centering
   \includegraphics[scale=0.5]{figures/esc_heatmap.png}
-  \caption{Visualization of the cosntant escapement strategy tuning procedure for the ‘‘three-species, two-fishery, non-stationary’’ model. There was a certain multiplicity in this tuning strategy: a ‘‘ridge of optimality’’ where policies had essentially equivalent behavior. Throughout our investigation, we tuned constant escapment in several occasions and, on each occassion, a different optimal policy along the ridge was found. The results for different policies along the ridge were in practice equivalent, with no discernible difference in performance. We highlighted the ridge with a white dotted line.}
+  \caption{Visualization of the cosntant escapement strategy tuning procedure for Model 4. There was a certain multiplicity in this tuning strategy: a ‘‘ridge of optimality’’ where policies had essentially equivalent behavior. Throughout our investigation, we tuned constant escapment in several occasions and, on each occassion, a different optimal policy along the ridge was found. The results for different policies along the ridge were in practice equivalent, with no discernible difference in performance. We highlighted the ridge with a white dotted line.}
   \label{fig:tuning}
 \end{figure}
 
@@ -596,9 +597,9 @@ The single-species model's (eq. \eqref{eq:may}) dynamic parameters were chosen a
 \label{eq:1d param vals}
 r = K = 1,\quad \beta = 0.25,\quad c = 0.1.
 \end{align}
-Here, the values of $\beta$ and $c$ are chosen as to make the system be roughly close to its tipping point.
+Here, the values of $\beta$ and $c$ were chosen as to make the system be roughly close to its tipping point.
 
-The three-species model's (eq. \eqref{eq:3d model}) dynamic parameters were chosen as follows
+For Models 2 and 3, their dynamic parameters (in eq. \eqref{eq:3d model}) were chosen as follows
 \begin{align}
 \label{eq:param vals}
 \begin{split}
@@ -606,13 +607,13 @@ The three-species model's (eq. \eqref{eq:3d model}) dynamic parameters were chos
   c_{XY} = 0.1,\quad f = 0.1,\quad D = 1.1, \quad d_Z = 0.1.
 \end{split}
 \end{align}
-Moreover, the variances for the stochastic terms were chosen as
+Moreover, the variances for the stochastic terms were chosenas
 $$
   \sigma^2(\eta_{X,t}) = \sigma^2(\eta_{Y,t}) = \sigma^2(\eta_{Z,t}) = 0.05.
 $$
-In the case with a time-varying $r_X$ parameter, we used $r_X(t)$ given as in eq. \eqref{eq:rx(t)} and all other parameters as given in eq. \eqref{eq:param vals}.
+For Model 4, we used $r_X(t)$ given as in eq. \eqref{eq:rx(t)} and all other parameters were given as in eq. \eqref{eq:param vals}.
 
-The values of $c$ and $\beta$ in the three-species model are slightly different than their values in the one-species model.
+The values of $c$ and $\beta$ in the three-species model were slightly different than their values in the one-species model.
 These values were chosen heuristically: 
 We observed that choosing the lower value of $c=0.1$ in this case would lead to quick near-extinction events even without a harvest.
 Moreover, $\beta$ was slightly increased simply to put more predation pressure on the $X$ and $Y$ populations and make them slightly more fragile.
@@ -621,30 +622,33 @@ Moreover, $\beta$ was slightly increased simply to put more predation pressure o
 To ensure that our results do not strongly depend on our parameter choices, we performed a stability analysis.
 Here, we perturbed parameters randomly and measured the difference in performance between our DRL-based methods and the constant escapement strategy.
 We observed that the difference in performance is maintained for even relatively high noise strengths.
-For simplicity we only perform stability analysis on the ‘‘3 species, 2 fisheries and a time varying parameter’’ case. 
+We only considered the most complex case here, Model 4. 
 
-More specifically, for each parametric noise strength $\sigma_{\text{param.}}$ choice in $[0.04, 0.08, \dots, 0.2]$, we executed the following procedure:
-Sample 100 choices of perturbed parameter values, where the perturbation is as follows---each parameter $P$ is perturbed to $(1+g_P)P$ where $g_P$ is a Gaussian random variable with variance $\sigma_{\text{param.}}^2$.
-For each of these parameter choices, tune the constant escapement strategy and train the DRL model on the corresponding model.
-Measure the average reward difference between strategies for each of these parameter choice samples using 100 replicate evaluation episodes.
-Take the mean of this average difference over the 100 perturbed parameter samples.
+For each value of parametric noise strength $\sigma_{\text{param.}}$, we executed the following procedure:
+We sampled 100 choices of perturbed parameter values, where the perturbation was as follows---each parameter $P$ was perturbed to $(1+g_P)P$ where $g_P$ was a Gaussian random variable with variance $\sigma_{\text{param.}}^2$.
+For each of these sample parameter sets, we tuned CEsc and trained the DRL agent.
+We measured the average reward difference between these two strategies for each of sample (this was done using 100 replicate evaluation episodes).
+Finally, we took the mean of this average difference over the 100 perturbed parameter samples.
+
+The parametric noise strength values used were $[0.04, 0.08, \dots, 0.2]$.
 
 
 # Results
 
-We evaluated each of the four control approaches considered -- MSY constant mortality, optimal constant escapement, PPO, and Gaussian process interpolation of the latter -- on each of the four scenarios examined (see Sec. 3).
+We evaluated each of the four management strategies considered on Models 1-4.
+To recap, the management strategies were CEsc, CMort, PPO and a Gaussian process interpolation of PPO (‘‘PPO+G’’).
 Furthermore, we characterized the trade-off between economic output and sustainability faced by constant mortality policies.
 This was done by evaluating constant mortality policies with a fraction of the optimal mortality rate (specifically, 80%, 90% and 95%).
 All evaluations were based on 100 replicate episodes. 
 
-We will visualize the results concerning the last scenario considered (‘‘3 species, 2 of which harvested, and a time-varying parameter’’) in this section, leaving the other cases for App. A.
+We will visualize the results concerning Model 4 in this section, leaving the other models for App. A.
 This is the most complex scenario considered and where our results show the most compelling advantage of DRL methods with respect to classical strategies.
 
 Our main result is summarized in Fig. \ref{fig:main} which displays the total reward distributions for the policy obtained through each strategy.
-Here we note two surprising things:
-First, optimal constant escapement performs considerably worse than not only DRL-based methods, but also than MSY.
-This conceptually shows how one-dimensional intuitions on ecological control may loose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
-Second, we see that classical strategies have relatively spread out reward distributions as compared to DRL methods.
+Here we see that CEsc has a long-tailed distribution of rewards, and its average reward is much lower than other management strategies.
+CMort has a shorter-tailed distribution and a much higher average reward.
+Finally, both DRL-based strategies have a more concentrated reward distribution and a higher average reward than CMort.
+
 
 ```{r}
 #| label: main
@@ -660,8 +664,9 @@ main_summaries %>%
 ```
 
 To assess what is the culprit for the classical strategies' low performance with respect to the DRL-based strategies, we plot the duration of each of the 100 evaluation episodes of each strategy in Fig. \ref{fig:ephistograms}.
-We see that early episode ends are a rather likely explanation for the wideness of constant escapement's wide reward distribution.
-The constant mortality strategy is also observed to lead to near-extinction events rather often, but in this case the episode lengths tend to be concentrated at higher values relative to the constant escapement case.
+We see that early episode ends are prevalent in classical strategies and rare for DRL-based strategies.
+Early episode ends tend to happen at lower $t$ values for CEsc than CMort.
+Thus, distribution of episode durations seems to be widest for CEsc, followed by CMort, DRL and DRL+GP.
 
 ```{r}
 #| label: ephistograms
@@ -673,26 +678,26 @@ esc_len <- esc_ends %>%
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="repetition", y="ep. duration")
+  labs(x="", y="ep. duration")
 msy_len <- msy_ends %>%
   filter(rep<50) %>%
   ggplot(
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="repetition", y="ep. duration")
+  labs(x="", y="")
 ppo_len <- ppo_ends %>%
   filter(rep<50) %>%
   ggplot(mapping = aes(x = rep, y = t)) +
   geom_col() +
-  labs(x="repetition", y="ep. duration")
+  labs(x="", y="")
 gpp_len <- gpp_ends %>%
   filter(rep<50) %>%
   ggplot(
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="repetition", y="ep. reward")
+  labs(x="", y="")
 
 esc_rew <- esc_ends %>%
   filter(rep<50) %>%
@@ -707,26 +712,26 @@ msy_rew <- msy_ends %>%
     mapping = aes(x = rep, y = reward)
   ) +
   geom_col() +
-  labs(x="repetition", y="ep. reward")
+  labs(x="repetition", y="")
 ppo_rew <- ppo_ends %>%
   filter(rep<50) %>%
   ggplot(mapping = aes(x = rep, y = reward)) +
   geom_col() +
-  labs(x="repetition", y="ep. reward")
+  labs(x="repetition", y="")
 gpp_rew <- gpp_ends %>%
   filter(rep<50) %>%
   ggplot(
     mapping = aes(x = rep, y = reward)
   ) +
   geom_col() +
-  labs(x="repetition", y="ep. duration")
+  labs(x="repetition", y="")
 
 (esc_len | msy_len | ppo_len | gpp_len) / (esc_rew | msy_rew | ppo_rew | gpp_rew)
 ```
 
-We examine the trade-off between profit and sustainability faced by the constant mortality strategy in Fig. \ref{fig:fracmsy}.
-We expect a similar and, possibly, more pronounced effect for the constant escapement strategy but do not analyze this case here.
-Here, two quantities are plotted: the fraction of evaluation episodes of maximal length (i.e. episodes with no near-extinction events) is and the average reward obtained.
+We examine the trade-off between profit and sustainability faced by the CMort strategy in Fig. \ref{fig:fracmsy}.
+We expect a similar and, possibly, more pronounced effect for the CEsc strategy but do not analyze this case here.
+Here, two quantities are plotted: the fraction of evaluation episodes with maximal length (i.e. episodes with no near-extinction events), and the average reward.
 On the x-axis we have several sub-optimal constant mortality strategies that err on the conservative side: e.g. the policy labeled ‘‘80% MSY’’ has the form
 \begin{align*}
   \pi: (X_t, Y_t, Z_t)\mapsto (0.8 M_X^*,\ 0.8 M_Y^*),
@@ -853,6 +858,11 @@ Eqs. \eqref{eq:3d model} are a generalization of the single-species model \eqref
 \end{align*}
 Throughout most of our paper, we use the parameter values given in eq. \eqref{eq:param vals}.
 In particular, $c_{XY} = d = f = 0.1$ and $\sigma_Z=0.05$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
+
+Here we note two surprising things:
+First, optimal constant escapement performs considerably worse than not only DRL-based methods, but also than MSY.
+This conceptually shows how one-dimensional intuitions on ecological control may loose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
+Second, we see that classical strategies have relatively spread out reward distributions as compared to DRL methods.
 
 ## Discussion
 
