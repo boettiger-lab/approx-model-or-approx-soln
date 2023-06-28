@@ -256,18 +256,18 @@ In particular, we observe that DRL strategies are more sensitive to stochastic v
 *Model 4:* Here, the performance gap between DRL and classical management strategies is broadened.
 In this case, as in Model 3, constant CEsc performs significantly worse than DRL and CMort.
 
-Our findings paint a picture of how a single-species optimal management strategy may loose performance rather dramatically when controlling a more complex ecosystem.
-Moreover, rather unintuitively, management strategies, such as MSY, known to be suboptimal and unsustainable in the single-species can turn out to even outperform the aforementioned single-species optimal strategy (e.g. constant escapement).
-Finally, within this regime of complex, possibly varying, ecosystems, we show that DRL consistently finds a policy which effectively either matches the best classical strategy, or outperforms it.
-We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms constant escapement.
-
-We notice that both classical management strategies are faced with a tradeoff---optimal classical strategies accept a rather large fraction of episodes ending with a population crash, whose negative reward is counteracted with a higher economic output.\footnote{
+We show that in the most complex scenario, Model 4, CMort is faced with a tradeoff---the optimal mortality rate leads a rather large fraction of episodes ending with a population crash, whose negative reward is counteracted with a higher economic output.\footnote{
 In our mathematical formulation of the decision problem, we have assumed for simplicity that the fishing effort cost is zero and that fish price is stable over time.
 This way, we equate economic output with harvested biomass.
 }
-Conversely, more conservative suboptimal classical strategies (e.g. with a higher constant escapement value) lead to lower total reward on average.
-The DRL approach side-steps this tradeoff by optimizing over a more complex family of possible policies—policies parametrized by a neural network, as opposed to policies labeled by a single parameter (the mortality rate).
-We thus observe that the DRL solution leads to a higher profitability *and* stability as compared to constant mortality policies. 
+Conversely, more conservative, lower, mortality rates lead to lower total reward on average.
+The DRL approach side-steps this trade-off by optimizing over a more complex family of possible policies--—policies parametrized by a neural network, as opposed to policies labeled by a single parameter (the mortality rate).
+
+Our findings paint a picture of how a single-species optimal management strategy may loose performance rather dramatically when controlling a more complex ecosystem.
+Here, DRL performs better from both economical *and* conservation points of view.
+Moreover, rather unintuitively, CMort -- known to be suboptimal and unsustainable for single-species models -- can turn out to even outperform the CEsc -- the single-species optimal strategy -- for complex ecosystems.
+Finally, within this regime of complex, possibly varying, ecosystems, we show that DRL consistently finds a policy which effectively either matches the best classical strategy, or outperforms it.
+We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms constant escapement.
 
 # Mathematical models of fisheries considered
 
