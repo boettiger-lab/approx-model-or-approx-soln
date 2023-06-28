@@ -371,11 +371,11 @@ A death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
 Finally, the noise variances $\sigma_X$, $\sigma_Y$ and $\sigma_Z$.
 
 The three models will branch off of eq. \eqref{eq:3d model} in the following way.
-*Model 1:* here, only $X$ is harvested, that is, in the notation of eq. \eqref{eq:general model}, we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
+*Model 2:* here, only $X$ is harvested, that is, in the notation of eq. \eqref{eq:general model}, we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
 All parameters here are constant.
-*Model 2:* as Model 1, but with $X$ and $Y$ being harvested. 
+*Model 3:* as Model 1, but with $X$ and $Y$ being harvested. 
 In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
-*Model 3:* here $X$ and $Y$ are harvested, but now we include a non-stationary parameter:
+*Model 4:* here $X$ and $Y$ are harvested, but now we include a non-stationary parameter:
 \begin{equation}
   \label{eq:rx(t)}
   r_X = r_X(t) = 
@@ -385,12 +385,8 @@ In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
   \end{cases}
 \end{equation}
 All other parameters are constant.
-
-
 Eq. \eqref{eq:rx(t)} is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
-In future work we intend to test the DRL framework in realistic models of particular fisheries.
-As a part of that effort, we will attempt capture more detailed models of the effects of climate change.
-For this exploratory work we have chosen this simple expression, however, for the sake of conceptual clarity.
+
 
 # Reinforcement learning {#sec:RL}
 
