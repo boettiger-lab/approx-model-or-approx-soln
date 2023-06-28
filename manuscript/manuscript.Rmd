@@ -730,18 +730,18 @@ gpp_rew <- gpp_ends %>%
 ```
 
 We examine the trade-off between profit and sustainability faced by the CMort strategy in Fig. \ref{fig:fracmsy}.
-We expect a similar and, possibly, more pronounced effect for the CEsc strategy but do not analyze this case here.
-Here, two quantities are plotted: the fraction of evaluation episodes with maximal length (i.e. episodes with no near-extinction events), and the average reward.
-On the x-axis we have several sub-optimal constant mortality strategies that err on the conservative side: e.g. the policy labeled ‘‘80% MSY’’ has the form
+Two quantities are plotted: the fraction of evaluation episodes with maximal length (i.e. episodes with no near-extinction events), and the average reward.
+On the x-axis we have several sub-optimal mortality rates that err on the conservative side: e.g. the policy labeled ‘‘80% Opt. CMort’’ has the form
 \begin{align*}
   \pi: (X_t, Y_t, Z_t)\mapsto (0.8 M_X^*,\ 0.8 M_Y^*),
 \end{align*}
-where $(M_X^*,\ M_Y^*)$ is the optimal constat mortality strategy.
+where $(M_X^*,\ M_Y^*)$ is the optimal CMort strategy.
 We see that sufficiently conservative policies attain high sustainability, but only at a high price in terms of profit.\footnote{
 As noted before, here we equate economic profit with biomass caught.
 This is done as an approximation to convey the conceptual message more clearly, and we do not expect our results to significantly change if, e.g., ‘‘effort cost’’ is included in the reward function.
 When we refer to ‘‘large differences’’ in profit, or ‘‘paying dearly,’’ we mean that the ratio between average rewards is considerable---e.g. a 15\% loss in profit.
 }
+We expect a similar and, possibly, more pronounced effect for the CEsc strategy but do not analyze this case here.
 
 ```{r}
 #| label: fracmsy
@@ -750,7 +750,7 @@ When we refer to ‘‘large differences’’ in profit, or ‘‘paying dearly
 lengths <- frac_msy %>%
   ggplot(aes(x=msy_fraction, y=num_full_eps)) +
   geom_col(fill="darksalmon")+
-  labs(x="% MSY constant mortality", y="% full-length eps.") + 
+  labs(x="% Opt. CMort", y="% full-length eps.") + 
   coord_cartesian(ylim=c(70,101))
 
 rewards <- frac_msy %>%
@@ -759,27 +759,22 @@ rewards <- frac_msy %>%
   geom_point()+
   geom_errorbar(aes(ymin=reward-reward_std, ymax=reward+reward_std), width=.01,
                  position=position_dodge(0.05)) +
-  labs(x="% MSY constant mortality", y="Mean ep. reward")
+  labs(x="% Opt. CMort", y="Mean ep. reward")
 
 (lengths | rewards)
 ```
 
 One problem that is often encountered when using machine learning methods is the interpretability of the output of these methods.
-In our case, the output is a policy function parametrized by a neural network $\theta$:
+For our PPO strategy, the output is a policy function parametrized by a neural network $\theta$:
 \begin{align*}
   \pi_\theta: N_t \mapsto (M_X(N_t), M_Y(N_t)),
 \end{align*}
 where $N_t=(X_t,Y_t,Z_t)$ is the state of the system at time $t$, and where $M_X$ and $M_Y$ are the mortalities due to harvest during that time-step.
-Moreover, in the case of our ‘‘PPO+GP’’ management strategy, we sample $\pi_\theta$ on a grid of points $G=\{(X_i, Y_i, Z_i)\}_i$ and use a Gaussian process to interpolate $\pi_\theta$, i.e.
-\begin{align}
-  \pi_{\text{PPO+GP}} = \text{Gaussian process interpolation of } \pi_\theta|_G.
-\end{align}
-This process was explained in detail in the Methods section.
+While the values of the neural network parameters are hard to interpret, the actual shape of the policy function is much more understandable. 
 
-Here we visualize the resulting $\pi_{\text{PPO+GP}}$ policy and provide an interpretation for it.\footnote{
-A similar characterization of $\pi_\theta$ is found on the appendix. 
-Here we focus on the Gaussian process interpolation as it is smoother and, thus, easier to interpret.
-}
+Here we visualize the PPO+GP policy function and provide an interpretation for it, as this function is smoother and less noisy than the PPO policy function.
+The PPO policy function is visualized similarly in App. B.
+
 Given its high dimension, it is not possible to fully display how the policy function obtained ‘‘looks like’’---we thus project it down to certain relevant axes.
 The result of this procedure is shown in Fig. \ref{fig:gpp-policy}.
 In that figure, the shape of the optimal escapement strategy is provided for comparison.
