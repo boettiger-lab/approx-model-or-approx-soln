@@ -271,7 +271,7 @@ We strengthen this result with a stability investigation: we show that random pe
 
 # Mathematical models of fisheries considered
 
-Here we introduce the four mathematical models of fisheries for which we compare different management strategies.
+Here we mathematically introduce the four fishery models for which we compare different management strategies.
 In general, the class of models that appear in this context are *stochastic, first order, finite difference equations*.
 For $n$ species, these models have the general form
 \begin{align}
@@ -294,10 +294,9 @@ The fishing efforts are the *control variables* of our problem---these may be se
 We make two further simplifying assumptions on the control problem:
 *1. Full observation:* the manager is able to accurately measure $N_t$ and use that measurement to inform their decision.
 *2. Perfect execution:* the action chosen by the manager is implemented perfectly (i.e., there is no noise affecting the actual value of the fishing efforts).
-In future work, we intend to relax these assumptions to get more realistic management scenarios.
 
-One of the models we consider is a single-species classical model of ecological tipping points.
-The other three models are all three-species models with similar dynamics---differing by the amount of species that are harvested, and whether the parameters of the model are fixed or time-dependent.
+Model 1 is a single-species classical model of ecological tipping points.
+Models 2-4 are all three-species models with similar dynamics.
 Following this logic, the first subsection will be dedicated to the single-species model and the second will focus on the three-species models.
 
 ## The single species model
@@ -311,19 +310,20 @@ The most familiar model of $f(X)$ is that of *logistic growth*, for which
 
 Real world ecological systems are obviously far more complicated than this simple model suggests.
 One particularly important aspect that has garnered much attention is the potential for the kind of highly non-linear functions that can support dynamics such as alternative stable states and hysteresis.
-A seminal example of such dynamics was introduced in [@may77], using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
+A seminal example of such dynamics was introduced in [@may77], using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator.
+In the notation of eq. \eqref{eq:general model},
 \begin{align}
   \label{eq:may}
-  \Delta X_t
-  = L(X_t;\ r, K) - \frac{\beta H X_t^2}{c^2 + X_t^2} + \eta_{X,t} - M_X X_t.
+  f_X(X_t)
+  = L(X_t;\ r, K) - \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align}
 In the following, we will denote
 \begin{align*}
   F(X_t,H;\ \beta,c) := \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align*}
 
-The model has six parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal predation rate $\beta$, the predation rate half-maximum biomass $c$, and the variance $\sigma_X^2$ of $\eta_{X,t}$. 
-(Here and in the following we will center our random variables at zero.)
+The model has six parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal predation rate $\beta$, the predation rate half-maximum biomass $c$, and the variance $\sigma_X^2$ of the stochastic term $\eta_{X,t}$. 
+(Here and in the following we will center all random variables at zero.)
 
 Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{fig:may}).
 Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $X_t$ of the system, these two attractors separated by an unstable fixed point.
@@ -351,14 +351,13 @@ Second, that if the evolution of $X_t$ is *stochastic*, then, even at values of 
 
 ## The three species models
 
-We consider three models of a three-species fishery ecosystem.
-These are all closely related---in fact, their natural dynamics (i.e. dynamics under zero harvest) is given by the same equations:
+Models 2-4 are three-species models and they are all closely related---in fact, their natural dynamics (i.e. dynamics under zero harvest) is essentially given by the same equations:
 \begin{align}
 \label{eq:3d model}
 \begin{split}
-  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{X,t},\\
-  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{Y,t},\\
-  \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
+  f_X(N_t) &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t, \\
+  f_Y(N_t) &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t,\\
+  f_Z(N_t) &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
 \end{split}
 \end{align}
 The three species modelled are $X$, $Y$ and $Z$.
@@ -371,21 +370,12 @@ A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
 A death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
 Finally, the noise variances $\sigma_X$, $\sigma_Y$ and $\sigma_Z$.
 
-Eqs. \eqref{eq:3d model} are a generalization of the single-species model \eqref{eq:may}: this can be seen by setting 
-\begin{align*}
-  c_{XY} = d = f = \sigma_Z = 0.
-\end{align*}
-Throughout most of our paper, we use the parameter values given in eq. \eqref{eq:param vals}.
-In particular, $c_{XY} = d = f = 0.1$ and $\sigma_Z=0.05$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
-Put differently, we are in a regime where, just by examining parameters, it would seem that the single-species model is a reasonable approximation.
-**Is this actually true? Should I maybe erase these last sentences?**
-
 The three models will branch off of eq. \eqref{eq:3d model} in the following way.
-*1. Three species, one fishery:* in this first model, only $X$ is harvested, that is, in the notation of eq. \eqref{eq:general model}, we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
-All parameters here are constant, with values given by \eqref{eq:param vals}.
-*2. Three species, two fisheries:* as the previous case but with $X$ and $Y$ being harvested. 
+*Model 1:* here, only $X$ is harvested, that is, in the notation of eq. \eqref{eq:general model}, we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
+All parameters here are constant.
+*Model 2:* as Model 1, but with $X$ and $Y$ being harvested. 
 In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
-Finally, *3. Three species, two fiseries, time-variation:* in this model we allow for the harvest of $X$ and $Y$, as in the previous model, but now we include a time dependent parameter:
+*Model 3:* here $X$ and $Y$ are harvested, but now we include a non-stationary parameter:
 \begin{equation}
   \label{eq:rx(t)}
   r_X = r_X(t) = 
@@ -394,7 +384,8 @@ Finally, *3. Three species, two fiseries, time-variation:* in this model we allo
     1/2, \quad & t > 100.
   \end{cases}
 \end{equation}
-All other parameters are fixed by eq. \eqref{eq:param vals}.
+All other parameters are constant.
+
 
 Eq. \eqref{eq:rx(t)} is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
 In future work we intend to test the DRL framework in realistic models of particular fisheries.
@@ -863,6 +854,17 @@ This figure shows that, for a wide range of parameter values, DRL-based strategi
 \end{figure}
 
 # Discussion
+
+## Pasted to-be-discussed
+
+Eqs. \eqref{eq:3d model} are a generalization of the single-species model \eqref{eq:may}: this can be seen by setting 
+\begin{align*}
+  c_{XY} = d = f = \sigma_Z = 0.
+\end{align*}
+Throughout most of our paper, we use the parameter values given in eq. \eqref{eq:param vals}.
+In particular, $c_{XY} = d = f = 0.1$ and $\sigma_Z=0.05$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
+
+## Discussion
 
 Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
 While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making.
