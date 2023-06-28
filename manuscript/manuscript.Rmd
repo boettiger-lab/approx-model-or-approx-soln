@@ -196,9 +196,7 @@ The data used is found in the ‘‘data’’ subdirectory, but the user may us
 We consider the problem of devising harvest strategies in a for a series of ecosystem models with increasing complexity (Table \ref{tab:models}):
 *1) one species, one fishery:* a simple single-species recruitment model based on [@may77];
 *2) three species, one fishery:* a three-species generalization of model *1)*, where one of the species is harvested;
-*3) three species, two fisheries:* the same three-species model as above but with two harvested species;\footnote{
-As we prepared this manuscript we became aware of [@nicolalove] which considers an ecological control problem with a similar mathematical formulation, but using an analytical calculus-based approach.
-}
+*3) three species, two fisheries:* the same three-species model as above but with two harvested species;
 *4) three species, two fisheries, parameter variation:* a three-species model of which two are harvested, as above, with a time-varying parameter.
 This last model is meant to be a toy model of climate change's effect on the system.
 Across all of these scenarios, two goals are balanced in the decision process: maximizing long-term catch and preventing stock sizes to fall below some a-priori threshold.
@@ -402,13 +400,13 @@ This objective is achieved by aggregating experience in what is called the *trai
 <!-- The *environment* is commonly a computer simulation, although it sometimes can be a real world system.
 The *agent*, on the other hand, is a computer program which interacts with the environment. -->
 
-For our use case, the environment will be a computational model of the population dynamics of a fishery, with the environment state at time $t$ being a vector of all the fish populations, e.g. $N_t=(X_t,Y_t,Z_t)$ in the three species case.
-At each time step, the agent observes the state $S$ and enacts some harvest---reducing $X_t$ to $X_t - M_X(N_t)\cdot X_t$, and, in the two-fishery scenario, also reducing $Y_t$ to $Y_t - M_Y(N_t)\cdot Y_t$.
+For this paper, we will consider four environments corresponding to each of the models considered (Table \ref{tab:models}).
+At each time step, the agent observes the state $S$ and enacts some harvest---reducing $X_t$ to $X_t - M_X(N_t)\cdot X_t$, and, for Models 3 and 4, also reducing $Y_t$ to $Y_t - M_Y(N_t)\cdot Y_t$.
 Here the fish mortality-rates-from-harvest (i.e. $M_X=M_X(N_t)$ and $M_Y=M_Y(N_t)$), are the agent's action at time $t$. 
-This secures a reward of $M_X(N_t)X$ in the single fishery case, and in the two-fishery case the reward is $M_X(N_t)X + M_Y(N_t)Y$.
-After this harvest portion of the time step, the environment changes according to its natural dynamics given by \eqref{eq:3d model}.
+This secures a reward of $M_X(N_t)X$ for Models 1 and 2, and, similarly, a reward of $M_X(N_t)X + M_Y(N_t)Y$ for Models 3 and 4.
+After this harvest portion of the time step, the environment changes according to its natural dynamics (see eq. \eqref{eq:3d model}).
 
-As mentioned, this discretized time framework allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
+As mentioned, discretising time allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
 This approximation is commonly used in fisheries for species with annual reproductive cycles (see e.g. [@mangel2006theoretical], Chap. 6).
 The division of the time-step into two parts (harvest and dynamics) happening sequentially is performed for all control methods evaluated, not only RL-based approaches.
 
