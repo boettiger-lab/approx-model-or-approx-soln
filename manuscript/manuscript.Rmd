@@ -128,7 +128,7 @@ This special issue highlights the development of novel data-driven methods, incl
 Much effort has been spent grappling with the complexity of our natural world in contrast to the relative simplicity of the models we use to understand it.
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
  But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
-While simplified models have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
+While simplified models have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform. <!-- ML: Can we clarify that we are talking about dynamics/process models here? Model is a very overloaded term for me-->
 For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of seven emissions marker scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
@@ -137,15 +137,15 @@ Modeling the potential action space as one of a handful of discrete scenarios is
 and may seem to reflect a division of responsibilities between 'scientists' modeling the 'natural processes' and policy-makers who make the decisions.
 But, more often, this simplification of decision choices is simply mathematically or conceptually convenient.  <!-- there are questions of policy scale hiding here -- e.g. local regulators of a specific industry obviously face a different action space than national legislatures or international diplomats -->
 This simplification reflects trade-offs between tractablity and complexity at the basis of any mathematical modeling -- if we make both the state space and action space too realistic, the problem of finding the best sequence of actions quickly becomes intractable.
-However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in such problems, but at the cost of opacity.  
+However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in previously intractable problems, but at the cost of opacity.
 
 In this paper, we focus on a well-developed application of model-based management of the natural world that has long illustrated the trade-offs between model complexity and policy complexity: the management of marine fisheries.
-Fisheries management is both an important issue to itself and a rich & frequent test-bed of ecological management more generally.
+Fisheries management is both an important issue to society and a rich & frequent test-bed of ecological management more generally.
 Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006, @Costello2016].
 Fisheries management has  roots in both the fields of _ecosystem management_ and _natural resource economics_.
 Both fields might trace their origins to the notion of maximum sustainable yield (MSY), introduced independently by a fisheries ecologist [@Schaefer1954] and the economist [@Gordon1954] in the same year.
 From this shared origin, each field would depart from the simplifying assumptions of the Gordon-Schaefer model in divergent ways, leading to different techniques for deriving policies from models.The heart of the management problem is easily understood: a manager seeks to set quotas on fishing that will ensure the long-term profitability and sustainability of the industry.
-Mathematical approaches developed over the past century may be roughly divided between these two fields: (A) ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
+Mathematical approaches developed over the past century may be roughly divided between these two fields: (A) ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering a relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
 The economist's approach can be characterized by the mathematics of a Markov decision process [MDP @Clark1973; @Clark1990; @Marescot2013], in which the decision-maker must observe the stock each year and recommend a possible action.
 In this approach, the policy space that must be searched is exponentially large -- for a management horizon of T decisions and a space of N actions, the number of possible policies is $N^T$.
 In contrast, fisheries ecologists and ecosystem management typically search a space of policies that does not scale with the time horizon.
@@ -162,8 +162,8 @@ knitr::include_graphics("figures/textbox.png")
 Recent advances in machine learning may allow us to once again bridge these approaches, while also bringing new challenges of their own.
 Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RAMLegacyDB].
 Constrained by computational limits, MDP approaches have been intractable on suitably realistic models and largely confined to more academic applications [@Costello2016].
-However, advances _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari1; @atari2] to fusion reactions [@fusion1; @fusion2] to the remarkable dialog abilities of ChatGPT [@chatgpt].
-RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, requiring immense computational costs, and presenting frequent challenges with transfer-ability or reproducibility.
+However, advances in _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari1; @atari2] to fusion reactions [@fusion1; @fusion2] to the remarkable dialog abilities of ChatGPT [@chatgpt].
+RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, requiring immense computational costs, and presenting frequent challenges with reproducibility.
 A review of all these issues is beyond our scope but can be found elsewhere [@rl-intro; @millie-3].
 Here, though, we will focus on the issue of opacity and interpretability raised by these methods.
 In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
@@ -214,7 +214,7 @@ knitr::include_graphics("figures/conceptual-v2.jpeg")
 <!--NEED some kind of map paragraph here saying what's ahead, what we show  -->
 In this article, we compare the performance of a DRL solution to that of classical management strategies (see Textbox 1).\footnote{A repository with all the relevant code to reproduce our results may be found at \url{https://github.com/boettiger-lab/approx-model-or-approx-soln} in the ‘‘src’’ subdirectory. 
 The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.} 
-We consider the problem of devising harvest strategies in a for a series of ecosystem models (Figure \ref{fig:conceptual-v2}):
+We consider the problem of devising harvest strategies for a series of ecosystem models (Figure \ref{fig:conceptual-v2}):
 *1) one species, one fishery:* a simple single-species recruitment model based on [@may77];
 *2) three species, one fishery:* a three-species generalization of model *1)*, where one of the species is harvested;
 *3) three species, two fisheries:* the same three-species model as above but with two harvested species;\footnote{
@@ -227,7 +227,7 @@ Across all of these scenarios, two goals are balanced in the decision process: m
 Regarding control for these 4 models, we show that: *1)* while all approaches match in performance in the single species deterministic model, even mild stochasticity plummets the performance of MSY relative to constant escapement. 
 Moreover, DRL recovers the optimal constant escapement policy.
 *2)* In the three species, single fishery model, all management strategies perform similarly.
-*3)* In the three species, two fisheries model DRL outperforms both classical strategies, with MSY surprisingly performing significantly better than constant escapement.
+*3)* In the three species, two fisheries model, DRL outperforms both classical strategies, with MSY surprisingly performing significantly better than constant escapement.
 In particular, we observe that DRL strategies are more sensitive to stochastic variations of the system which allows it to adaptively manage the system to prevent population collapses below the threshold.
 *4)* In the three species, two fisheries model with parametric time-variation, the performance gap between DRL and MSY is broadened.
 In this case, as in *3)*, constant escapement strategies perform significantly worse than DRL and MSY.
@@ -235,9 +235,9 @@ In this case, as in *3)*, constant escapement strategies perform significantly w
 Our findings paint a picture of how a single-species optimal management strategy may loose performance rather dramatically when controlling a more complex ecosystem.
 Moreover, rather unintuitively, management strategies, such as MSY, known to be suboptimal and unsustainable in the single-species can turn out to even outperform the aforementioned single-species optimal strategy (e.g. constant escapement).
 Finally, within this regime of complex, possibly varying, ecosystems, we show that DRL consistently finds a policy which effectively either matches the best classical strategy, or outperforms it.
-We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms constant escapement.
+We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms constant escapement. <!-- ML: I think would be clearest to specify "in the environment's/dynamics model's param..."-->
 
-We notice that both classical management strategies are faced with a tradeoff---optimal classical strategies accept a rather large fraction of episodes ending with a population crash, whose negative reward is counteracted with a higher economic output.\footnote{
+We notice that both classical management strategies are faced with a tradeoff -- optimal classical strategies accept a rather large fraction of episodes ending with a population crash, whose negative reward is counteracted with a higher economic output.\footnote{
 In our mathematical formulation of the decision problem, we have assumed for simplicity that the fishing effort cost is zero and that fish price is stable over time.
 This way, we equate economic output with harvested biomass.
 }
@@ -273,7 +273,7 @@ We make two further simplifying assumptions on the control problem:
 In future work, we intend to relax these assumptions to get more realistic management scenarios.
 
 One of the models we consider is a single-species classical model of ecological tipping points.
-The other three models are all three-species models with similar dynamics---differing by the amount of species that are harvested, and whether the parameters of the model are fixed or time-dependent.
+The other three models are all three-species models with similar dynamics---differing by the amount of species that are harvested, and whether the parameters of the model are fixed or time-dependent. <!--ML: Triple parenthetical dash on purpose or an accident? Noticing this has been done before -->
 Following this logic, the first subsection will be dedicated to the single-species model and the second will focus on the three-species models.
 
 ## The single species model
@@ -337,7 +337,7 @@ These are all closely related---in fact, their natural dynamics (i.e. dynamics u
   \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
 \end{split}
 \end{align}
-The three species modelled are $X$, $Y$ and $Z$.
+The three species modeled are $X$, $Y$ and $Z$.
 Species $Z$ preys on both $X$ and $Y$, while the latter two compete for resources.
 There are thirteen parameters in this model: 
 The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and $Y$.
@@ -354,14 +354,14 @@ Eqs. \eqref{eq:3d model} are a generalization of the single-species model \eqref
 Throughout most of our paper, we use the parameter values given in eq. \eqref{eq:param vals}.
 In particular, $c_{XY} = d = f = 0.1$ and $\sigma_Z=0.05$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
 Put differently, we are in a regime where, just by examining parameters, it would seem that the single-species model is a reasonable approximation.
-**Is this actually true? Should I maybe erase these last sentences?**
+**Is this actually true? Should I maybe erase these last sentences?** <!-- ML: cc Carl, but I think these sentences seem reasonable-->
 
 The three models will branch off of eq. \eqref{eq:3d model} in the following way.
 *1. Three species, one fishery:* in this first model, only $X$ is harvested, that is, in the notation of eq. \eqref{eq:general model}, we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
 All parameters here are constant, with values given by \eqref{eq:param vals}.
 *2. Three species, two fisheries:* as the previous case but with $X$ and $Y$ being harvested. 
 In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
-Finally, *3. Three species, two fiseries, time-variation:* in this model we allow for the harvest of $X$ and $Y$, as in the previous model, but now we include a time dependent parameter:
+Finally, *3. Three species, two fisheries, time-variation:* in this model we allow for the harvest of $X$ and $Y$, as in the previous model, but now we include a time dependent parameter:
 \begin{equation}
   \label{eq:rx(t)}
   r_X = r_X(t) = 
@@ -374,14 +374,14 @@ All other parameters are fixed by eq. \eqref{eq:param vals}.
 
 Eq. \eqref{eq:rx(t)} is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
 In future work we intend to test the DRL framework in realistic models of particular fisheries.
-As a part of that effort, we will attempt capture more detailed models of the effects of climate change.
+As a part of that effort, we will attempt to capture more detailed models of the effects of climate change.
 For this exploratory work we have chosen this simple expression, however, for the sake of conceptual clarity.
 
 # Reinforcement learning {#sec:RL}
 
 Reinforcement learning (RL) is a way of approaching *sequential decision problems* through machine learning.
 All applications of RL can be conceptually separated into two parts: an *agent* and an *environment* which the agent interacts with.
-That is, the agent takes actions within the environment.
+That is, the agent performs actions within the environment.
 As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent. (See Fig. 1 in [@rl-intro] for a conceptual description of reinforcement learning algorithms.)
 The rewards encode the agent's goal.
 The main task of any RL algorithm is then to maximize the cumulative reward received. 
@@ -397,7 +397,7 @@ Here the fish mortality-rates-from-harvest (i.e. $M_X=M_X(N_t)$ and $M_Y=M_Y(N_t
 This secures a reward of $M_X(N_t)X$ in the single fishery case, and in the two-fishery case the reward is $M_X(N_t)X + M_Y(N_t)Y$.
 After this harvest portion of the time step, the environment changes according to its natural dynamics given by \eqref{eq:3d model}.
 
-As mentioned, this discretized time framework allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
+As mentioned previously, this discretized time framework allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
 This approximation is commonly used in fisheries for species with annual reproductive cycles (see e.g. [@mangel2006theoretical], Chap. 6).
 The division of the time-step into two parts (harvest and dynamics) happening sequentially is performed for all control methods evaluated, not only RL-based approaches.
 
@@ -405,7 +405,7 @@ The division of the time-step into two parts (harvest and dynamics) happening se
 
 The RL environment can be formally described as a discrete time *partially observable Markov decision process (POMDP)*.
 This formalization is rather flexible and allows one, e.g., to account for situations where the agent may not fully observe the environment state, or where the only observations available to the agent are certain functions of the underlying state.
-For the sake of clarity, we will only present here the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (henceforth MDPs for short).
+For the sake of clarity, we will only present here the subclass of POMDPs which are relevant to our work: *fully observable MDPs* (henceforth MDPs for short).
 An MDP may be defined by the following data:
 
 - $\mathcal{S}$: *state space*, the set of states of the environment,
@@ -445,7 +445,7 @@ The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expec
 
 ## Deep Reinforcement Learning
 
-The policy function $\pi$ often lives in a high or even infinite-dimensional space.
+The optimal policy function $\pi$ often lives in a high or even infinite-dimensional space.
 This makes it unfeasible to directly optimize $\pi$.
 In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions.\footnote{
 Policies are, in general, functions from state space to policy space.
@@ -457,12 +457,6 @@ This approach runs into tractability problems: First, the dimension of policy sp
 Second, even for a fixed number of species (e.g., 3), the dimension optimized over can be prohibitively large---for example if one uses 1000 bins for each population in a three-species model, the overall number of parameters being optimized over is $10^9$.
 Neural networks with much smaller number of parameters, on the other hand, can be quite expressive and sufficient to find a rather good (if not optimal) policy function.
 }
-<!-- ML: I am not following this line of thought here. I see the main reason why NN's are used as being that NN's are universal function approximators, and we don't know what the policy and/or value function will look like.
-
-FM: my take here is that the space of functions from states to actions is in principle infinite-dimensional or at least very high dimensional. (e.g. exponentially high dimensional in terms of the number of degrees of freedom in state space, for the case of discretized state spaces).
-By restricting our ansatz to neural networks of a fixed depth/breadth, we're restricting ourselves to a finite dimensional (or, in the discrete case, potentially much lower dimensional) manifold of policies over which gradient descent may be performed much more efficiently.
-E.g. the dimensionality of the space we're searching for is determined by the size of the neural network, it's finite dimensional for continuous state spaces, and its dimension is not necessarily exponential in the number of species.
--->
 Deep reinforcement learning uses this strategy, focusing on function families parameterized by neural networks. (See Fig. 1 and App. A in [@rl-intro] for a conceptual introduction to the use of reinforcement learning in the context of conservation decision making.)
 <!--(See Fig. \ref{tbd}.)-->
 <!-- The figure should kinda explain how the parametrization arises, and how gradient ascent is used. Maybe namedrop backpropagataion for the sake of usefulness to the reader? -->
@@ -470,8 +464,8 @@ Deep reinforcement learning uses this strategy, focusing on function families pa
 
 We will focus on deep reinforcement learning throughout this paper.
 Within the DRL literature there is a wealth of algorithms from which to choose from to optimize $\pi$, each with its pros and cons.
-Most, if not all, of these are based on gradient ascent by using the technique of *back-propagation* to efficiently compute the gradient.
-Here we have used only one such algorithm (*proximal policy optimization (PPO)*) for the sake of particularity---to draw a clear comparison between the RL-based and the classical fishery management approaches.
+Most of these are based on gradient ascent by using the technique of *back-propagation* to efficiently compute the gradient.
+Here we have used only one such algorithm (*proximal policy optimization (PPO)*) to draw a clear comparison between the RL-based and the classical fishery management approaches.
 In practice, further improvements can be expected by a careful selection of the optimization algorithm. 
 (See, e.g., [@franccois2018introduction] for an overview of different optimization schemes used in DRL.)
 
@@ -495,7 +489,7 @@ In fact, it has been shown that model-free RL outperforms model-based alternativ
 
 This context provides a motivation for this paper. 
 Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
-This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
+This way, it is plausible that model-free RL controls could outperform currently used model-based controls in ecological management problems.
 
 Model-free DRL provides, moreover, a framework within which agents can be trained to be generally competent over a *variety* of different models.
 This could more faithfully capture the ubiquitous uncertainty around ecosystem models.
@@ -509,7 +503,7 @@ Due to the increased computational requirements of this framework, we have left 
 # Methods
 
 \textbf{The Environment.}
-As seen in Fig. \ref{fig:conceptual-v2}, we consider four different models of the ecosystem with which the fishery interacts, each of this is called an *environment*, alluding to the environment in an RL setting.
+As seen in Fig. \ref{fig:conceptual-v2}, we consider four different models of the ecosystem with which the fishery interacts, each of these is called an *environment*, alluding to the environment in an RL setting.
 We summarize these models in Table \ref{tab:models}.
 To recap, these four environments are a single-species growth model \eqref{eq:may} for a harvested species; a three-species model \eqref{eq:3d model} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
 
@@ -532,7 +526,7 @@ The policies explored were functions from states $N_t$ to either a single number
   \end{center}
 \end{table}
 
-Our goal is to evaluate the performance of different policy strategies over a specified window of time.
+Our goal is to evaluate the performance of different policies over a specified window of time.
 We have chosen this window to be 200 time-steps, where each discrete time-step represents the dynamical evolution of the system over a year.
 _Episodes_ begin at time-step zero and are controlled by the policy and the system's natural evolution until either the maximum time-span is reached, or until a ‘‘near-extinction event’’ occurs---that is, until any of the populations go below a given threshold,
 \begin{align}
@@ -542,11 +536,11 @@ _Episodes_ begin at time-step zero and are controlled by the policy and the syst
   \text{or,}\quad
   Z \leq Z_{\text{thresh.}}.
 \end{align}
-In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from its ‘‘natural’’ level.
+In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from its ‘‘natural’’ level. <!-- ML: Should we talk about units somewhere, seeing "0.5 to 1" might be startling to some people here-->
 
 The reward function defining our policy optimization problem has two components.
 The first is economical: the total biomass harvested over an episode.
-The second seeks to reflect conservation goals: if a near-extinction event occurs at time $t$, the episode is ended early and a negative reward of $-100/t$ was awarded.
+The second seeks to reflect conservation goals: if a near-extinction event occurs at time $t$, the episode terminates early and a negative reward of $-100/t$ is received.
 This reward function balances the extractive motivation of the fishery with conservation goals that go beyond the scope of long-term sustainable harvests.
 
 
@@ -655,7 +649,7 @@ This is the most complex scenario considered and where our results show the most
 Our main result is summarized in Fig. \ref{fig:main} which displays the total reward distributions for the policy obtained through each strategy.
 Here we note two surprising things:
 First, optimal constant escapement performs considerably worse than not only DRL-based methods, but also than MSY.
-This conceptually shows how one-dimensional intuitions on ecological control may loose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
+This conceptually shows how one-dimensional intuitions on ecological control may lose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
 Second, we see that classical strategies have relatively spread out reward distributions as compared to DRL methods.
 
 ```{r}
@@ -677,7 +671,7 @@ The constant mortality strategy is also observed to lead to near-extinction even
 
 ```{r}
 #| label: ephistograms
-#| fig.cap: "Hisotgrams of episode lengths and rewards for the four different management strategies considered. Only the first 50 evaluation episodes (from a total of 100) were included, for ease of visualization."
+#| fig.cap: "Histograms of episode lengths and rewards for the four different management strategies considered. Only the first 50 evaluation episodes (from a total of 100) were included, for ease of visualization."
 #| out.width: "6in"
 esc_len <- esc_ends %>%
   filter(rep<50) %>%
@@ -738,12 +732,12 @@ gpp_rew <- gpp_ends %>%
 
 We examine the trade-off between profit and sustainability faced by the constant mortality strategy in Fig. \ref{fig:fracmsy}.
 We expect a similar and, possibly, more pronounced effect for the constant escapement strategy but do not analyze this case here.
-Here, two quantities are plotted: the fraction of evaluation episodes of maximal length (i.e. episodes with no near-extinction events) is and the average reward obtained.
+Here, two quantities are plotted: the fraction of evaluation episodes of maximal length (i.e. episodes with no near-extinction events) and the average reward obtained.
 On the x-axis we have several sub-optimal constant mortality strategies that err on the conservative side: e.g. the policy labeled ‘‘80% MSY’’ has the form
 \begin{align*}
   \pi: (X_t, Y_t, Z_t)\mapsto (0.8 M_X^*,\ 0.8 M_Y^*),
 \end{align*}
-where $(M_X^*,\ M_Y^*)$ is the optimal constat mortality strategy.
+where $(M_X^*,\ M_Y^*)$ is the optimal constant mortality strategy.
 We see that sufficiently conservative policies attain high sustainability, but only at a high price in terms of profit.\footnote{
 As noted before, here we equate economic profit with biomass caught.
 This is done as an approximation to convey the conceptual message more clearly, and we do not expect our results to significantly change if, e.g., ‘‘effort cost’’ is included in the reward function.
@@ -802,7 +796,7 @@ In that figure, the shape of the optimal escapement strategy is provided for com
 
 We notice that the DRL-derived policy has similarities to a constant escapement policy.
 Here, the key difference is that the escapement value for each of the fished species is sensitive to variations in the other populations. 
-This can be seen as a color gradients in the plots of $(X, M_X)$ and $(Y, M_Y)$, where the gradient corresponds to differing values of $Z$.
+This can be seen as color gradients in the plots of $(X, M_X)$ and $(Y, M_Y)$, where the gradient corresponds to differing values of $Z$.
 Moreover, this can be seen as an anti-correlation in the plot of $(X, M_Y)$---for optimal constant escapement, $M_Y$ is uncorrelated to $X$.
 
 This sensitivity of the policy to, for instance, the values of $Z$ can be seen in the sample time series displayed in Fig. \ref{fig:gpp-ep}.
@@ -820,18 +814,18 @@ This pattern is rather common among the whole dataset---early episode ends are l
 
 ## Recovering constant escapement for a single species
 
-While the optimal control for our single-species model \eqref{eq:may} can not be easily proven to be constant escapement (since the right-hand side of that equation is not concave), from experience we can expect for constant escapement to either be optimal or near-optimal.
+While the optimal control for our single-species model \eqref{eq:may} can not be easily proven to be constant escapement (since the right-hand side of that equation is not concave), from experience we can expect constant escapement to either be optimal or near-optimal.
 We give evidence for this intuition by showing that our DRL method recovers a constant escapement solution when trained.
 These results are shown in Fig. \ref{fig:1sp-pol}
 Here we show both the output PPO policy, and its Gaussian process interpolation.
 This helps build an intuition about the relationship between our ‘‘PPO’’ and ‘‘PPO+GP’’ management strategies.
 
 There is a presence of certain high-mortality points at low $X$ values in the PPO policy (which in turn generates a rising fishing mortality for $X$ values below a certain threshold in the PPO+GP policy).
-This is likely due to experience of near-extinctions early on in the training process---where, given an impending extinction, it is more rewardful to fish intensively. 
+This is likely due to experience of near-extinctions early on in the training process---where, given an impending extinction, there is a higher reward for intensive fishing. 
 These ‘‘jitters’’ are likely not fully erased through the optimization algorithm since near-extinction events become extremely rare after only a few training iterations.
 This way, the agent does not further explore that region of state space to generate new experience.
 We believe the most important aspect of the constant escapement policy reproduced by PPO is the fact that there is some sufficiently-wide window below the threshold of the policy (i.e. below the optimal escapement value), on which no fishing is performed.
-That is, there exists some sufficiently large $\varepsilon$ such that, if $X_{\text{thresh.}}$ is the optimal escapement value of the system, then $\pi_{PPO}(X)=0$ for all $X\in[X_{\text{thresh.}}-\varepsilon,\ X_{\text{thresh.}}]$.
+That is, there exists some sufficiently large $\varepsilon$ such that if $X_{\text{thresh.}}$ is the optimal escapement value of the system, then $\pi_{PPO}(X)=0$ for all $X\in[X_{\text{thresh.}}-\varepsilon,\ X_{\text{thresh.}}]$.
 
 \begin{figure}
   \centering
@@ -842,7 +836,7 @@ That is, there exists some sufficiently large $\varepsilon$ such that, if $X_{\t
 
 ## Stability analysis
 
-In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values.
+In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values. <!--ML: For clarity, I think it would be good to specify that you are referring to parameters of the dynamics model.-->
 
 Our main result in this respect is Fig. \ref{fig:stability}.
 There, we plot the *median episode reward difference* between the two DRL-based methods we considered, and the optimal constant escapement strategy.
@@ -858,13 +852,13 @@ This figure shows that, for a wide range of parameter values, DRL-based strategi
 # Discussion
 
 Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
-While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making.
-This provides very interpretable solutions, such as constant mortality policies.
+While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making. <!-- ML: First half of this sentence comes off as vague, esp. without a citation -->
+This provides easily interpretable solutions, such as constant mortality policies.
 There is a drawback here, however: due to the simplicity of these dynamical models, the policies might not respond effectively in many situations---situations where the predictions of these simple models deviate considerably from reality.
 Because of this, policies such as MSY have faced pushback and are believed to have contributed to the depletion of fish stocks [@Worm2006; @Costello2016].
 
 We propose an alternative approach to the problem of fishery control: to use a more expressive -- albeit more complicated -- dynamical model to guide decision making.
-Furthermore, rather than computing the optimal control policy for the model (something that is impossible in practice for complex systems) we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
+Furthermore, rather than computing the optimal control policy for the model (something that is impossible in practice for complex systems), we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
 This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model}) as a black box of input-output pairs.
 By not relying on precise knowledge of the model's parameter values, but rather just relying on input-output statistics, model-free approaches have gained traction in a variety of control theory settings (see, e.g., [@sato2019; @ramirez2022; @zeng2019]).
 
@@ -873,11 +867,11 @@ While the latter are inspired by the shape of optimal solutions in the single-sp
 
 Because of the simplicity of the classical policy functions, the optimal such policy may be easily estimated through a grid-search.
 This is the case since these policy functions are only specified by one or two parameters (respectively in the single fishery, or two fishery cases).
-In contrast, DRL optimizes over the more expressive -- and more complicated -- family of policies parametrized by a neural network.
-Because of this, our DRL approach uses a variant of *gradient ascent* (the proximal policy optimization algorithm) to obtain a good candidate policy.
+In contrast, DRL optimizes over the more expressive -- and more complicated -- family of policies parameterized by neural networks.
+Because of this, our DRL approach uses a variant of *gradient ascent* (the proximal policy optimization algorithm) to obtain a good candidate policy. <!-- ML: I don't think this sentence is the most helpful here. Might just be better to say something like how NN's do well in approximating just about any function empirically-->
 
 We showed that for sufficiently complex management scenarios -- with multiple harvested species and, possibly, time-varying parameters -- DRL-based management strategies perform significantly better than constant escapement.
-This with respect to both average rewards received and conservation goals.
+This is with respect to both average rewards received and conservation goals.
 In this sense, an approximate solution to a more complicated and expressive model, can outperform the optimal solution of the single-species problem---even when the parameters of the single-species solution are empirically optimized.
 
 What is more, this DRL advantage happened within a regime of parameter space where species interaction terms were much smaller than the single-species logistic growth terms.
@@ -891,7 +885,7 @@ We can understand this as a consequence of the rigidity of classical strategies:
 
 Finally, we performed a stability analysis to ensure that the advantage of DRL-based techniques over constant escapement is a ubiquitous phenomenon and not a result of a lucky selection of parameter values.
 We found (in Fig. \ref{fig:stability}) that an advantage can be observed even for relatively high-noise perturbations of the parameters---noise with a variance of 20% of the parameter values.
-The aforementioned Figure summarizes the statistics of 100 parameter perturbations so that we may expect perturbations of up to 60% (i.e. three sigmas) in the parameter values to appear in these statistics.
+The aforementioned Figure summarizes the statistics of 100 parameter perturbations so that we may expect perturbations of up to 60% (i.e. three sigmas) in the parameter values to appear in these statistics. <!--ML: Great to have this paragraph in here, but it doesn't strike me as the most satisfying one to end on. Might be better to end on a paragraph that points to future directions or gives a high-level review/takeaway. -->
 
 
 ## Acknowledgements
