@@ -134,7 +134,6 @@ dmypy.json
 
 # cache
 venv/
-cache/
 *.gz
 
 manuscript/*.pdf
