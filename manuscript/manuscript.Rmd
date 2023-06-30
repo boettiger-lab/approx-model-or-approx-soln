@@ -137,7 +137,7 @@ Modeling the potential action space as one of a handful of discrete scenarios is
 and may seem to reflect a division of responsibilities between 'scientists' modeling the 'natural processes' and policy-makers who make the decisions.
 But, more often, this simplification of decision choices is simply mathematically or conceptually convenient.  <!-- there are questions of policy scale hiding here -- e.g. local regulators of a specific industry obviously face a different action space than national legislatures or international diplomats -->
 This simplification reflects trade-offs between tractablity and complexity at the basis of any mathematical modeling -- if we make both the state space and action space too realistic, the problem of finding the best sequence of actions quickly becomes intractable.
-However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in previously intractable problems, but at the cost of opacity.  
+However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in previously intractable problems, but at the cost of opacity.
 
 In this paper, we focus on a well-developed application of model-based management of the natural world that has long illustrated the trade-offs between model complexity and policy complexity: the management of marine fisheries.
 Fisheries management is both an important issue to society and a rich & frequent test-bed of ecological management more generally.
@@ -385,7 +385,6 @@ In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
 All other parameters are constant.
 Eq. \eqref{eq:rx(t)} is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
 
-
 # Reinforcement learning {#sec:RL}
 
 Reinforcement learning (RL) is a way of approaching *sequential decision problems* through machine learning.
@@ -456,7 +455,7 @@ The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expec
 
 ## Deep Reinforcement Learning
 
-The policy function $\pi$ often lives in a high or even infinite-dimensional space.
+The optimal policy function $\pi$ often lives in a high or even infinite-dimensional space.
 This makes it unfeasible to directly optimize $\pi$.
 In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions.\footnote{
 Policies are, in general, functions from state space to policy space.
@@ -468,12 +467,6 @@ This approach runs into tractability problems: First, the dimension of policy sp
 Second, even for a fixed number of species (e.g., 3), the dimension optimized over can be prohibitively large---for example if one uses 1000 bins for each population in a three-species model, the overall number of parameters being optimized over is $10^9$.
 Neural networks with much smaller number of parameters, on the other hand, can be quite expressive and sufficient to find a rather good (if not optimal) policy function.
 }
-<!-- ML: I am not following this line of thought here. I see the main reason why NN's are used as being that NN's are universal function approximators, and we don't know what the policy and/or value function will look like.
-
-FM: my take here is that the space of functions from states to actions is in principle infinite-dimensional or at least very high dimensional. (e.g. exponentially high dimensional in terms of the number of degrees of freedom in state space, for the case of discretized state spaces).
-By restricting our ansatz to neural networks of a fixed depth/breadth, we're restricting ourselves to a finite dimensional (or, in the discrete case, potentially much lower dimensional) manifold of policies over which gradient descent may be performed much more efficiently.
-E.g. the dimensionality of the space we're searching for is determined by the size of the neural network, it's finite dimensional for continuous state spaces, and its dimension is not necessarily exponential in the number of species.
--->
 Deep reinforcement learning uses this strategy, focusing on function families parameterized by neural networks. (See Fig. 1 and App. A in [@rl-intro] for a conceptual introduction to the use of reinforcement learning in the context of conservation decision making.)
 <!--(See Fig. \ref{tbd}.)-->
 <!-- The figure should kinda explain how the parametrization arises, and how gradient ascent is used. Maybe namedrop backpropagataion for the sake of usefulness to the reader? -->
@@ -481,8 +474,8 @@ Deep reinforcement learning uses this strategy, focusing on function families pa
 
 We will focus on deep reinforcement learning throughout this paper.
 Within the DRL literature there is a wealth of algorithms from which to choose from to optimize $\pi$, each with its pros and cons.
-Most, if not all, of these are based on gradient ascent by using the technique of *back-propagation* to efficiently compute the gradient.
-Here we have used only one such algorithm (*proximal policy optimization (PPO)*) for the sake of particularity---to draw a clear comparison between the RL-based and the classical fishery management approaches.
+Most of these are based on gradient ascent by using the technique of *back-propagation* to efficiently compute the gradient.
+Here we have used only one such algorithm (*proximal policy optimization (PPO)*) to draw a clear comparison between the RL-based and the classical fishery management approaches.
 In practice, further improvements can be expected by a careful selection of the optimization algorithm. 
 (See, e.g., [@franccois2018introduction] for an overview of different optimization schemes used in DRL.)
 
@@ -506,7 +499,7 @@ In fact, it has been shown that model-free RL outperforms model-based alternativ
 
 This context provides a motivation for this paper. 
 Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
-This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
+This way, it is plausible that model-free RL controls could outperform currently used model-based controls in ecological management problems.
 
 Model-free DRL provides, moreover, a framework within which agents can be trained to be generally competent over a *variety* of different models.
 This could more faithfully capture the ubiquitous uncertainty around ecosystem models.
@@ -531,7 +524,7 @@ Each time-step was composed of two parts:
 First, a *harvest period* where the harvest is collected from the system (e.g. the population $X$ is reduced to $X_t\mapsto X_t - M_X(N_t) X_t$).
 Second, a *recruitment and interaction period*, where the system's state evolves according to its natural dynamics.
 
-Training and evaluating management strategies was done by simulating *episodes.* 
+Training and evaluating management strategies were performed by simulating *episodes.* 
 An episode begins at a fixed initial state and the system is controlled with a management policy until $t=200$, or until a ‘‘near-extinction event’’ occurs---that is, until any of the populations go below a given threshold,
 \begin{align}
   \label{eq:thresh}
@@ -540,7 +533,7 @@ An episode begins at a fixed initial state and the system is controlled with a m
   \text{or,}\quad
   Z \leq Z_{\text{thresh.}}.
 \end{align}
-In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from their ‘‘natural’’ level.
+In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from their ‘‘natural’’ level. <!-- ML: Should we talk about units somewhere, seeing "0.5 to 1" might be startling to some people here-->
 
 The reward function defining our policy optimization problem had two components.
 The first was economical: the total biomass harvested over an episode.
@@ -800,7 +793,7 @@ In that figure, the shape of the optimal escapement strategy is provided for com
 
 We notice that the DRL-derived policy has similarities to a constant escapement policy.
 Here, the key difference is that the escapement value for each of the fished species is sensitive to variations in the other populations. 
-This can be seen as a color gradients in the plots of $(X, M_X)$ and $(Y, M_Y)$, where the gradient corresponds to differing values of $Z$.
+This can be seen as color gradients in the plots of $(X, M_X)$ and $(Y, M_Y)$, where the gradient corresponds to differing values of $Z$.
 Moreover, this can be seen as an anti-correlation in the plot of $(X, M_Y)$---for optimal constant escapement, $M_Y$ is uncorrelated to $X$.
 
 This sensitivity of the policy to, for instance, the values of $Z$ can be seen in the sample time series displayed in Fig. \ref{fig:gpp-ep}.
@@ -818,18 +811,18 @@ This pattern is rather common among the whole dataset---early episode ends are l
 
 ## Recovering constant escapement for a single species
 
-While the optimal control for our single-species model \eqref{eq:may} can not be easily proven to be constant escapement (since the right-hand side of that equation is not concave), from experience we can expect for constant escapement to either be optimal or near-optimal.
+While the optimal control for our single-species model \eqref{eq:may} can not be easily proven to be constant escapement (since the right-hand side of that equation is not concave), from experience we can expect constant escapement to either be optimal or near-optimal.
 We give evidence for this intuition by showing that our DRL method recovers a constant escapement solution when trained.
 These results are shown in Fig. \ref{fig:1sp-pol}
 Here we show both the output PPO policy, and its Gaussian process interpolation.
 This helps build an intuition about the relationship between our ‘‘PPO’’ and ‘‘PPO+GP’’ management strategies.
 
 There is a presence of certain high-mortality points at low $X$ values in the PPO policy (which in turn generates a rising fishing mortality for $X$ values below a certain threshold in the PPO+GP policy).
-This is likely due to experience of near-extinctions early on in the training process---where, given an impending extinction, it is more rewardful to fish intensively. 
+This is likely due to experience of near-extinctions early on in the training process---where, given an impending extinction, there is a higher reward for intensive fishing. 
 These ‘‘jitters’’ are likely not fully erased through the optimization algorithm since near-extinction events become extremely rare after only a few training iterations.
 This way, the agent does not further explore that region of state space to generate new experience.
 We believe the most important aspect of the constant escapement policy reproduced by PPO is the fact that there is some sufficiently-wide window below the threshold of the policy (i.e. below the optimal escapement value), on which no fishing is performed.
-That is, there exists some sufficiently large $\varepsilon$ such that, if $X_{\text{thresh.}}$ is the optimal escapement value of the system, then $\pi_{PPO}(X)=0$ for all $X\in[X_{\text{thresh.}}-\varepsilon,\ X_{\text{thresh.}}]$.
+That is, there exists some sufficiently large $\varepsilon$ such that if $X_{\text{thresh.}}$ is the optimal escapement value of the system, then $\pi_{PPO}(X)=0$ for all $X\in[X_{\text{thresh.}}-\varepsilon,\ X_{\text{thresh.}}]$.
 
 \begin{figure}
   \centering
@@ -840,7 +833,7 @@ That is, there exists some sufficiently large $\varepsilon$ such that, if $X_{\t
 
 ## Stability analysis
 
-In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values.
+In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values. <!--ML: For clarity, I think it would be good to specify that you are referring to parameters of the dynamics model.-->
 
 Our main result in this respect is Fig. \ref{fig:stability}.
 There, we plot the *median episode reward difference* between the two DRL-based methods we considered, and the optimal constant escapement strategy.
@@ -858,13 +851,13 @@ This figure shows that, for a wide range of parameter values, DRL-based strategi
 ## Discussion
 
 Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
-While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making.
-This provides very interpretable solutions, such as constant mortality policies.
+While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making. <!-- ML: First half of this sentence comes off as vague, esp. without a citation -->
+This provides easily interpretable solutions, such as constant mortality policies.
 There is a drawback here, however: due to the simplicity of these dynamical models, the policies might not respond effectively in many situations---situations where the predictions of these simple models deviate considerably from reality.
 Because of this, policies such as MSY have faced pushback and are believed to have contributed to the depletion of fish stocks [@Worm2006; @Costello2016].
 
 We propose an alternative approach to the problem of fishery control: to use a more expressive -- albeit more complicated -- dynamical model to guide decision making.
-Furthermore, rather than computing the optimal control policy for the model (something that is impossible in practice for complex systems) we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
+Furthermore, rather than computing the optimal control policy for the model (something that is impossible in practice for complex systems), we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
 This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model}) as a black box of input-output pairs.
 By not relying on precise knowledge of the model's parameter values, but rather just relying on input-output statistics, model-free approaches have gained traction in a variety of control theory settings (see, e.g., [@sato2019; @ramirez2022; @zeng2019]).
 
@@ -897,7 +890,7 @@ Moreover, non-stationarity exacerbated the advantage of DRL over CEsc and CMort,
 
 Finally, we performed a stability analysis to ensure that the advantage of DRL-based techniques over constant escapement is a ubiquitous phenomenon and not a result of a lucky selection of parameter values.
 We found (in Fig. \ref{fig:stability}) that an advantage can be observed even for relatively high-noise perturbations of the parameters---noise with a variance of 20% of the parameter values.
-The aforementioned Figure summarizes the statistics of 100 parameter perturbations so that we may expect perturbations of up to 60% (i.e. three sigmas) in the parameter values to appear in these statistics.
+The aforementioned Figure summarizes the statistics of 100 parameter perturbations so that we may expect perturbations of up to 60% (i.e. three sigmas) in the parameter values to appear in these statistics. <!--ML: Great to have this paragraph in here, but it doesn't strike me as the most satisfying one to end on. Might be better to end on a paragraph that points to future directions or gives a high-level review/takeaway. -->
 
 ## Future directions
 
