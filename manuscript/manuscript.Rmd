@@ -127,8 +127,8 @@ This special issue highlights the development of novel data-driven methods, incl
 
 Much effort has been spent grappling with the complexity of our natural world in contrast to the relative simplicity of the models we use to understand it.
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
- But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
-While simplified models have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
+But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
+While simplified process models for the population dynamics have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
 For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of seven emissions marker scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
@@ -137,15 +137,15 @@ Modeling the potential action space as one of a handful of discrete scenarios is
 and may seem to reflect a division of responsibilities between 'scientists' modeling the 'natural processes' and policy-makers who make the decisions.
 But, more often, this simplification of decision choices is simply mathematically or conceptually convenient.  <!-- there are questions of policy scale hiding here -- e.g. local regulators of a specific industry obviously face a different action space than national legislatures or international diplomats -->
 This simplification reflects trade-offs between tractablity and complexity at the basis of any mathematical modeling -- if we make both the state space and action space too realistic, the problem of finding the best sequence of actions quickly becomes intractable.
-However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in such problems, but at the cost of opacity.  
+However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in previously intractable problems, but at the cost of opacity.  
 
 In this paper, we focus on a well-developed application of model-based management of the natural world that has long illustrated the trade-offs between model complexity and policy complexity: the management of marine fisheries.
-Fisheries management is both an important issue to itself and a rich & frequent test-bed of ecological management more generally.
+Fisheries management is both an important issue to society and a rich & frequent test-bed of ecological management more generally.
 Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006, @Costello2016].
 Fisheries management has  roots in both the fields of _ecosystem management_ and _natural resource economics_.
 Both fields might trace their origins to the notion of maximum sustainable yield (MSY), introduced independently by a fisheries ecologist [@Schaefer1954] and the economist [@Gordon1954] in the same year.
 From this shared origin, each field would depart from the simplifying assumptions of the Gordon-Schaefer model in divergent ways, leading to different techniques for deriving policies from models.The heart of the management problem is easily understood: a manager seeks to set quotas on fishing that will ensure the long-term profitability and sustainability of the industry.
-Mathematical approaches developed over the past century may be roughly divided between these two fields: (A) ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
+Mathematical approaches developed over the past century may be roughly divided between these two fields: (A) ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering a relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
 The economist's approach can be characterized by the mathematics of a Markov decision process [MDP @Clark1973; @Clark1990; @Marescot2013], in which the decision-maker must observe the stock each year and recommend a possible action.
 In this approach, the policy space that must be searched is exponentially large -- for a management horizon of T decisions and a space of N actions, the number of possible policies is $N^T$.
 In contrast, fisheries ecologists and ecosystem management typically search a space of policies that does not scale with the time horizon.
@@ -162,8 +162,8 @@ knitr::include_graphics("figures/textbox.png")
 Recent advances in machine learning may allow us to once again bridge these approaches, while also bringing new challenges of their own.
 Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RAMLegacyDB].
 Constrained by computational limits, MDP approaches have been intractable on suitably realistic models and largely confined to more academic applications [@Costello2016].
-However, advances _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari1; @atari2] to fusion reactions [@fusion1; @fusion2] to the remarkable dialog abilities of ChatGPT [@chatgpt].
-RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, requiring immense computational costs, and presenting frequent challenges with transfer-ability or reproducibility.
+However, advances in _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari1; @atari2] to fusion reactions [@fusion1; @fusion2] to the remarkable dialog abilities of ChatGPT [@chatgpt].
+RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, requiring immense computational costs, and presenting frequent challenges with reproducibility.
 A review of all these issues is beyond our scope but can be found elsewhere [@rl-intro; @millie-3].
 Here, though, we will focus on the issue of opacity and interpretability raised by these methods.
 In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
@@ -358,7 +358,7 @@ Models 2-4 are three-species models and they are all closely related---in fact, 
   f_Z(N_t) &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
 \end{split}
 \end{align}
-The three species modelled are $X$, $Y$ and $Z$.
+The three species modeled are $X$, $Y$ and $Z$.
 Species $Z$ preys on both $X$ and $Y$, while the latter two compete for resources.
 There are thirteen parameters in this model: 
 The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and $Y$.
@@ -390,7 +390,7 @@ Eq. \eqref{eq:rx(t)} is intended to reflect in a simple manner a possible effect
 
 Reinforcement learning (RL) is a way of approaching *sequential decision problems* through machine learning.
 All applications of RL can be conceptually separated into two parts: an *agent* and an *environment* which the agent interacts with.
-That is, the agent takes actions within the environment.
+That is, the agent performs actions within the environment.
 As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent. (See Fig. 1 in [@rl-intro] for a conceptual description of reinforcement learning algorithms.)
 The rewards encode the agent's goal.
 The main task of any RL algorithm is then to maximize the cumulative reward received. 
@@ -406,7 +406,7 @@ Here the fish mortality-rates-from-harvest (i.e. $M_X=M_X(N_t)$ and $M_Y=M_Y(N_t
 This secures a reward of $M_X(N_t)X$ for Models 1 and 2, and, similarly, a reward of $M_X(N_t)X + M_Y(N_t)Y$ for Models 3 and 4.
 After this harvest portion of the time step, the environment changes according to its natural dynamics (see eq. \eqref{eq:3d model}).
 
-As mentioned, discretising time allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
+As mentioned previously, discretising time allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
 This approximation is commonly used in fisheries for species with annual reproductive cycles (see e.g. [@mangel2006theoretical], Chap. 6).
 The division of the time-step into two parts (harvest and dynamics) happening sequentially is performed for all control methods evaluated, not only RL-based approaches.
 
@@ -414,7 +414,7 @@ The division of the time-step into two parts (harvest and dynamics) happening se
 
 The RL environment can be formally described as a discrete time *partially observable Markov decision process (POMDP)*.
 This formalization is rather flexible and allows one, e.g., to account for situations where the agent may not fully observe the environment state, or where the only observations available to the agent are certain functions of the underlying state.
-For the sake of clarity, we will only present here the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (henceforth MDPs for short).
+For the sake of clarity, we will only present here the subclass of POMDPs which are relevant to our work: *fully observable MDPs* (henceforth MDPs for short).
 An MDP may be defined by the following data:
 
 - $\mathcal{S}$: *state space*, the set of states of the environment,
