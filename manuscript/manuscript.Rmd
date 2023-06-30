@@ -942,7 +942,7 @@ summary_11 <- read_csv("manuscript_data/comparison_1-1_100.csv.xz") %>%
 
 ```{r}
 #| label: main_32
-#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘three species, two fisheries’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 3 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
 #| out.width: "6in"
 summary_32 %>% 
   ggplot() +
@@ -955,7 +955,7 @@ summary_32 %>%
 
 ```{r}
 #| label: main_31
-#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘three species, one fishery’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 2 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
 #| out.width: "6in"
 summary_31 %>% 
   ggplot() +
@@ -968,7 +968,7 @@ summary_31 %>%
 
 ```{r}
 #| label: main_11
-#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘one species, one fishery’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 1 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
 #| out.width: "6in"
 summary_11 %>% 
   ggplot() +
