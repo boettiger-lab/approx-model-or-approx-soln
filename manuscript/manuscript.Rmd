@@ -891,13 +891,24 @@ The aforementioned Figure summarizes the statistics of 100 parameter perturbatio
 
 ## Future directions
 
-There are a number of interesting directions that we intend to explore in future work.
+There are a number of interesting directions that would be interseting to explore in future work.
 
-First, it is to benchmark our results on increasingly more compex and realistic fishery models.
+First, benchmarking our results against increasingly more compex and realistic fishery models.
 This would include non-stationarities in the dynamical parameters to accurately reflect the effects of climate change on the ecosystem.
 This added complexity would likely pose a computational challenge---in future work we will likely need to test several different DRL training algorithms (see e.g. [@rl-intro] for a non-exhaustive list), and it is very likely that hyperparameter tuning will need to be performed.
 Moreover, it may be that larger neural networks than the one we used in this research will be needed for the policy function.
 This all will mean that considerable technical work will be needed in order to make this next step computationally feasible (e.g. we might need to make more extensive use of GPUs and parallelization).
+
+Second, to account for noisy estimates of the system's state and imperfect policy implementation.
+This could be done straightforwardly, albeit it might increase the training time before DRL approaches converge, as well as introducing the need for hyperparameter tuning.
+
+Third, to account for the systematic uncertainties behind the dynamics of the ecosystem---that is, to account for model biases with respect to reality.
+Here, one can employ tools from curriculum learning in order to train an agent that is *generally capable* of good management over a range of different dynamical models.
+This way, one can incorporate different models---expressing different aspects of the ecosystem---into the learning process of the agent.
+We believe that this step will likely be necessary if DRL algorithms are to be applied successfully in the fishery management problem.
+Curriculum learning is rather expensive computationally, however, and involves a non-trivial *curriculum design* which will guide the agent in its learning process.
+This way, considerable technical work would be needed for this direction.
+
 
 
 ## Acknowledgements
