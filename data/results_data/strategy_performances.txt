@@ -1,0 +1,75 @@
+1 species:
+
+  strategy = CMort
+  reward    0.881624
+  fraction max t=199: 0.56
+
+  strategy = CEsc
+  reward    1.984923
+  fraction max t=199: 0.85
+
+  strategy = PPO
+  reward    1.720435
+  fraction max t=199: 0.86
+
+  strategy = PPO+GP
+  reward    1.898827
+  fraction max t=199: 0.77
+
+3 species, 1 fishery
+
+  strategy = CMort
+  reward    19.766159
+  fraction max t=199: 1.0
+
+  strategy = CEsc
+  reward    19.522589
+  fraction max t=199: 0.99
+
+  strategy = PPO
+  reward    19.939227
+  fraction max t=199: 1.0
+
+  strategy = PPO+GP
+  reward    19.620178
+  fraction max t=199: 1.0
+
+3 species, 2 fishery
+
+  strategy = CMort
+  reward    62.303953
+  fraction max t=199: 0.75
+
+  strategy = CEsc
+  reward    48.356836
+  fraction max t=199: 0.57
+
+  strategy = PPO
+  reward    66.832084
+  fraction max t=199: 0.88
+
+  strategy = PPO+GP
+  reward    68.751831
+  fraction max t=199: 0.93
+
+3 species, 2 fishery, time-varying r_x parameter
+
+  strategy = CMort
+  reward    44.519652
+  dtype: float64
+  fraction max t=199: 0.8
+
+  strategy = CEsc
+  reward    36.764047
+  dtype: float64
+  fraction max t=199: 0.54
+
+  strategy = PPO
+  reward    48.753288
+  dtype: float64
+  fraction max t=199: 0.94
+
+  strategy = PPO+GP
+  reward    49.439857
+  dtype: float64
+  fraction max t=199: 0.98

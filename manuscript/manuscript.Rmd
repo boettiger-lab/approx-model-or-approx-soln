@@ -50,12 +50,12 @@ abstract: |
   we demonstrate the ability for DRL algorithms using deep neural networks 
   to successfully approximate solutions (the ‘‘policy function’’ or control 
   rule) in a non-linear three-variable model for a fishery without knowing 
-  or ever attempting to infer a model for the process itself. We find that 
-  the reinforcement learning agent discovers an effective simplification of
-  the problem to obtain an interpretable control rule. We show that the 
-  policy obtained with DRL is both more profitable and more sustainable 
-  than any constant mortality policy---the standard family of policies 
-  considered in fishery management.
+  or ever attempting to infer a model for the process itself. We find that
+  the reinforcement learning agent discovers a policy that outperforms both
+  constant escapement and constant mortality policies---the standard family of policies 
+  considered in fishery management. This DRL policy has 
+  the shape of a constant escapement policy whose escapement values depend
+  on the stock sizes of other species in the model.
 
   
 bibliography: bibliography.bib
@@ -96,64 +96,25 @@ knitr::opts_chunk$set(cache = TRUE, echo = FALSE, message = FALSE,
                       warning = FALSE, fig.height=5, fig.width=7.5)
 library(tidyverse)
 library(patchwork)
+library(ggplot2)
 ```
 
 ```{r}
-# for best const mortality and best const escapement
-msy_optimizer <- function(df) {
-  df |> 
-  group_by(action, rep) |>
-  filter(t == max(t)) |> 
-  group_by(action) |>
-  summarise(mean_reward = mean(reward), sd = sd(reward)) |> 
-  filter(mean_reward == max(mean_reward))
-}
-escapement_optimizer <- function(df) {
-  df |> 
-  group_by(escapement, rep) |>
-  filter(t == max(t)) |> 
-  group_by(escapement) |>
-  summarise(mean_reward = mean(reward), sd = sd(reward)) |> 
-  filter(mean_reward == max(mean_reward))
-}
+# read data
+#frac_msy_8 <- read_csv("manuscript_data/0.8msy.csv.xz")
+#frac_msy_9 <- read_csv("manuscript_data/0.9msy.csv.xz")
+#frac_msy_95 <- read_csv("manuscript_data/0.95msy.csv.xz")
+#frac_msy_100 <- read_csv("manuscript_data/1msy.csv.xz")
+frac_msy <- read_csv("manuscript_data/frac_msy_summaries.csv.xz")
 
-# Collect data (outsource to separate R script later TBD)
-msy_df <- read_csv("../data/msy.csv.xz")
-best_action <- msy_optimizer(msy_df)$action
-escapement_df <- read_csv("../data/escapement.csv.xz", show_col_types = FALSE)
-best_e <- escapement_optimizer(escapement_df)$escapement
-ppo_df <- read_csv("../data/PPO200.csv.xz")
+main_summaries <- read_csv("manuscript_data/comparison_3-2-var_300.csv.xz") %>%
+  mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
+  arrange(strategy)
 
-opt_escapement <- escapement_df |> filter(escapement == best_e)
-
-# set up for plots:
-
-msy_sim <- msy_df |>
-    filter(action == best_action) |> 
-    group_by(rep) |>
-    pivot_longer(c("X", "Y", "Z"),
-                names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "msy") # natural units, policy name
-
-actions <- unique(msy_df$action)
-i <- which.min(abs(actions - best_action* 0.8))
-tac_sim <- msy_df |> 
-    filter(action == actions[[i]]) |>
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "tac")
-
-ppo_sim <- ppo_df |> 
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "ppo")
-
-esc_sim_df <- escapement_df |> 
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1)
-
-msy_tac_ppo <- bind_rows(msy_sim, tac_sim, ppo_sim)
+esc_ends <- read_csv("manuscript_data/esc_ends_100.csv.xz")
+msy_ends <- read_csv("manuscript_data/msy_ends_100.csv.xz")
+ppo_ends <- read_csv("manuscript_data/ppo300_ends.csv.xz")
+gpp_ends <- read_csv("manuscript_data/gpp300_ends.csv.xz")
 ```
 
 <!--
@@ -166,9 +127,9 @@ This special issue highlights the development of novel data-driven methods, incl
 
 Much effort has been spent grappling with the complexity of our natural world in contrast to the relative simplicity of the models we use to understand it.
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
- But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
-While simplified models have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
-For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of six emissions scenarios from the IPCC [@riahi2017shared].
+But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
+While simplified process models for the population dynamics have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
+For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of seven emissions marker scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
 Similar combinations of rich process models and highly simplified decision models (often not even given the status of 'model') are common.
@@ -176,15 +137,15 @@ Modeling the potential action space as one of a handful of discrete scenarios is
 and may seem to reflect a division of responsibilities between 'scientists' modeling the 'natural processes' and policy-makers who make the decisions.
 But, more often, this simplification of decision choices is simply mathematically or conceptually convenient.  <!-- there are questions of policy scale hiding here -- e.g. local regulators of a specific industry obviously face a different action space than national legislatures or international diplomats -->
 This simplification reflects trade-offs between tractablity and complexity at the basis of any mathematical modeling -- if we make both the state space and action space too realistic, the problem of finding the best sequence of actions quickly becomes intractable.
-However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in such problems, but at the cost of opacity.  
+However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in previously intractable problems, but at the cost of opacity.  
 
 In this paper, we focus on a well-developed application of model-based management of the natural world that has long illustrated the trade-offs between model complexity and policy complexity: the management of marine fisheries.
-Fisheries management is both an important issue to itself and a rich & frequent test-bed of ecological management more generally.
+Fisheries management is both an important issue to society and a rich & frequent test-bed of ecological management more generally.
 Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006, @Costello2016].
 Fisheries management has  roots in both the fields of _ecosystem management_ and _natural resource economics_.
 Both fields might trace their origins to the notion of maximum sustainable yield (MSY), introduced independently by a fisheries ecologist [@Schaefer1954] and the economist [@Gordon1954] in the same year.
 From this shared origin, each field would depart from the simplifying assumptions of the Gordon-Schaefer model in divergent ways, leading to different techniques for deriving policies from models.The heart of the management problem is easily understood: a manager seeks to set quotas on fishing that will ensure the long-term profitability and sustainability of the industry.
-Mathematical approaches developed over the past century may be roughly divided between these two fields: (A) ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
+Mathematical approaches developed over the past century may be roughly divided between these two fields: (A) ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering a relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
 The economist's approach can be characterized by the mathematics of a Markov decision process [MDP @Clark1973; @Clark1990; @Marescot2013], in which the decision-maker must observe the stock each year and recommend a possible action.
 In this approach, the policy space that must be searched is exponentially large -- for a management horizon of T decisions and a space of N actions, the number of possible policies is $N^T$.
 In contrast, fisheries ecologists and ecosystem management typically search a space of policies that does not scale with the time horizon.
@@ -201,13 +162,14 @@ knitr::include_graphics("figures/textbox.png")
 Recent advances in machine learning may allow us to once again bridge these approaches, while also bringing new challenges of their own.
 Novel data-driven methods have allowed these models to evolve into ever more complex and realistic simulations used in fisheries management, where models with over 100 parameters are not uncommon [@RAMLegacyDB].
 Constrained by computational limits, MDP approaches have been intractable on suitably realistic models and largely confined to more academic applications [@Costello2016].
-However, advances _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari1; @atari2] to fusion reactions [@fusion1; @fusion2] to the remarkable dialog abilities of ChatGPT [@chatgpt].
-RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, requiring immense computational costs, and presenting frequent challenges with transfer-ability or reproducibility.
+However, advances in _Deep Reinforcement Learning_, (DRL) a sub-field of machine learning, have recently demonstrated remarkable performance in a range of such MDP problems, from video games [@atari1; @atari2] to fusion reactions [@fusion1; @fusion2] to the remarkable dialog abilities of ChatGPT [@chatgpt].
+RL methods also bring many challenges of their own: being notoriously difficult to train and evaluate, requiring immense computational costs, and presenting frequent challenges with reproducibility.
 A review of all these issues is beyond our scope but can be found elsewhere [@rl-intro; @millie-3].
 Here, though, we will focus on the issue of opacity and interpretability raised by these methods.
 In contrast with optimization algorithms currently used in either ecosystem management or resource economics, RL algorithms have no guarantees of or metrics for convergence to an optimal solution.
 In general, one can only assess the performance of these black box methods relative to alternatives.
 
+<!--
 ```{r}
 #| label: conceptual
 #| echo: FALSE
@@ -226,67 +188,140 @@ In general, one can only assess the performance of these black box methods relat
  
 knitr::include_graphics("figures/conceptual.png")
 ```
+-->
 
 <!--NEED some kind of map paragraph here saying what's ahead, what we show  -->
-In this article, we compare the performance of a DRL solution to that of a management strategy evaluation across potential 'constant mortality' policies.\footnote{A repository with all the relevant code to reproduce our results may be found at \url{https://github.com/boettiger-lab/approx-model-or-approx-soln} in the ‘‘code’’ subdirectory. The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.} 
-We consider the problem of devising harvest strategies in a three species ecosystem (Figure 1B).
-We show that, somewhat surprisingly, the DRL policy closely resembles a *bang-bang* solution (see Text Box 1).
-Bang-bang solutions are known to be optimal for a variety of single-species models, however, there is no a-priori reason why they should be optimal for higher-dimensional systems.
-This way, the DRL agent discovers and exploits, as it were, an effective simplification of the control problem.
-We provide some intuition as to how this simplification arises from the dynamics of the system, but leave a more rigorous characterization of this phenomenon for future work.
+In this article, we compare the performance of a DRL solution to that of classical management strategies (see Textbox 1).\footnote{A repository with all the relevant code to reproduce our results may be found at \url{https://github.com/boettiger-lab/approx-model-or-approx-soln} in the ‘‘src’’ subdirectory. 
+The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.} 
+We consider the problem of devising harvest strategies in a for a series of ecosystem models with increasing complexity (Table \ref{tab:models}):
+*1) one species, one fishery:* a simple single-species recruitment model based on [@may77];
+*2) three species, one fishery:* a three-species generalization of model *1)*, where one of the species is harvested;
+*3) three species, two fisheries:* the same three-species model as above but with two harvested species;
+*4) three species, two fisheries, parameter variation:* a three-species model of which two are harvested, as above, with a time-varying parameter.
+This last model is meant to be a toy model of climate change's effect on the system.
+Across all of these scenarios, two goals are balanced in the decision process: maximizing long-term catch and preventing stock sizes to fall below some a-priori threshold.
 
-The DRL policy drives an oscillation process in the system and, in this way, maintains the long-term sustainability of fishing.
-In contrast, constant mortality policies overfish at low populations and underfish (relative to the DRL solution) at high populations.
-This leads to a tradeoff when leveraging constant mortality strategies: higher constant mortality rates lead to high profitability at the expense of a higher probability of overfishing to extinction, while lower constant mortality rates attain stability at the expense of profit.
+\begin{table}
+  \begin{center}
+    \begin{tabular}{|l|c|c|c|c|}
+      \hline
+      \textbf{Model name} & \textbf{Model eqs.} & \textbf{N. Sp.} & \textbf{Harv. Sp.} & \textbf{Stationary?}\\
+      \hline
+      Model 1 & \eqref{eq:may} & 1 & $X$ & Yes \\
+      Model 2 & \eqref{eq:3d model} & 3 & $X$ & Yes \\
+      Model 3 & \eqref{eq:3d model} & 3 & $X$ and $Y$ & Yes \\
+      Model 4 & \eqref{eq:3d model} & 3 & $X$ and $Y$ & No \\
+      \hline
+    \end{tabular}
+    \caption{Table of models considered in this paper. Here, \textbf{N. Sp.} is the \emph{number of species} in the model, \textbf{Harv. Sp.} is the species of the model which are harvested, and \textbf{Stationary?} refers to whether the parameters of the model have fixed values (or, on the contrary, if they vary in time). The only non-stationary case presented in the paper is where $r_X$ drifts linearly with time. In the code repository associated to the paper, we consider other possible choices of non-stationarity.}
+    \label{tab:models}
+  \end{center}
+\end{table}
 
-The DRL approach side-steps this tradeoff by optimizing over a more complex family of possible policies—policies parametrized by a neural network, as opposed to policies labeled by a single parameter (the mortality rate).
-We thus observe that the DRL solution leads to a higher profitability *and* stability as compared to constant mortality policies. 
+This way, we evaluate classical management strategies (CMort and CEsc) and DRL-based strategies on four different models.
+This experimental design is summrized in Fig.  \ref{fig:conceptual-v2}.
 
+```{r}
+#| label: conceptual-v2
+#| echo: FALSE
+#| message: FALSE
+#| fig.align: 'center'
+#| fig.cap:  'An experimental-design type of visualization of the management scenarios considered in this paper. 
+#| On the x-axis are four different fishery management problems: a single species model, and three three-species models.
+#| From left to right, the latter are: three species out of which one, X, is harvested, and all parameters are constant in time; 
+#| three species out of which two, X and Y, are harvested and all parameters are constant in time;
+#| and finally three species out of which two, X and Y, are harvested and one parameter depends on time. 
+#| We represent the latter’s time-dependence with a clock next to the X variable, and we intend to use it as an example of a possible simplified model for the effects of climate change.
+#| On the y-axis we have different management strategies with which one may control each of the models. 
+#| On the bottom we have the constant mortality strategy (CMort), where one optimizes over constant fishing effort strategies.
+#| Above that is the constant escapement strategy (CEsc), based on calling off all fishing below a certain threshold population value.
+#| Finally, on top we have DRL-based strategies where policies are in general functions of the full state of the system, and they are parametrized by a neural network.'
+#| out.width: '6.5in' 
+#| fig.pos: 'H'
+ 
+knitr::include_graphics("figures/conceptual-v2.jpeg")
+```
 
-# Mathematical models of fisheries
+Regarding control for these 4 models, we show the following. 
+*Model 1:* DRL-based strategies recover the optimal CEsc policy function.  
+Constant mortality performs considerably worse than these three.\footnote{
+As will be explained later, all our models are stochastic. 
+If we set stochasticity to zero in Model 1, constant mortality matches the performance of the other management strategies.
+}
+*Model 2:* Here, all management strategies perform similarly.
+*Model 3:* For this model, DRL outperforms both classical strategies, with CMort surprisingly performing significantly better than constant escapement.
+In particular, we observe that DRL strategies are more sensitive to stochastic variations of the system which allows it to adaptively manage the system to prevent population collapses below the threshold.
+*Model 4:* Here, the performance gap between DRL and classical management strategies is broadened.
+In this case, as in Model 3, constant CEsc performs significantly worse than DRL and CMort.
 
-In this section we introduce some models describing the population dynamics of fisheries.
-In general, the class of models that appear in this context are *first order finite difference equations* (potentially stochastic difference equations).
+We show that in the most complex scenario, Model 4, CMort is faced with a tradeoff---the optimal mortality rate leads a rather large fraction of episodes ending with a population crash, whose negative reward is counteracted with a higher economic output.\footnote{
+In our mathematical formulation of the decision problem, we have assumed for simplicity that the fishing effort cost is zero and that fish price is stable over time.
+This way, we equate economic output with harvested biomass.
+}
+Conversely, more conservative, lower, mortality rates lead to lower total reward on average.
+The DRL approach side-steps this trade-off by optimizing over a more complex family of possible policies--—policies parametrized by a neural network, as opposed to policies labeled by a single parameter (the mortality rate).
+
+Our findings paint a picture of how a single-species optimal management strategy may lose performance rather dramatically when controlling a more complex ecosystem.
+Here, DRL performs better from both economical *and* conservation points of view.
+Moreover, rather unintuitively, CMort -- known to be suboptimal and unsustainable for single-species models -- can turn out to even outperform the CEsc -- the single-species optimal strategy -- for complex ecosystems.
+Finally, within this regime of complex, possibly varying, ecosystems, we show that DRL consistently finds a policy which effectively either matches the best classical strategy, or outperforms it.
+We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms constant escapement.
+
+# Mathematical models of fisheries considered
+
+Here we mathematically introduce the four fishery models for which we compare different management strategies.
+In general, the class of models that appear in this context are *stochastic, first order, finite difference equations*.
 For $n$ species, these models have the general form
 \begin{align}
   \label{eq:general model}
   \begin{split}
-    \Delta X_t &= f_X(N_t) - M_X X_t\\
-    \Delta Y_t &= f_Y(N_t) - M_Y Y_t\\
+    \Delta X_t &= f_X(N_t) + \eta_{X,t} - M_X X_t\\
+    \Delta Y_t &= f_Y(N_t) + \eta_{Y,t} - M_Y Y_t\\
+    \Delta Z_t &= f_Z(N_t) + \eta_{Z,t} - M_Z Z_t\\
     &\dots
   \end{split}
 \end{align}
-where $N_t = (X_t,\ Y_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $\Delta X_t := X_{t+1} - X_t$, $\Delta Y_t := Y_{t+1} - Y_t$, and where $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions.
-Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting (sometimes referred to as *fishing effort*).
-Thus, the term $M_X X_t$ is the total $X$ harvest at time $t$.
-We will focus on systems where a single species, $X$, is harvested, i.e. $M_Y = M_Z = \dots = 0$.
+where $N_t = (X_t,\ Y_t,\ Z_t,\ \dots) \in \mathbb{R}^{n}_+$ is a vector of populations, $\Delta X_t := X_{t+1} - X_t$, $f_i:\mathbb{R}^{n}\to\mathbb{R}$ are arbitrary functions, and where $\eta_{i,t}$ are Gaussian random variables.
+Here, $M_i=M_i(N_t)\in\mathbb{R}_+$ is a state-dependent fish mortality arising from harvesting the $i$-th species (sometimes this is referred to as *fishing effort*).
 
-## A single species model
+The term $M_X X_t$ is the total $X$ harvest at time $t$.
+This formulation of stock recruitment as a discrete finite difference process is common among fisheries, as opposed to continuous time formulations which involve instantaneous growth rates.
+This growth rate simplifies e.g. the possibly seasonal nature of reproduction (which would need to be accounted for in a realistic continuous-time model) by simply considering the total recruitment experienced by the population over a full year.
+
+The fishing efforts are the *control variables* of our problem---these may be set by the manager at each time-step to specified values.
+We make two further simplifying assumptions on the control problem:
+*1. Full observation:* the manager is able to accurately measure $N_t$ and use that measurement to inform their decision.
+*2. Perfect execution:* the action chosen by the manager is implemented perfectly (i.e., there is no noise affecting the actual value of the fishing efforts).
+
+Model 1 is a single-species classical model of ecological tipping points.
+Models 2-4 are all three-species models with similar dynamics.
+Following this logic, the first subsection will be dedicated to the single-species model and the second will focus on the three-species models.
+
+## The single species model
 
 Optimal control policies for fisheries are frequently based on 1-dimensional models, $n=1$, as described in $Text$ $Box$ $1$.
 The most familiar model of $f(X)$ is that of *logistic growth*, for which
-
 \begin{align}
   \label{eq:logistic}
   f(X_t) = r X_t\big(1 - X_t / K \big) =: L(X_t;\ r, K).
 \end{align}
 
-
 Real world ecological systems are obviously far more complicated than this simple model suggests.
 One particularly important aspect that has garnered much attention is the potential for the kind of highly non-linear functions that can support dynamics such as alternative stable states and hysteresis.
-A seminal example of such dynamics was introduced in [@may77], using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator:
-
+A seminal example of such dynamics was introduced in [@may77], using a one-dimensional model of a prey (resource) species under the pressure of a (fixed) predator.
+In the notation of eq. \eqref{eq:general model},
 \begin{align}
   \label{eq:may}
-  f_{\text{May}}(X_t)
-  := L(X_t;\ r, K) - F(X_t, H; \beta,c),
+  f_X(X_t)
+  = L(X_t;\ r, K) - \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align}
-where,
+In the following, we will denote
 \begin{align*}
   F(X_t,H;\ \beta,c) := \frac{\beta H X_t^2}{c^2 + X_t^2}.
 \end{align*}
 
-The model has five parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal predation rate $\beta$, and the predation rate half-maximum biomass $c$.
+The model has six parameters: the growth rate $r$ and carrying capacity $K$ for $X$, a constant population $H$ of a species which preys on $X$, the maximal predation rate $\beta$, the predation rate half-maximum biomass $c$, and the variance $\sigma_X^2$ of the stochastic term $\eta_{X,t}$. 
+(Here and in the following we will center all random variables at zero.)
 
 Eq. \eqref{eq:may} is an interesting study case of a *tipping point* (saddle-node bifurcation) (see Fig. \ref{fig:may}).
 Holding the value of $\beta$ fixed, for intermediate values of $H$ there exist two stable fixed points for the state $X_t$ of the system, these two attractors separated by an unstable fixed point.
@@ -296,9 +331,8 @@ This also creates the phenomenon of *hysteresis*, where returning $H$ to its ori
 
 ```{r}
 #| label: may
-#| fig.cap: "The fixed point diagram for the model associated to $f_{\\text{May}}$ as a function of varying the parameter $\\beta H$.
-#| That is, these are the zeroes of the function $f_{\\text{May}}$. 
-#| Stable fixed points (also known as *attractors*) are plotted using a solid line, while the unstable fixed point is shown as a dotted line."
+#| fig.cap: "The fixed point diagram for model (TBD) as a function of varying the parameter $\\beta H$, assuming zero noise.
+#| Stable fixed points (also known as attractors) are plotted using a solid line, while the unstable fixed point is shown as a dotted line."
 #| out.width: "6.5in"
 
 knitr::include_graphics("figures/MayStablePoints.pdf")
@@ -313,123 +347,50 @@ Second, that if the evolution of $X_t$ is *stochastic*, then, even at values of 
 <!-- Briefly motivate reason to consider 3d model, adding competition and predation processes -->
 
 
-## A three species model
+## The three species models
 
-Consider the following three species generalization of eq. \eqref{eq:may}:
-
+Models 2-4 are three-species models and they are all closely related---in fact, their natural dynamics (i.e. dynamics under zero harvest) is essentially given by the same equations:
 \begin{align}
 \label{eq:3d model}
 \begin{split}
-  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t,\\
-  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t,\\
-  \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
+  f_X(N_t) &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t, \\
+  f_Y(N_t) &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t,\\
+  f_Z(N_t) &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
 \end{split}
 \end{align}
-The model is conceptualized in Fig. \ref{fig:conceptual}, panel B.
-It contains three populations, the state at time $t$ is $(X_t, Y_t, Z_t)$. 
+The three species modeled are $X$, $Y$ and $Z$.
 Species $Z$ preys on both $X$ and $Y$, while the latter two compete for resources.
-There are ten parameters in this model: 
+There are thirteen parameters in this model: 
 The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and $Y$.
 A parameter $c_{XY}$ mediating a Lotka-Volterra competition between $X$ and $Y$.
 A maximum predation rate $\beta$ and a predation rate half-maximum biomass $c$ specifying how $Z$ forages on $X$ and $Y$.
 A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
-Finally, a death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
+A death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
+Finally, the noise variances $\sigma_X$, $\sigma_Y$ and $\sigma_Z$.
 
-This model generalizes eq. \eqref{eq:may} in the following sense:
-If $f=d_Z=c_{XY}=0$, and we let $Z_{t=0}=H$, then eq. \eqref{eq:3d model} becomes
-\begin{align*}
-  \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, H;\ \beta, c) - h_t,\\
-  \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, H;\ \beta, c),\\
-  Z_t &= H.
-\end{align*}
-The equations for $X_t$ and $Y_t$ thus become decoupled, with $X_t$ evolving according to \eqref{eq:may}.
-
-As can be expected, the dynamics of eq. \eqref{eq:3d model} are significantly more complex than those of eq. \eqref{eq:may}.
-There are a variety of fixed points for the equations---around 8 or 9 for wide ranges of parameter values.
-Fig. \ref{fig:fixed points} provides a rough idea of the fixed point structure by plotting the bifurcation diagram obtained from varying $D$ and fixing the other parameters.
-
-\begin{figure}
-  \centering
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/stX.png}
-    \caption{$X$ component of fixed points.}
-    \label{fig:stx}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/stY.png}
-    \caption{$Y$ component of fixed points.}
-    \label{fig:sty}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[b]{0.32\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/stZ.png}
-    \caption{$Z$ component of fixed points.}
-    \label{fig:stz}
-  \end{subfigure}
-  \caption{Numerically-computed fixed points of the three-species deterministic model, eq. \eqref{eq:3d model}.
-  Here, the parameter $D$ was varied between 0.75 and 1.25, and the values of the other parameters are fixed as in eq. \eqref{eq:param vals}. 
-  The three components of the fixed points are plotted separately, as a function of $D$.}
-  \label{fig:fixed points}
-\end{figure}
-
-Throughout most of this paper we will fix the parameters of the model according to eq. \eqref{eq:param vals}.
-At these values, the fixed points of the model are:\footnote{
-We have included only three decimal digits for readability.
-These fixed points may be generated by running the ‘‘stable\_points.py’’ script in \url{https://github.com/boettiger-lab/approx-model-or-approx-soln}.
-}
-\begin{align*}
-  (X,Y,Z) \approx 
-  &(0.839, 0.054, 0.377), \quad 
-    (0.048, 0.774, 0.480), \quad
-    (0.359, 0.491, 0.509), \\
-    &(0.899, 0.000, 0.303), \quad
-    (0.000, 0.818, 0.457), \quad
-    (0.666, 0.666, 0.000), \\
-    &(1.000,0.000,0.000),\quad (0.000,1.000,0.000),\quad (0.000,0.000,0.000).
-\end{align*}
-The classification of fixed points for multi-dimensional systems is generally more complicated than in one dimension.
-A fixed point might be stable against perturbations in one direction, but unstable against perturbations along another.
-While a detailed classification of these fixed points is beyond the scope of this work, we point out that the point $(0.839, 0.054, 0.377)$ is stable against perturbations in all directions.
-We will thus use it as a starting point for our simulations.
-
-## Stochastic dynamics
-
-We have, up to now, presented eqs. \eqref{eq:may} and \eqref{eq:3d model} as *deterministic* dynamical models for the sake of clarity.
-In practice, we will consider a stochastic contribution to these dynamics.
-This way, instead of eq. \eqref{eq:3d model}, we consider the problem of harvesting the following stochastic model:
-<!--
-\begin{align}
-  \label{eq:may stoch}
-  \Delta X_t
-  = L(X_t;\ r, K) - F(X_t, H; \beta,c) - h_t + \eta_t,
-\end{align}
-where $\{\eta_t\}_t$ are independent Gaussian variables with zero mean.
-The variance $\sigma^2$ of $\eta_t$ is an additional parameter of the model.
-
-Similarly, we use the following dynamical model in place of eq. \eqref{eq:3d model}-->
-\begin{align}
-  \label{eq:3d model stoch}
-  \begin{split}
-    \Delta X_t &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t - h_t + \eta_{X,t},\\
-    \Delta Y_t &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t + \eta_{Y,t},\\
-    \Delta Z_t &= \left(f(X_t + DY_t\right) - d_Z)Z_t + \eta_{Z,t}.
-\end{split}
-\end{align}
-Here, $\{\eta_{i,t}\}$ is a set of independent Gaussian variables centered at zero with variances, respectively, $\sigma_X^2$, $\sigma_Y^2$ and $\sigma_Z^2$.
-
-
-
+The three models will branch off of eq. \eqref{eq:3d model} in the following way.
+*Model 2:* here, only $X$ is harvested, that is, in the notation of eq. \eqref{eq:general model}, we fix $M_Y=M_Z=0$ and leave $M_X$ as a control variable.
+All parameters here are constant.
+*Model 3:* as Model 1, but with $X$ and $Y$ being harvested. 
+In other words, we set $M_Z=0$ and leave $M_X$ and $M_Y$ as control variables.
+*Model 4:* here $X$ and $Y$ are harvested, but now we include a non-stationary parameter:
+\begin{equation}
+  \label{eq:rx(t)}
+  r_X = r_X(t) = 
+  \begin{cases}
+    1-t/200, \quad & t \leq 100,\\
+    1/2, \quad & t > 100.
+  \end{cases}
+\end{equation}
+All other parameters are constant.
+Eq. \eqref{eq:rx(t)} is intended to reflect in a simple manner a possible effect of climate change: where the reproductive rate of $X$ is reduced linearly over time until it stabilizes.
 
 
 # Reinforcement learning {#sec:RL}
 
 Reinforcement learning (RL) is a way of approaching *sequential decision problems* through machine learning.
 All applications of RL can be conceptually separated into two parts: an *agent* and an *environment* which the agent interacts with.
-That is, the agent takes actions within the environment.
+That is, the agent performs actions within the environment.
 As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent. (See Fig. 1 in [@rl-intro] for a conceptual description of reinforcement learning algorithms.)
 The rewards encode the agent's goal.
 The main task of any RL algorithm is then to maximize the cumulative reward received. 
@@ -439,29 +400,32 @@ This objective is achieved by aggregating experience in what is called the *trai
 <!-- The *environment* is commonly a computer simulation, although it sometimes can be a real world system.
 The *agent*, on the other hand, is a computer program which interacts with the environment. -->
 
-For our use case, the environment will be a computational model of the population dynamics of a fishery, with the environment state at time $t$ being a vector of all the fish populations, $N_t=(X_t,Y_t,Z_t)$.
-At each time step, the agent observes the state $S$ and harvests $X$,
-\begin{align*}
-  (X_t, Y_t, Z_t) \mapsto ((1-M_X)\cdot X_t, Y_t, Z_t),
-\end{align*}
-where the fish mortality-from-harvest $M_X=M_X(N_t)$ is the agent's action at time $t$. 
-This secures a reward of $M_X(N_t)X$.
-Afterwards, the environment undergoes a time step under its natural dynamics given by \eqref{eq:3d model stoch}.
+For this paper, we will consider four environments corresponding to each of the models considered (Table \ref{tab:models}).
+At each time step, the agent observes the state $S$ and enacts some harvest---reducing $X_t$ to $X_t - M_X(N_t)\cdot X_t$, and, for Models 3 and 4, also reducing $Y_t$ to $Y_t - M_Y(N_t)\cdot Y_t$.
+Here the fish mortality-rates-from-harvest (i.e. $M_X=M_X(N_t)$ and $M_Y=M_Y(N_t)$), are the agent's action at time $t$. 
+This secures a reward of $M_X(N_t)X$ for Models 1 and 2, and, similarly, a reward of $M_X(N_t)X + M_Y(N_t)Y$ for Models 3 and 4.
+After this harvest portion of the time step, the environment changes according to its natural dynamics (see eq. \eqref{eq:3d model}).
+
+As mentioned previously, discretising time allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
+This approximation is commonly used in fisheries for species with annual reproductive cycles (see e.g. [@mangel2006theoretical], Chap. 6).
+The division of the time-step into two parts (harvest and dynamics) happening sequentially is performed for all control methods evaluated, not only RL-based approaches.
 
 ## Mathematical framework for RL
 
 The RL environment can be formally described as a discrete time *partially observable Markov decision process (POMDP)*.
 This formalization is rather flexible and allows one, e.g., to account for situations where the agent may not fully observe the environment state, or where the only observations available to the agent are certain functions of the underlying state.
-For the sake of clarity, we will only present here the class of POMDPs which are relevant to our work: *fully observable MDPs with a trivial emission function* (henceforth MDPs for short).
+For the sake of clarity, we will only present here the subclass of POMDPs which are relevant to our work: *fully observable MDPs* (henceforth MDPs for short).
 An MDP may be defined by the following data:
 
 - $\mathcal{S}$: *state space*, the set of states of the environment,
 
 - $\mathcal{A}$: *action space*, the set of actions which the agent may choose from,
 
-- $T(N_{t+1}|N_t, a_t)$: *transition operator*, a conditional distribution which describes the dynamics of the system (where $N_i\in\mathcal{S}$ are states of the environment),
+- $T(N_{t+1}|N_t, a_t, t)$: *transition operator*, a conditional distribution which describes the dynamics of the system (where $N_i\in\mathcal{S}$ are states of the environment),\footnote{
+Transition operators are commonly discussed without having a direct time-dependence for simplicity, but the inclusion of $t$ as an argument to $T$ does not alter the structure of the learning problem appreciably.
+}
 
-- $r(N_t, a_t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $N_t$,
+- $r(N_t, a_t, t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $N_t$,
 
 - $d(N_0)$: *initial state distribution*, the initial state of the environment is sampled from this distribution,
 
@@ -477,7 +441,7 @@ sampled randomly from the distribution
 \begin{align*}
   p_\pi(\tau) = 
   d(N_0) \prod_{t=0}^{ t_{\text{fin.}}-1 }
-  \pi( a_t | N_t ) T( N_{t+1} | N_t, a_t ).
+  \pi( a_t | N_t ) T( N_{t+1} | N_t, a_t, t ).
 \end{align*}
 Reinforcement learning seeks to optimize $\pi$ such that the expected rewards are maximal,
 $$  
@@ -485,7 +449,7 @@ $$
 $$
 where,
 $$
-  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, N_t),
+  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, N_t, t),
 $$
 is the cumulative reward of path $\tau$.
 The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expected return*.
@@ -496,9 +460,9 @@ The policy function $\pi$ often lives in a high or even infinite-dimensional spa
 This makes it unfeasible to directly optimize $\pi$.
 In practice, an alternative approach is used: $\pi$ is optimized over a much lower-dimensional parameterized family of functions.\footnote{
 Policies are, in general, functions from state space to policy space.
-In our case, these are real-valued functions on a cube $\pi:[0,2]^{\times 3}\to \mathbb{R}_+$.
+In our paper, these are $\pi:[0,1]^{\times 3}\to \mathbb{R}_+$ for the single fishery case, and $\pi:[0,1]^{\times 3}\to \mathbb{R}_+^2$ for two fisheries.
 The space of all such functions is highly singular, spanning a \emph{non-separable Hilbert space}.
-Even restricting ourselves to continuous policy functions, we end up with a set of policies which span the infinite dimensional space $L^2([0,2]^{\times3})$.
+Even restricting ourselves to continuous policy functions, we end up with a set of policies which span the infinite dimensional space $L^2([0,1]^{\times3})$.
 One way to avoid optimizing over an infinite dimensional ambient space is to discretize state space into a set of bins.
 This approach runs into tractability problems: First, the dimension of policy space scales exponentially with the number of species.
 Second, even for a fixed number of species (e.g., 3), the dimension optimized over can be prohibitively large---for example if one uses 1000 bins for each population in a three-species model, the overall number of parameters being optimized over is $10^9$.
@@ -544,14 +508,31 @@ This context provides a motivation for this paper.
 Indeed, models for ecosystem dynamics are only ever approximate and incomplete descriptions of reality. 
 This way, it is plausible that model-free RL controls outperform currently used model-based controls in ecological management problems.
 
+Model-free DRL provides, moreover, a framework within which agents can be trained to be generally competent over a *variety* of different models.
+This could more faithfully capture the ubiquitous uncertainty around ecosystem models.
+The aforementioned framework---known as *curriculum learning*---is considerably more intensive on computational resources than the ‘‘vanilla’’ DRL methods we have used in this paper.\footnote{
+All our agents were trained in a local server with two commercial GPUs. 
+The training time was between 30 minutes and one hour in each case.
+}
+Due to the increased computational requirements of this framework, we have left the exploration in this direction for future work.
+
 
 # Methods
 
-\textbf{Training a DRL agent.}
-We trained a DRL agent parametrized by a neural network $\theta$ with two hidden, 64-neuron, layers.
-The state space used was a cube $[0,2]^{\times 3}$, while the policies explored mapped states $N_t$ to a single number, $M_X(N_t) = \pi_\theta(N_t)$, the harvest mortality on species $X$ at that timestep.
-Each episode in the training and in the evaluation stages was at most 200 time steps long.
-Episodes were ended early in case of a ‘‘near-extinction event,’’ a moment in which any of the populations dipped below a threshold value, i.e.,
+\textbf{The Environment.}
+We considered the problem of managing four increasingly complex models (see Table \ref{tab:models}).
+To recap, these four environments are a single-species growth model \eqref{eq:may} for a harvested species; a three-species model \eqref{eq:3d model} with a single harvested species; the same three-species model but with *two* harvested species; and, finally, a three-species model with a time-varying parameter and two harvested species.
+
+The policies explored were functions from states $N_t$ to either a single number $M_X(N_t) = \pi(N_t)$ (for Models 1 and 2), or a pair of numbers $(M_X(N_t), M_Y(N_t)) = \pi(N_t)$ (for Models 3 and 4).
+
+Our goal was to evaluate the performance of different policy strategies over a specified window of time.
+We chose this window to be 200 time-steps, where each discrete time-step represents the dynamical evolution of the system over a year.
+Each time-step was composed of two parts: 
+First, a *harvest period* where the harvest is collected from the system (e.g. the population $X$ is reduced to $X_t\mapsto X_t - M_X(N_t) X_t$).
+Second, a *recruitment and interaction period*, where the system's state evolves according to its natural dynamics.
+
+Training and evaluating management strategies was done by simulating *episodes.* 
+An episode begins at a fixed initial state and the system is controlled with a management policy until $t=200$, or until a ‘‘near-extinction event’’ occurs---that is, until any of the populations go below a given threshold,
 \begin{align}
   \label{eq:thresh}
   X_t \leq X_{\text{thresh.}},\quad
@@ -559,308 +540,322 @@ Episodes were ended early in case of a ‘‘near-extinction event,’’ a mome
   \text{or,}\quad
   Z \leq Z_{\text{thresh.}}.
 \end{align}
-The reward function had two componenets:
-First, at each time step the harvest $h_t$ was received as a reward.
-Second, if the episode ended early (say, at time-step $t$) because of a near-extinction event, a negative reward of $-50/t$ was awarded.
-The constant 50 was chosen so as to select against highly extractive policies in the early stages of training, and thus guide the agent towards sustainable policies.
-This technique, falling under the ‘‘umbrella’’ category of *reward shaping*, is commonly used -- alongside hyper-parameter tuning and state space normalization -- to improve the speed of training by avoiding badly-performing local optima in the gradient ascent algorithm.
+In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{thresh.}}=0.05$ as a rule of thumb---given that under natural (unharvested) dynamics the populations range within values of 0.5 to 1, this would represent on the order of a 90-95% population decrease from their ‘‘natural’’ level.
 
-Thus, we normalized state space (to be contained in a cube of length 2) and engaged in reward shaping in order to optimize our agent's learning.
-We did not need to tune hyper-parameters for this goal, however.
-
-We used the Ray framework\footnote{\url{https://docs.ray.io/}} for training, in particular we used a Ray PPOConfig object to build the algorithm using the default values for all hyper-parameters.
-The agent was trained for 200 iterations of the PPO optimization step.
-
-\textbf{Tuning the constant mortality strategy.}
-A grid of 100 mortality rates was laid in the interval $[0, 0.1]$.
-For each one of these rates, say $M$, we simulated 50 episodes based on \eqref{eq:3d model stoch}:
-At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $MX_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model stoch}.
-The optimal mortality rate was the value $M^*$ for which the mean episode reward was maximal.
-We additionally evaluated a more conservative strategy where a mortality of $0.8 M^*$ instead is used.
-
-The result of the tuning procedure is shown in Fig. \ref{fig:tuning}. 
-There, we see that the optimal value $M^*$ lies in an area with high episode reward variance.
-We will see in Fig. \ref{fig:rew_len_fig} that a likely candidate for this variance is the presence of episodes with early endings.
-Thus, the value $0.8 M^*$ supports a smaller variance, and correspondingly -- as Fig. \ref{fig:rew_len_fig} shows -- this policy leads to a much smaller probability of a near-extinction event.
-
-```{r}
-#| label: tuning
-#| fig.cap : "Result of the tuning procedure for the constant mortality strategy. 
-#| (A) Mean episode reward (averaged over 50 episodes) shown as scatter data, and shaded in gray are two standard deviations around each scatter point. Vertical lines correspond to the optimal constant mortality rate $M^* = $ 0.045 (green) and $0.8 M^*=$ 0.036 (violet). 
-#| (B) Several constant mortality policies shown for illustrative purposes. Slopes $0.02$, $0.03$, $0.055$ and $0.065$ shown in black; the optimal linear policy $M^*X$ shown in green, while $0.8M^*X$ shown in violet." 
-#| out.width : "6.5in"
-msy_rewards <- msy_df |>
-  group_by(action, rep) |>
-  filter(t == max(t)) |> 
-  group_by(action) |>
-  summarise(mean_reward = mean(reward),
-            sd = sd(reward))
-
-rmsy <- msy_rewards |>
-  ggplot(aes(action, mean_reward, 
-             ymin = mean_reward - 2*sd,
-             ymax=mean_reward+2*sd)) +
-  geom_point() + geom_ribbon(alpha=0.4) +
-  labs(y = "episode reward", x = "constant mortality") +
-  theme(aspect.ratio = 1/1) + 
-  geom_vline(aes(xintercept=best_action), color="seagreen3", size=1) + 
-  geom_vline(aes(xintercept=0.8*best_action), color="violetred3", size=1) +
-  theme_bw() + 
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        aspect.ratio = 1) 
-
-# linear function blueprint
-linear_f <- function(slope, x) slope*x
-# generates linear function with given slope
-linear_f_gen <- function(slope) (function(x) slope*x)
-
-# dummy data set to keep ggplot happy
-p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
-
-# p + stat_function(fun = linear_f_gen(0.5)) + xlim(0,2)
-lines <- p + stat_function(fun = linear_f_gen(0.009)) + 
-  stat_function(fun = linear_f_gen(0.018)) +
-  stat_function(fun = linear_f_gen(0.027)) +
-  stat_function(fun = linear_f_gen(0.8*best_action), col = "violetred3", size=1) +
-  stat_function(fun = linear_f_gen(best_action), col = "seagreen3", size=1) +
-  stat_function(fun = linear_f_gen(0.054)) + 
-  stat_function(fun = linear_f_gen(0.063)) +
-  stat_function(fun = linear_f_gen(0.072)) +
-  stat_function(fun = linear_f_gen(0.081)) +
-  stat_function(fun = linear_f_gen(0.090)) +
-  xlim(0,2) +
-  xlab("X") + ylab("harvest") +
-  theme_bw() +
-  theme(#panel.grid.major = element_blank(), 
-        #panel.grid.minor = element_blank(), 
-        aspect.ratio = 1)
+The reward function defining our policy optimization problem had two components.
+The first was economical: the total biomass harvested over an episode.
+The second seeked to reflect conservation goals: if a near-extinction event occurred at time $t$, the episode was ended early and a negative reward of $-100/t$ was awarded.
+This reward function balanced the extractive motivation of the fishery with conservation goals which went beyond the scope of long-term sustainable harvests commonly used in fishery management.
 
 
-(rmsy | lines) + plot_annotation(tag_levels = c('A'))
-```
+\textbf{Training a DRL agent.}
+We trained a DRL agent parametrized by a neural network with two hidden, 64-neuron, layers, on a local server with 2 commercial GPUs.
+We used the Ray framework\footnote{\url{https://docs.ray.io/}} for training, specifically we used the Ray PPOConfig class to build the policy optimization algorithm using the default values for all hyper-parameters.
+In particular, no hyperparameter tuning was performed.
+The agent was trained for 300 iterations of the PPO optimization step for the three-species cases.
+The total training time was on the order of 30 minutes to 1 hour.
+For the single-species model, the training iterations were scaled down to 100 and the training time was around 10 minutes.
+
+The state space used was normalized case-by-case as follows: 
+*Model 1:* a line segment $[0,1]$, 
+*Models 2-4:* a cube $[0,1]^{\times 3}$.
+We used simulated data to derive a bound on the population sizes typically observed, and thus be able to normalize states to a finite volume.
+
+Policies obtained from the PPO algorithm can be ‘‘noisy’’ as their optimization algorithm is randomized (see, e.g. App. B for a visualization of the PPO policy obtained for Model 4).
+We smoothed this policy out using a Gaussian process regressor interpolation. 
+Details for this interpolation process can be found in App. C.
+
+
+\textbf{Tuning the CMort strategy.}
+In order to estimate the optimum mortality rate, we optimized over a grid of possible mortality rates.
+Namely, for Models 1 and 2, grid of 101 mortality rates was laid in the interval $[0, 0.5]$;
+for Models 3 and 4, a $51\times51$ grid was set in the square $[0,0.5]^2$.
+The latter had a slightly coarser grid due to the high memory cost of using the denser grid.
+Since the approach for tuning was completely analogous for all models evaluated, here we discuss only Model 4.
+For each one of these choices of mortality rates, say $(M_X, M_Y)$, we simulated 100 episodes based on \eqref{eq:3d model}:
+At each time step the state $(X_t, Y_t, Z_t)$ was observed, a harvest of $M_X X_t+M_YY_t$ was collected and then the system evolved according to its natural dynamics \eqref{eq:3d model}.
+The optimal mortality rate was the value $(M_X^*,\ M_Y^*)$ for which the mean episode reward was maximal.
+
+
+\textbf{Tuning the CEsc strategy.}
+This tuning procedure was analogous to that of the constant mortality strategy just summarized.
+Namely:
+A grid of 101 escapement values was laid out on the interval $[0,1]$ for Models 1 and 2; and a $51\times 51$ grid on $[0,1]^2$ was laid out for Models 3 and 4.
+Each grid point represented a CEsc policy.
+We used each of these policies to manage 100 replicate episodes.
+The optimal policy was the policy with the highest average reward obtained.
+A visualization of the tuning outcome for Model 4 is shown in Fig. \ref{fig:tuning}. 
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.5]{figures/esc_heatmap.png}
+  \caption{Visualization of the cosntant escapement strategy tuning procedure for Model 4. There was a certain multiplicity in this tuning strategy: a ‘‘ridge of optimality’’ where policies had essentially equivalent behavior. Throughout our investigation, we tuned constant escapment in several occasions and, on each occassion, a different optimal policy along the ridge was found. The results for different policies along the ridge were in practice equivalent, with no discernible difference in performance. We highlighted the ridge with a white dotted line.}
+  \label{fig:tuning}
+\end{figure}
 
 \textbf{Parameter values used.}
-The model's dynamic parameters were chosen as follows
+The single-species model's (eq. \eqref{eq:may}) dynamic parameters were chosen as
+\begin{align}
+\label{eq:1d param vals}
+r = K = 1,\quad \beta = 0.25,\quad c = 0.1.
+\end{align}
+Here, the values of $\beta$ and $c$ were chosen as to make the system be roughly close to its tipping point.
+
+For Models 2 and 3, their dynamic parameters (in eq. \eqref{eq:3d model}) were chosen as follows
 \begin{align}
 \label{eq:param vals}
 \begin{split}
-  r_X = K_X = r_Y = K_Y = 1, \quad \beta = 0.3, \quad c = 0.1\\
-  c_{XY} = 0.5,\quad f = 0.15,\quad D = 1.1, \quad d_Z = 0.135.
+  r_X = K_X = r_Y = K_Y = 1, \quad \beta = 0.3, \quad c = 0.3\\
+  c_{XY} = 0.1,\quad f = 0.1,\quad D = 1.1, \quad d_Z = 0.1.
 \end{split}
 \end{align}
-Moreover, the variances for the stochastic terms were chosen as
+Moreover, the variances for the stochastic terms were chosenas
 $$
   \sigma^2(\eta_{X,t}) = \sigma^2(\eta_{Y,t}) = \sigma^2(\eta_{Z,t}) = 0.05.
 $$
-The threshold values used to determine an early episode end were chosen as
-$$
-  X_{\text{thresh.}} = 0.08,\quad Y_{\text{thresh.}} = Z_{\text{thresh.}} = 10^{-4},
-$$
-where the higher value of $X_{\text{thresh.}}$ helped select for more sustainable fishing strategies.
+For Model 4, we used $r_X(t)$ given as in eq. \eqref{eq:rx(t)} and all other parameters were given as in eq. \eqref{eq:param vals}.
+
+The values of $c$ and $\beta$ in the three-species model were slightly different than their values in the one-species model.
+These values were chosen heuristically: 
+We observed that choosing the lower value of $c=0.1$ in this case would lead to quick near-extinction events even without a harvest.
+Moreover, $\beta$ was slightly increased simply to put more predation pressure on the $X$ and $Y$ populations and make them slightly more fragile.
+
+\textbf{Stability analysis.}
+To ensure that our results do not strongly depend on our parameter choices, we performed a stability analysis.
+Here, we perturbed parameters randomly and measured the difference in performance between our DRL-based methods and the constant escapement strategy.
+We observed that the difference in performance is maintained for even relatively high noise strengths.
+We only considered the most complex case here, Model 4. 
+
+For each value of parametric noise strength $\sigma_{\text{param.}}$, we executed the following procedure:
+We sampled 100 choices of perturbed parameter values, where the perturbation was as follows---each parameter $P$ was perturbed to $(1+g_P)P$ where $g_P$ was a Gaussian random variable with variance $\sigma_{\text{param.}}^2$.
+For each of these sample parameter sets, we tuned CEsc and trained the DRL agent.
+We measured the average reward difference between these two strategies for each of sample (this was done using 100 replicate evaluation episodes).
+Finally, we took the mean of this average difference over the 100 perturbed parameter samples.
+
+The parametric noise strength values used were $[0.04, 0.08, \dots, 0.2]$.
+
 
 # Results
 
-We evaluated each of the three control approaches (MSY constant mortality, 80% MSY constant mortality and DRL) by running 50 episodes using the respective control rule.
-In Fig. \ref{fig:timeseries} we show the time series of one such repetition.
-The left panel uses an MSY constant mortality control $M^*X$, the middle panel uses $0.8 M^* X$, while the right panel is controlled by the trained DRL agent.
-We see that that optimal constant mortality control leads to a near-extinction event at around $t=150$.
-The constant mortality policy at $0.8 M^*$ is already conservative enough to support a sustainable path.
-There, the population levels are maintained roughly in a stationary state.
-Finally, the DRL time series shows an oscillatory behavior, with a slight dephase between the $Y$ and $Z$ curves, while the $X$ oscillations are roughly anticorrelated with $Z$.
+We evaluated each of the four management strategies considered on Models 1-4.
+To recap, the management strategies were CEsc, CMort, PPO and a Gaussian process interpolation of PPO (‘‘PPO+G’’).
+Furthermore, we characterized the trade-off between economic output and sustainability faced by constant mortality policies.
+This was done by evaluating constant mortality policies with a fraction of the optimal mortality rate (specifically, 80%, 90% and 95%).
+All evaluations were based on 100 replicate episodes. 
 
-```{r} 
-#| label: timeseries 
-#| fig.cap: "A sample time series for the three fish populations, with the system being controlled, respectively, by the MSY optimal mortality, by $80$ percent of the MSY optimal mortality, and by DRL." 
-#| out.width: "6.5in"
-policy_labels <- list("msy" = "MSY Const. Mortality", "tac"= "80% MSY Const. Mortality", "ppo"= "DRL")
-policy_labeller <- function(variable,value){
-  return(policy_labels[value])
+We will visualize the results concerning Model 4 in this section, leaving the other models for App. A.
+This is the most complex scenario considered and where our results show the most compelling advantage of DRL methods with respect to classical strategies.
+
+Our main result is summarized in Fig. \ref{fig:main} which displays the total reward distributions for the policy obtained through each strategy.
+Here we see that CEsc has a long-tailed distribution of rewards, and its average reward is much lower than other management strategies.
+CMort has a shorter-tailed distribution and a much higher average reward.
+Finally, both DRL-based strategies have a more concentrated reward distribution and a higher average reward than CMort.
+
+
+```{r}
+#| label: main
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| out.width: "6in"
+main_summaries %>% 
+  ggplot() +
+  geom_violin(mapping = aes(x=reward,y=strategy,fill = strategy)) +
+  geom_boxplot(aes(x=reward,y=strategy, fill = strategy), width = 0.1, color = 'black', alpha=0.2)+
+  theme(
+    legend.position="none"
+  )
+```
+
+To assess what is the culprit for the classical strategies' low performance with respect to the DRL-based strategies, we plot the duration of each of the 100 evaluation episodes of each strategy in Fig. \ref{fig:ephistograms}.
+We see that early episode ends are prevalent in classical strategies and rare for DRL-based strategies.
+Early episode ends tend to happen at lower $t$ values for CEsc than CMort.
+Thus, distribution of episode durations seems to be widest for CEsc, followed by CMort, DRL and DRL+GP.
+
+```{r}
+#| label: ephistograms
+#| fig.cap: "Hisotgrams of episode lengths and rewards for the four different management strategies considered. Only the first 50 evaluation episodes (from a total of 100) were included, for ease of visualization. From left to right, the four management strategies compared are CEsc, CMort, PPO, and PPO+GP."
+#| out.width: "6in"
+esc_len <- esc_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = t)
+  ) +
+  geom_col() +
+  labs(x="", y="ep. duration") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("CEsc")
+msy_len <- msy_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = t)
+  ) +
+  geom_col() +
+  labs(x="", y="") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("CMort")
+ppo_len <- ppo_ends %>%
+  filter(rep<50) %>%
+  ggplot(mapping = aes(x = rep, y = t)) +
+  geom_col() +
+  labs(x="", y="")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("PPO")
+gpp_len <- gpp_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = t)
+  ) +
+  geom_col() +
+  labs(x="", y="")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("PPO+GP")
+
+esc_rew <- esc_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = reward)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="ep. reward")
+msy_rew <- msy_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = reward)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="")
+ppo_rew <- ppo_ends %>%
+  filter(rep<50) %>%
+  ggplot(mapping = aes(x = rep, y = reward)) +
+  geom_col() +
+  labs(x="repetition", y="")
+gpp_rew <- gpp_ends %>%
+  filter(rep<50) %>%
+  ggplot(
+    mapping = aes(x = rep, y = reward)
+  ) +
+  geom_col() +
+  labs(x="repetition", y="")
+
+(esc_len | msy_len | ppo_len | gpp_len) / (esc_rew | msy_rew | ppo_rew | gpp_rew)
+```
+
+We examine the trade-off between profit and sustainability faced by the CMort strategy in Fig. \ref{fig:fracmsy}.
+Two quantities are plotted: the fraction of evaluation episodes with maximal length (i.e. episodes with no near-extinction events), and the average reward.
+On the x-axis we have several sub-optimal mortality rates that err on the conservative side: e.g. the policy labeled ‘‘80% Opt. CMort’’ has the form
+\begin{align*}
+  \pi: (X_t, Y_t, Z_t)\mapsto (0.8 M_X^*,\ 0.8 M_Y^*),
+\end{align*}
+where $(M_X^*,\ M_Y^*)$ is the optimal CMort strategy.
+We see that sufficiently conservative policies attain high sustainability, but only at a high price in terms of profit.\footnote{
+As noted before, here we equate economic profit with biomass caught.
+This is done as an approximation to convey the conceptual message more clearly, and we do not expect our results to significantly change if, e.g., ‘‘effort cost’’ is included in the reward function.
+When we refer to ‘‘large differences’’ in profit, or ‘‘paying dearly,’’ we mean that the ratio between average rewards is considerable---e.g. a 15\% loss in profit.
 }
-msy_tac_ppo |> 
-    group_by(rep, policy) |>
-    filter(rep == 6) |>
-    ggplot(aes(t, abundance, col = species)) + 
-        geom_line()  + 
-        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
-        facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
-        labs(y = "abundance", x = "time") +
-        theme_bw() +
-        theme(aspect.ratio = 2/3)
-```
-
-This time series is representative of the patterns observed in the data (see App. A.1).
-The episode reward and episode length statistics are shown in Fig. \ref{fig:rew_len_fig}.
-There, we highlight two things:
-First, that the tendency towards early episode ends is fixed by the conservative approach of fishing at 80% of the MSY mortality rate.
-(In App. A.2 we discuss and evaluate other policies using a fixed-percentage of the MSY mortality rate.)
-Second, that while the conservative 80% approach has a stable behavior, it consistently produces smaller harvests than a DRL generated policy.
-
-```{r} 
-#| label: rew_len_fig
-#| fig.cap: "Bar charts for the episode lengths (top panel) and episode total harvests (bottom panel) for 50 episodes." 
-#| out.width: "6.5in"
-p1 <- msy_tac_ppo |> 
-    group_by(rep, policy) |>
-    filter(t==max(t), species == "X", rep < 50) |>
-    ggplot(aes(rep, t)) + 
-      geom_col() +
-      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
-      labs(y = "episode length", x = "repetition") +
-      theme_bw() + 
-      theme(axis.text.x = element_blank())
-
-p2 <- msy_tac_ppo |> 
-    group_by(rep, policy) |>
-    filter(t==max(t), species == "X", rep < 50) |>
-    ggplot(aes(rep, reward)) + 
-      geom_col() +
-      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
-      labs(y = "episode harvest", x = "repetition") +
-      theme_bw() + 
-      theme(axis.text.x = element_blank())
-
-(p1 / p2) + plot_annotation(tag_levels = 'A')
-```
-
-To understand the DRL-derived policy, Fig. \ref{fig:action-X} depicts the harvest as a function of $X$.
-Specifically, for each point $(x,y,z)$ visited by one of the aforementioned 50 evaluation episodes, we evaluate the harvest collected by the DRL agent and we subsequently plot the scatter data as a function of the projection $x$ onto the $X$ axis.
-In panel A we have used color to add the a $Y$-dependence, while in panel B we did the same with $Z$-dependence.
-This shows that the $Z$ and $Y$ dependence of the policy is rather weak and in fact it has roughly the same shape as an escapement policy.
-
-Fig. \ref{fig:action-X} additionally shows (pink line) the optimal constant escapement policy and the MSY constant mortality policy (green line).
-The optimal constant escapement was computed in a manner similar to how the MSY constant mortality was computed: for each escapement in a grid of 100 values between 0 and 1, 50 episodes were run using the corresponding escapement policy.
-The value with the best mean episode reward was chosen as the optimal escapement value.
-We observe that the DRL policy approximates the optimal constant escapement policy, with the difference of being more conservative in its harvest at high $X$ values.
-This pattern can be seen in panels (C-D), where at high $X$ values, the DRL escapement mildly increases in a non-linear fashion rather than staying constant.
-Finally, relative to these two policies, we observe that MSY constant mortality underfishes at high $X$ values and overfishes at low $X$ values.
+We expect a similar and, possibly, more pronounced effect for the CEsc strategy but do not analyze this case here.
 
 ```{r}
-#| label: action-X
-#| fig.cap: "(A-B) Harvest and escapement scatter data for the DRL policy together with the optimal constant escapement (pink) and constant mortality (green) policies for comparison. 
-#| (A) includes $Y$ dependence through color, whereas (B) includes $Z$ dependence similarly.
-#| (B-C) escapement (i.e. $X_t - h_t$) scatter data for the DRL policy. 
-#| Optimal constant escapement policy shown in pink for comparison."
-#| out.width: "6.5in"
-opt_escapement_harvest <- function(X) case_when(
-  X > best_e ~ X - best_e,
-  X <= best_e ~ 0
-)
+#| label: fracmsy
+#| fig.cap: "Trade-off between reward and probability of a near-extinction event for constant mortality policies. We evaluated policies at the full optimal constant escapement value, and also at 0.8, 0.9, 0.95 of the latter. Each evaluation is based on 100 episodes. On the left we plot the percentage of episodes which last their maximum time window, i.e. that do not see a near-extinction event. On the right, we plot the mean episdoe reward and standard deviation for each policy."
+#| out.width: "6in"
+lengths <- frac_msy %>%
+  ggplot(aes(x=msy_fraction, y=num_full_eps)) +
+  geom_col(fill="darksalmon")+
+  labs(x="% Opt. CMort", y="% full-length eps.") + 
+  coord_cartesian(ylim=c(70,101))
 
-opt_escapement_escapement <- function(X) case_when(
-  X <= best_e ~ X,
-  X > best_e ~ best_e
-)
+rewards <- frac_msy %>%
+  ggplot(aes(x=msy_fraction, y=reward)) +
+  geom_line()+
+  geom_point()+
+  geom_errorbar(aes(ymin=reward-reward_std, ymax=reward+reward_std), width=.01,
+                 position=position_dodge(0.05)) +
+  labs(x="% Opt. CMort", y="Mean ep. reward")
 
-msy_harvest <- function(X) best_action*X
-tac_harvest <- function(X) 0.8*msy_harvest(X)
-
-py <- ppo_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
-  ggplot(aes(X, harvest, color = Y)) +
-  geom_point() +
-  theme_bw() + 
-  theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_harvest, col = 'deeppink', size = 0.7) + 
-  stat_function(fun = msy_harvest, col = 'seagreen2', size = 0.7)
-
-pz <- ppo_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
-  ggplot(aes(X, harvest, color = Z)) +
-  geom_point() +
-  theme_bw() + 
-  theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_harvest, col = 'deeppink', size = 0.7) + 
-  stat_function(fun = msy_harvest, col = 'seagreen2', size = 0.7)
-
-escxy <- ppo_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
-  ggplot(aes(X, escapement, color = Y)) +
-  geom_point() +
-  theme_bw() + 
-  theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_escapement, col = 'deeppink', size = 0.7)
-
-escxz <- ppo_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
-  ggplot(aes(X, escapement, color = Z)) +
-  geom_point() +
-  theme_bw() + 
-  theme(aspect.ratio = 1/1) +
-  stat_function(fun = opt_escapement_escapement, col = 'deeppink', size = 0.7)
-
-((py | pz)/ (escxy | escxz)) + plot_annotation(tag_levels = c('A'))
+(lengths | rewards)
 ```
 
-In Fig. \ref{fig:state-space}, we perform a back to back visualization of all the policies evaluated---MSY constant mortality, 80% MSY constant mortality, DRL and optimal constant escapement.
-The policies are computed at each state along the paths they traverse in the 50 evaluation rounds, and the values are projected on the $X$-$Z$ plane for visualization.
-This figure highlights the similarity between the policy found by the DRL agent and the optimal escapement policy.
+One problem that is often encountered when using machine learning methods is the interpretability of the output of these methods.
+For our PPO strategy, the output is a policy function parametrized by a neural network $\theta$:
+\begin{align*}
+  \pi_\theta: N_t \mapsto (M_X(N_t), M_Y(N_t)),
+\end{align*}
+where $N_t=(X_t,Y_t,Z_t)$ is the state of the system at time $t$, and where $M_X$ and $M_Y$ are the mortalities due to harvest during that time-step.
+While the values of the neural network parameters are hard to interpret, the actual shape of the policy function is much more understandable. 
 
-Notice the anti-correlation between $X$ and $Y$ along the paths, this is especially prominent for the constant mortality plots.
-This anti-correlation is, furthermore, observed in the time series plots (see Fig. \ref{fig:timeseries} and App. A.1).
+Here we visualize the PPO+GP policy function and provide an interpretation for it, as this function is smoother and less noisy than the PPO policy function.
+The PPO policy function is visualized similarly in App. B.
 
-```{r}
-#| label: state-space
-#| fig.cap: "Policy heatmaps. Each policy, say, $\\pi$, was evaluated at points $(x,y,z)$ visited during any of the 50 evaluation rounds. We projected this data down to the $X$-$Y$ plane---i.e. we plotted the heatmap $\\pi(x,y,z)$ as a function of $x$ and $y$."
-#| out.width: "6.5in"
-i_tac <- which.min(abs(actions - best_action * 0.8))
+Given its high dimension, it is not possible to fully display how the policy function obtained ‘‘looks like’’---we thus project it down to certain relevant axes.
+The result of this procedure is shown in Fig. \ref{fig:gpp-policy}.
+In that figure, the shape of the optimal escapement strategy is provided for comparison.
 
-# color pallette limits
-library(RColorBrewer)
-myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")))
-sc <- scale_colour_gradientn(colours = myPalette(100), limits=c(0,0.25))
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.25]{figures/gpp-policy-pdf.pdf}
+  \caption{Plots of the PPO+GP policy $\pi_{\text{PPO+GP}}$ along several relevant axes. Here $M_X$ and $M_Y$ are the $X$ and $Y$ components of the policy function. The values of the plots are generated in the following way: For each variable $X$, $Y$, and $Z$, the time-series of evaluation episodes are used to generate a window of typical values that variable attains when controlled by $\pi_{\text{PPO+GP}}$. Then, for each plot either $X$ or $Y$ was varied on $[0,1]$ along the $x$ axis, while the other variables (resp. $Y$ and $Z$, or $X$ and $Z$) were varied within the typical window computed before. The value of one of the latter two variables were visualized as color.}
+  \label{fig:gpp-policy}
+\end{figure}
 
-pmsy <- msy_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
-  filter(action == best_action) |>
-  ggplot(aes(X, Y, color = harvest)) +
-  geom_point() + sc +
-  xlim(0,1) +
-  ylim(0,0.85) +
-  theme_bw() + 
-  ggtitle("Opt. Const. Mortality")
 
-ptac <- msy_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
-  filter(action == actions[[i_tac]]) |>
-  ggplot(aes(X, Y, color = harvest)) +
-  geom_point() + sc +
-  xlim(0,1) +
-  ylim(0,0.85) +
-  theme_bw() + 
-  ggtitle("80% Opt. Const. Mortality")
 
-pppo <- ppo_df |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action * X) |>
-  ggplot(aes(X, Y, color = harvest)) +
-  geom_point() + sc +
-  xlim(0,1) +
-  ylim(0,0.85) +
-  theme_bw() + 
-  ggtitle("DRL")
+We notice that the DRL-derived policy has similarities to a constant escapement policy.
+Here, the key difference is that the escapement value for each of the fished species is sensitive to variations in the other populations. 
+This can be seen as a color gradients in the plots of $(X, M_X)$ and $(Y, M_Y)$, where the gradient corresponds to differing values of $Z$.
+Moreover, this can be seen as an anti-correlation in the plot of $(X, M_Y)$---for optimal constant escapement, $M_Y$ is uncorrelated to $X$.
 
-pesc <- opt_escapement |>
-  mutate(X = X+1, Y = Y+1, Z = Z+1, 
-        harvest = case_when(
-          X - escapement > 0 ~ X - escapement,
-          X - escapement <= 0 ~  0)
-         ) |> 
-  ggplot(aes(X, Y, color = harvest)) +
-  geom_point() + sc +
-  xlim(0,1) +
-  ylim(0,0.85) +
-  theme_bw() + 
-  ggtitle("Opt. Const. Escapement")
+This sensitivity of the policy to, for instance, the values of $Z$ can be seen in the sample time series displayed in Fig. \ref{fig:gpp-ep}.
+Here, we can see that species $Z$ becomes endangered due to harvesting for all management strategies.
+The DRL-based strategy, however, is sensitive to the values of $Z$ and can respond accordingly by scaling the fishing effort with the value of $Z$.
+In particular, the policy responds to the period of diminishing values of $Z$ near the end of the episode, by restricting fishing on $X$ and $Y$, thus promoting $Z$'s growth.
+This pattern is rather common among the whole dataset---early episode ends are largely due to near-extinctions of $Z$ for all management strategies.
 
-(
-  (pmsy | ptac) / (pppo | pesc) +
-  plot_layout(guides = "collect") & theme(legend.position = 'right')
-) + 
-  plot_annotation(tag_levels = c('A'))
-```
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.33]{figures/timeseries-gpp.jpeg}
+  \caption{Time-series of an episode managed with $\pi_{\text{PPO+GP}}$. Here we plot the state of the system on the bottom panel, and the actions taken (fishing efforts on $X$ and $Y$---respectively $M_X$ and $M_Y$) on the top panel.}
+  \label{fig:gpp-ep}
+\end{figure}
 
+## Recovering constant escapement for a single species
+
+While the optimal control for our single-species model \eqref{eq:may} can not be easily proven to be constant escapement (since the right-hand side of that equation is not concave), from experience we can expect for constant escapement to either be optimal or near-optimal.
+We give evidence for this intuition by showing that our DRL method recovers a constant escapement solution when trained.
+These results are shown in Fig. \ref{fig:1sp-pol}
+Here we show both the output PPO policy, and its Gaussian process interpolation.
+This helps build an intuition about the relationship between our ‘‘PPO’’ and ‘‘PPO+GP’’ management strategies.
+
+There is a presence of certain high-mortality points at low $X$ values in the PPO policy (which in turn generates a rising fishing mortality for $X$ values below a certain threshold in the PPO+GP policy).
+This is likely due to experience of near-extinctions early on in the training process---where, given an impending extinction, it is more rewardful to fish intensively. 
+These ‘‘jitters’’ are likely not fully erased through the optimization algorithm since near-extinction events become extremely rare after only a few training iterations.
+This way, the agent does not further explore that region of state space to generate new experience.
+We believe the most important aspect of the constant escapement policy reproduced by PPO is the fact that there is some sufficiently-wide window below the threshold of the policy (i.e. below the optimal escapement value), on which no fishing is performed.
+That is, there exists some sufficiently large $\varepsilon$ such that, if $X_{\text{thresh.}}$ is the optimal escapement value of the system, then $\pi_{PPO}(X)=0$ for all $X\in[X_{\text{thresh.}}-\varepsilon,\ X_{\text{thresh.}}]$.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.25]{figures/1sp-policy.jpeg}
+  \caption{Left panel: the policy obtained from 100 training iterations of the PPO algorithm on the ‘‘single species, single fishery’’ model. Right panel: the Gaussian process interpolation of the left panel. We plot both as scatter data evaluated on a 101-point grid on $[0,1]$, but these policies may of course be evaluated continuously---on any possible value of $X$.}
+  \label{fig:1sp-pol}
+\end{figure}
+
+## Stability analysis
+
+In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values.
+
+Our main result in this respect is Fig. \ref{fig:stability}.
+There, we plot the *median episode reward difference* between the two DRL-based methods we considered, and the optimal constant escapement strategy.
+This figure shows that, for a wide range of parameter values, DRL-based strategies can have a considerable advantage over an optimized constant escapement policy (the single-species optimal solution).
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.8]{figures/jiggle_v1.png}
+  \caption{Mean reward difference between DRL methods (resp. our ‘‘PPO’’ and ‘‘PPO+GP’’ strategies), on the one hand, and the optimal constant escapement policy (‘‘CEsc’’) on the other. The dynamic parameters in eq. \eqref{eq:3d model} were randomly perturbed from the values given in \eqref{eq:param vals} according to the procedure detailed in Sec. 4. The noise strength of this perturbation is plotted as the x-axis. For each noise strength, 100 parameter perturbations were sampled---each one giving rise to a \emph{realization} of the model. For each such realization, we optimized a constant escapement policy and trained a PPO agent. Moreover, we interpolated the PPO policy using a Gaussian process, as detailed in Sec 4. Then, for each realization we compared the performance of these policies: we measured the mean reward difference betwen PPO and constant escapement, and between PPO+GP and constant escapement. The plot represents the distribution of reward differences observed at a given noise strength---we plot the mean and the standard deviation of the mean reward differences observed. In an equation, we plot the means $\mathbb{E}_{P}[\mu_P^{\text{DRL}}-\mu_P^{\text{CEsc}}]$, where $P$ are the paramter values, $\mu_P^{\text{DRL}}$ is the mean reward for a DRL policy trained on the problem with parameter values $P$, and, similarly, $\mu_P^{\text{CEsc}}$ is the mean reward of the optimal constant escpament policy for parameter values $P$.}
+  \label{fig:stability}
+\end{figure}
 
 # Discussion
+
+## Discussion
 
 Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
 While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making.
@@ -870,46 +865,61 @@ Because of this, policies such as MSY have faced pushback and are believed to ha
 
 We propose an alternative approach to the problem of fishery control: to use a more expressive -- albeit more complicated -- dynamical model to guide decision making.
 Furthermore, rather than computing the optimal control policy for the model (something that is impossible in practice for complex systems) we use deep reinforcement learning to obtain a ‘‘pretty darn good’’ policy.
-This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model stoch}) as a black box of input-output pairs.
+This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model}) as a black box of input-output pairs.
 By not relying on precise knowledge of the model's parameter values, but rather just relying on input-output statistics, model-free approaches have gained traction in a variety of control theory settings (see, e.g., [@sato2019; @ramirez2022; @zeng2019]).
 
-We compare deep reinforcement learning-based policies against optimal constant mortality policies. 
-While the latter are MSY-inspired, they are optimized in a model-free way as well: the optimal constant mortality rate is computed empirically from simulated data.
+We compare deep reinforcement learning-based policies against classical management strategies (optimal constant mortality and optimal constant escapement policies policies). 
+While the latter are inspired by the shape of optimal solutions in the single-species setting, they are optimized in a model-free way as well: e.g. the optimal constant mortality rate is computed empirically from simulated data.
 
-Because of the simplicity of the constant mortality ansatz, the optimal such policy may be easily estimated (see Figure \ref{fig:tuning}).
+Because of the simplicity of the classical policy functions, the optimal such policy may be easily estimated through a grid-search.
+This is the case since these policy functions are only specified by one or two parameters (respectively in the single fishery, or two fishery cases).
 In contrast, DRL optimizes over the more expressive -- and more complicated -- family of policies parametrized by a neural network.
-Because of this, our DRL approach uses a variant of *gradient ascent* (the proximal policy optimization algorithm) to obtain a good candidate policy.
+Neural networks are often used as flexible function approximators that can be efficiently optimized over.
 
-We have shown that the DRL agent finds an approximately *bang-bang* type of solution (see Text Box 1 for the definition of bang-bang solutions and Figs. \ref{fig:action-X} and \ref{fig:state-space} for the result).
-While bang-bang solutions are known to be optimal for a wide variety of single-species fishery control problems [@hening2019; @hening2021], there is no such proof of optimality for general multi-species models.
-In this sense this example is rather surprising and reassuring: while no general guarantee points at the optimality of bang-bang solutions for multi-species model, the existence of one such example provides a benchmark for the use of DRL in fishery control.
+We showed that for sufficiently complex management scenarios -- Models 3 and 4 -- DRL-based management strategies perform significantly better than CEsc.
+This with respect to both average rewards received and conservation goals.
+In this sense, an approximate solution to a more complicated and expressive model, can outperform the optimal solution of the single-species problem---even when the parameters of the single-species solution are empirically optimized.
 
-One intuition for why a constant escapement policy performs so well in such a model comes from the anti-correlation between $X$ and $Y$ noted in the results section.
-We have observed this pattern arise in a variety of policies, both classical as well as some obtained by training DRL agents.
-In fact, ‘‘crashes’’ in the $X$ population are almost invariably shortly preceeded by dramatic increases in $Y$.
-We hypothesize that this effectively leads to a dimensionality reduction: once the value of $X$ is known, along a path traced by the control system, then $Y$ may be roughly predicted.
-A similar, although weaker, anti-correlation is also observed between $X$ and $Z$.
-These two informal observations point at an effective simplification of the prediction process: the values of $Y$ and $Z$ are much less impactful to policy decisions than the value of $X$ itself.
-We have not yet pushed further to establish a more precise picture of this dynamical simplification.\footnote{
-A hand-waving way to understand this phenomenon is the following:
-The $X$-$Y$ anti-correlation can be associated to the Lotka-Volterra competition term between $X$ and $Y$, i.e. $c_{XY}XY$ in eq. \eqref{eq:3d model stoch}.
-Now, consider a fall in population $X$.
-Because of the aforementioned anti-correlation with $Y$, this is accompanied by a growth in $Y$.
-We may understand this, roughly, as a \emph{replacement} of $X$ for $Y$.
-But then, because the parameter $D = 1.1 > 1$, this increases the effective birth rate $Z$, i.e. the term $f(X+DY)Z$ in eq. \eqref{eq:3d model stoch}.
-This, in turn, leads to a growth of $Z$ and, thus, an anti-correlation between $Z$ and $X$.}
+We found that the optimal CMort policy surprisingly performs much better than constant escapement (Fig. \ref{fig:main}).
+However, it can be observed in Fig. \ref{fig:fracmsy} that the constant mortality strategy faces a trade-off: high sustainability is achieved for sub-optimal constant mortality rates, but only at a significant decrease in the mean episode reward.
+We expect that with increasing ecosystem complexity this phenomenon might become more pronounced.
+We can understand this as a consequence of the rigidity of classical strategies: the simplicity of their expressions, depending only on a few parameters, means that policy optimization is constrained to a rather reduced subset of the space of possible policies.
 
-This manuscript functions as a first step in the process of incorporating DRL into fishery decision making.
-We have shown that highly non-linear systems may give rise to simple, good policies, and that these may be found via reinforcement learning.
-Moreover, the framework allows for the possibility that these simplifications do not in fact happen, and that good harvest policies are highly non-linear, multi-parameter functions.
+The question of when multi-species models are well-approximated by single-species models was studied in detail in [@burgess].
+Here our approach is dual to that of the aforementioned paper.
+Rather than first optimizing a single-species model to approximate a more complex model and then finding the MSY value for the single-species model, we used simulated data to optimize CMort and CEsc directly on the three-species model.
+We do not investigate further whether our three-species models are well approximated by a single-species model in the sense of [@burgess].
+However:
+*1)* Because the interaction terms in \eqref{eq:3d model} are about an order of magnitude smaller than $r_X$ and $r_Y$, Models 2-4 are ‘‘close’’ in parameter-space to a single-species model.
+*2)* The fact that for Model 2 all strategies match in performance suggests that \eqref{eq:3d model} might be well-approximated by a single species model.
+This in turn suggests that the reason that DRL outperforms both single-species strategies for Models 3 and 4 is not due a lack of a single-species approximation for either $X$ or $Y$, but due to the complexity of having two harvested species.
+Moreover, non-stationarity exacerbated the advantage of DRL over CEsc and CMort, which can be expected as non-stationary parameters have been observed to introduce bias into single-species reference point estimation [@burgess].
 
-In this regard, DRL provides a framework flexible enough to capture the intricate population dynamics that are relevant in fishery management.
-Importantly, DRL is equipped with tools to deal with complex models for which simple policies might yield unsatisfactory results (and thus more refined techniques are needed to control them).
-For example, tools such as *long short-term memories* [@lstm], *curriculum learning* [@curriculum-learning] and *open-ended learning* [@open-ended] can be incorporated when faced with parametric noise or drift, or generally uncertainties about the agent's environment. 
-These techniques can be used to obtain agents who perform well over a variety of different environments. <!-- ML: Could also use LSTMs for parametric drift. Might be better to use a different selling point for curriculum learning like if you want to have a bit more generalizability in your RL agent. -->
+Finally, we performed a stability analysis to ensure that the advantage of DRL-based techniques over constant escapement is a ubiquitous phenomenon and not a result of a lucky selection of parameter values.
+We found (in Fig. \ref{fig:stability}) that an advantage can be observed even for relatively high-noise perturbations of the parameters---noise with a variance of 20% of the parameter values.
+The aforementioned Figure summarizes the statistics of 100 parameter perturbations so that we may expect perturbations of up to 60% (i.e. three sigmas) in the parameter values to appear in these statistics.
 
-Finally, in our study case, we have shown that the ‘‘rest periods’’ -- periods of several time steps with no fishing at all -- prominent in both the DRL solution and in the optimal bang-bang policy, may be important to maintain the sustainability of the fishery and to increase its long-term profits.
-This hypothesis could be explored in more generality as it might apply to a wide variety of models.
+## Future directions
+
+There are a number of interesting directions that would be interseting to explore in future work.
+
+First, benchmarking our results against increasingly more compex and realistic fishery models.
+This would include non-stationarities in the dynamical parameters to accurately reflect the effects of climate change on the ecosystem.
+This added complexity would likely pose a computational challenge---in future work we will likely need to test several different DRL training algorithms (see e.g. [@rl-intro] for a non-exhaustive list), and it is very likely that hyperparameter tuning will need to be performed.
+Moreover, it may be that larger neural networks than the one we used in this research will be needed for the policy function.
+This all will mean that considerable technical work will be needed in order to make this next step computationally feasible (e.g. we might need to make more extensive use of GPUs and parallelization).
+
+Second, to account for noisy estimates of the system's state and imperfect policy implementation.
+This could be done straightforwardly, albeit it might increase the training time before DRL approaches converge, as well as introducing the need for hyperparameter tuning.
+
+Third, to account for the systematic uncertainties behind the dynamics of the ecosystem---that is, to account for model biases with respect to reality.
+Here, one can employ tools from curriculum learning in order to train an agent that is *generally capable* of good management over a range of different dynamical models.
+This way, one can incorporate different models---expressing different aspects of the ecosystem---into the learning process of the agent.
+We believe that this step will likely be necessary if DRL algorithms are to be applied successfully in the fishery management problem.
+Curriculum learning is rather expensive computationally, however, and involves a non-trivial *curriculum design* which will guide the agent in its learning process.
+This way, considerable technical work would be needed for this direction.
+
+
 
 ## Acknowledgements
 
@@ -921,217 +931,96 @@ This material is based upon work supported by the National Science Foundation un
 
 \appendix
 
-# Appendix
 
-## Collected time series data
+# Appendix: Results for stationary models
 
-In this appendix we provide a wider selection of time series taken from the same data set as Fig. \ref{fig:timeseries}.
-Namely, Figs. \ref{fig:timeseries_msy}, \ref{fig:timeseries_tac} and \ref{fig:timeseries_ppo} display these time series.
-
-```{r} 
-#| label: timeseries_msy
-#| fig.cap: "Nine time series of the system controlled by the MSY constant mortality policy." 
-#| out.width: "6.5in"
-msy_tac_ppo |> 
-    group_by(rep) |>
-    filter(rep < 9, policy == "msy") |>
-    ggplot(aes(t, abundance, col = species)) + 
-        geom_line()  + 
-        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
-        facet_wrap(~factor(rep)) +
-        labs(y = "abundance", x = "time") +
-        theme_bw() + 
-        theme(aspect.ratio = 0.5)
-```
-
-```{r} 
-#| label: timeseries_tac
-#| fig.cap: "Nine time series of the system controlled by the policy using 80 percent of the MSY constant mortality." 
-#| out.width: "6.5in"
-msy_tac_ppo |> 
-    group_by(rep) |>
-    filter(rep < 9, policy == "tac") |>
-    ggplot(aes(t, abundance, col = species)) + 
-        geom_line()  + 
-        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
-        facet_wrap(~factor(rep)) +
-        labs(y = "abundance", x = "time") +
-        theme_bw() + 
-        theme(aspect.ratio = 0.5)
-```
-
-```{r} 
-#| label: timeseries_ppo
-#| fig.cap: "Nine time series of the system controlled by the trained DRL agent." 
-#| out.width: "6.5in"
-msy_tac_ppo |> 
-    group_by(rep) |>
-    filter(rep < 9, policy == "ppo") |>
-    ggplot(aes(t, abundance, col = species)) + 
-        geom_line()  + 
-        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
-        facet_wrap(~factor(rep)) +
-        labs(y = "abundance", x = "time") +
-        theme_bw() + 
-        theme(aspect.ratio = 0.5)
-```
-
-
-
-
-## Conservative scale-downs of MSY
-
-Here we show the performance of constant mortality policies with a fraction $\alpha$ of the MSY mortality rate (in the main text we focused on $\alpha=0.8$).
-Their performance is evaluated in Fig. \ref{fig:several-tac}.
-Notice the sharp transition in performance between $\alpha = 0.9$ and $0.95$.
-While the behaviour of the former closely mimics, e.g., the $\alpha=0.8$ policy, the performance of the latter is essentially the same as the optimal constant mortality ($\alpha=1$, see Fig. \ref{fig:rew_len_fig}).
-This points at the fact that the value of the parameter $\alpha$, although commonly chosen simply as a rule of thumb, lives on a ‘‘knife's edge,’’ small changes in this parameter may lead to drastic changes in the dynamics of the controlled system.
-What is worse: the particular scale at which this transition happens is generally dependent on the system's intrinsic dynamics.
-In reality, where fishery models and their respective parameters are subject to substantial uncertainty, this fact calls to question the purported additional safety obtained via these rules of thumb.
+In the main text we focused on the non-stationary model (‘‘three species, two fisheries, non-stationary’’ in Table 1) for the sake of space and because our results were most compelling there.
+Here we present the reward distributions for the other models considered---the three stationary models, lines 1-3 in Table 1.
+These results are shown in Figs. \ref{fig:main_32}, \ref{fig:main_31} and \ref{fig:main_11}.
 
 ```{r}
-#| label: several-tac
-#| fig.cap: "Performance of constant mortality policies with mortality $\\alpha M^*$ for several values of $\\alpha$.
-#| The top panel displays the episode lengths for each repetition, while the bottom pannel displays the episode harvest.
-#| The labels in the plots are the value of $\\alpha$ expressed as a percentage."
-#| out.width: "6.5in"
-N <- 30
-actions <- unique(msy_df$action)
-i85 <- which.min(abs(actions - best_action* 0.85))
-i90 <- which.min(abs(actions - best_action* 0.90))
-i95 <- which.min(abs(actions - best_action* 0.95))
-tac_85_sim <- msy_df |> 
-    filter(action == actions[[i85]]) |>
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "85%")
-tac_90_sim <- msy_df |> 
-    filter(action == actions[[i90]]) |>
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "90%")
-tac_95_sim <- msy_df |> 
-    filter(action == actions[[i95]]) |>
-    pivot_longer(c("X", "Y", "Z"),
-        names_to = "species", values_to = "abundance") |>
-    mutate(abundance = abundance + 1, policy = "95%")
-
-tac_80_sim <- tac_sim |> mutate(policy = "80%")
-
-tac4 <- bind_rows(tac_80_sim, tac_85_sim, tac_90_sim, tac_95_sim)
-
-p1 <- tac4 |> 
-    group_by(rep, policy) |>
-    filter(t==max(t), species == "X", rep < N) |>
-    ggplot(aes(rep, t)) + 
-      geom_col() +
-      facet_wrap(~factor(policy), ncol = 4) +
-      labs(y = "episode length", x = "repetition") +
-      theme_bw() + 
-      theme(axis.text.x = element_blank())
-
-p2 <- tac4 |> 
-    group_by(rep, policy) |>
-    filter(t==max(t), species == "X", rep < N) |>
-    ggplot(aes(rep, reward)) + 
-      geom_col() +
-      facet_wrap(~factor(policy), ncol=4) +
-      labs(y = "episode harvest", x = "repetition") +
-      theme_bw() + 
-      theme(axis.text.x = element_blank())
-
-(p1 / p2)
+summary_32 <- read_csv("manuscript_data/comparison_3-2-const_300.csv.xz") %>%
+  mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
+  arrange(strategy)
+summary_31 <- read_csv("manuscript_data/comparison_3-1_300.csv.xz") %>%
+  mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
+  arrange(strategy)
+summary_11 <- read_csv("manuscript_data/comparison_1-1_100.csv.xz") %>%
+  mutate(strategy=recode(strategy, "PPO+GP"="PPO_GP")) %>%
+  arrange(strategy)
 ```
-
-## Optimal constant escapement policy evaluation
-
-Here we reproduce the plots from the main text for the optimal constant escapement policy to illustrate the similarity to the DRL-derived policy.
-
-Fig. \ref{fig:esc-tuning-eval} illustrates the tuning process of finding the optimal constant escapment policy (left panel, compare Fig. \ref{fig:tuning}).
-The same figure shows, in the middle panel, the reward histogram for the optimal constant escapement policy (compare Fig. \ref{fig:rew_len_fig}).
-Finally, the right panel displays the same histogram for the DRL policy (reproduced from Fig. \ref{fig:rew_len_fig}).
-We may see that the two policies lead to essentially the same reward distribution.
-
 
 ```{r}
-#| label: esc-tuning-eval
-#| fig.cap: "(Left panel) Tuning results for constant escapement policies: mean episode reward scatter data (averaged over 50 episodes) together with two standard deviations shaded in grey. 
-#| The optimal escapement level (the one producing maximum mean harvest) is $X_{\\text{esc.}}=0.62$.
-#| (Middle and right panels) Reward histograms for the optimal constant escapement policy (middle) and for the DRL policy (right).
-#| For both DRL and optimal constant escapement, no early episode ends are observed (i.e. all episodes last for 200 time steps)."
-#| out.width: "6.5in"
-#| fig.align: "center"
-esc_rewards <- escapement_df |>
-  group_by(escapement, rep) |>
-  filter(t == max(t)) |> 
-  group_by(escapement) |>
-  summarise(mean_reward = mean(reward),
-            sd = sd(reward))
-
-resc <- esc_rewards |>
-  ggplot(aes(escapement, mean_reward, 
-             ymin = mean_reward - 2*sd,
-             ymax=mean_reward+2*sd)) +
-  geom_point() + geom_ribbon(alpha=0.4) +
-  labs(y = "episode reward", x = "constant escapement") +
-  theme_bw() +
-  theme(aspect.ratio = 1/1)
-
-esc_len <- esc_sim_df |>
-  group_by(rep) |>
-  filter(t==max(t), species == "X", escapement == best_e, rep < 50) |>
-  ggplot(aes(rep, t)) + 
-      geom_col() +
-      labs(y = "episode length", x = "repetition") +
-      theme_bw() + 
-      theme(axis.text.x = element_blank())
-
-esc_rew <- esc_sim_df |>
-  group_by(rep) |>
-  filter(t==max(t), species == "X", escapement == best_e, rep < 50) |>
-  ggplot(aes(rep, reward)) + 
-      geom_col() +
-      labs(y = "episode harvest", x = "repetition", title = "Escapement") +
-      ylim(0,12.8) +
-      #ggtitle("Escapement") + 
-      theme_bw() + 
-      theme(axis.text.x = element_blank(), plot.title = element_text(hjust = 0.5))
-
-drl_rew <- msy_tac_ppo |> 
-    group_by(rep, policy) |>
-    filter(t==max(t), species == "X", policy == "ppo", rep < 50) |>
-    ggplot(aes(rep, reward)) + 
-      geom_col() +
-      labs(y = "episode harvest", x = "repetition", title = "DRL") +
-      ylim(0,12.8) +
-      #ggtitle("DRL") + 
-      theme_bw() + 
-      theme(axis.text.x = element_blank(), plot.title = element_text(hjust = 0.5))
-
-(resc | esc_rew | drl_rew)
+#| label: main_32
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 3 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| out.width: "6in"
+summary_32 %>% 
+  ggplot() +
+  geom_violin(mapping = aes(x=reward,y=strategy,fill = strategy)) +
+  geom_boxplot(aes(x=reward,y=strategy, fill = strategy), width = 0.1, color = 'black', alpha=0.2)+
+  theme(
+    legend.position="none"
+  )
 ```
 
-Fig. \ref{fig:timeseries_esc} displays 9 time-series for episodes controlled with the optimal constant escapement policy.
-Again, this behaviour is essentially indistinguishable from the behavior of the system controlled by the DRL policy (see Fig. \ref{fig:timeseries_ppo}).
-
-This series of figures gives evidence that, in fact, the DRL agent we have trained has obtained a policy which, effectively, acts as an optimal constant escapement policy.
-Although in Fig. \ref{fig:action-X} we found some deviations from the constant escapement case (e.g. DRL was more conservative when fishing high populations), these do not seem to lead to a different dynamics.
-
-```{r} 
-#| label: timeseries_esc
-#| fig.cap: "Nine time series of the system controlled by the optimal constant escapement policy." 
-#| out.width: "6.5in"
-esc_sim_df |> 
-    group_by(rep) |>
-    filter(rep < 9, escapement == best_e) |>
-    ggplot(aes(t, abundance, col = species)) + 
-        geom_line()  + 
-        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
-        facet_wrap(~factor(rep)) +
-        labs(y = "abundance", x = "time") +
-        theme_bw() + 
-        theme(aspect.ratio = 0.5)
+```{r}
+#| label: main_31
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 2 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| out.width: "6in"
+summary_31 %>% 
+  ggplot() +
+  geom_violin(mapping = aes(x=reward,y=strategy,fill = strategy)) +
+  geom_boxplot(aes(x=reward,y=strategy, fill = strategy), width = 0.1, color = 'black', alpha=0.2)+
+  theme(
+    legend.position="none"
+  )
 ```
+
+```{r}
+#| label: main_11
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 1 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| out.width: "6in"
+summary_11 %>% 
+  ggplot() +
+  geom_violin(mapping = aes(x=reward,y=strategy,fill = strategy)) +
+  geom_boxplot(aes(x=reward,y=strategy, fill = strategy), width = 0.1, color = 'black', alpha=0.2)+
+  theme(
+    legend.position="none"
+  )
+```
+
+# Appendix: PPO policy function for non-stationary model
+
+In the main text, Fig. \ref{fig:gpp-policy}, we presented a visualization of the PPO+GP policy function obtained for the ‘‘three species, two fisheries, non-stationary’’ model.
+This policy function is a Gaussian process regression of scatter data of the PPO policy function.
+In Fig. \ref{fig:ppo-policy} we present a representation of this scatter data in a similar format as Fig. \ref{fig:gpp-policy}.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.35]{figures/ppo-policy.jpeg}
+  \caption{Plots of the PPO policy $\pi_{\text{PPO}}$ along several relevant axes. Here $M_X$ and $M_Y$ are the $X$ and $Y$ components of the policy function. The values of the plots are generated in the following way: For each variable $X$, $Y$, and $Z$, the time-series of evaluation episodes are used to generate a window of typical values that variable attains when controlled by $\pi_{\text{PPO}}$. Then, for each plot either $X$ or $Y$ was evaluated on 100 values in $[0,1]$ along the $x$ axis, while the other variables (resp. $Y$ and $Z$, or $X$ and $Z$) were varied within the typical window computed before. Within this window, 5 values are used. The value of one of the latter two variables were visualized as color. This scatter data was used as an input to generate $\pi_{\text{PPO+GP}}$, visualized in the main text.}
+  \label{fig:ppo-policy}
+\end{figure}
+
+# Appendix: Gaussian process interpolation
+
+Here we summarize the procedure used to interpolate the PPO policy (visualized in Fig. \ref{fig:ppo-policy}).
+We use the *GaussianProcessRegressor* object of the *sklearn* Python library with a kernel given by
+\begin{align*}
+  \text{RBF}(\text{length scale = 10}) + \text{WhiteNoise}(\text{noise level = 0.1}).
+\end{align*}
+This interpolation method is applied to scatter data of the PPO policy evaluated on 3 different grids on $(X,Y,Z)$ states:
+$G_X$, a $51\times 5 \times 5$ grid; $G_Y$, a $5\times 51 \times 5$ grid; and $G_Z$, a $5\times 5 \times 51$ grid.
+This combination of grids was used instead of a single dense grid in order to reduce the computational intensity of the interpolation procedure.
+For $G_X$, the 5 values for $Y$ and $Z$ were varied in a ‘‘popular window,’’ i.e. episode time-series data was used to determine windows of $Y$ and $Z$ values which were most likely. 
+The grids $G_Y$ and $G_Z$ were generated in a similar fashion, *mutatis mutandis*.\footnote{
+The raw dataset is found at the data/results\_data/2FISHERY/RXDRIFT sub-directory in the repository with the source code and data linked above.
+Scatter plots visualizing this policy are shown in App. B.
+}
+The length scale and noise level values of this kernel were chosen arbitrarily---no hyperparameter tuning was needed to produce satisfactory interpolation, as will be shown in the results section.
+
+
+
 # References
 
 

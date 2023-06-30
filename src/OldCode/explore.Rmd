@@ -1,0 +1,312 @@
+---
+output: github_document
+---
+
+```{r setup}
+library(tidyverse)
+library(patchwork)
+library(RColorBrewer)
+```
+
+<!-- Data sources -->
+```{r}
+# for best const mortality and best const escapement
+msy_optimizer <- function(df) {
+  df |> 
+  group_by(action, rep) |>
+  filter(t == max(t)) |> 
+  group_by(action) |>
+  summarise(mean_reward = mean(reward), sd = sd(reward)) |> 
+  filter(mean_reward == max(mean_reward))
+}
+escapement_optimizer <- function(df) {
+  df |> 
+  group_by(escapement, rep) |>
+  filter(t == max(t)) |> 
+  group_by(escapement) |>
+  summarise(mean_reward = mean(reward), sd = sd(reward)) |> 
+  filter(mean_reward == max(mean_reward))
+}
+
+# Collect data (outsource to separate R script later TBD)
+msy_df <- read_csv("../data/msy.csv.xz")
+best_action <- msy_optimizer(msy_df)$action
+escapement_df <- read_csv("../data/escapement.csv.xz", show_col_types = FALSE)
+best_e <- escapement_optimizer(escapement_df)$escapement
+
+
+
+ppo_df <- read_csv("../data/PPO150.csv.xz")
+
+opt_msy <- msy_df |> filter(action == best_action)
+opt_escapement <- escapement_df |> filter(escapement == best_e)
+```
+Overall mean reward
+
+```{r}
+list(
+  ppo_df |> mutate(method="PPO"),
+  opt_msy |> mutate(method="MSY"),
+  opt_escapement |> mutate(method="escapement")
+  ) |>
+  purrr::list_rbind() |>
+  group_by(rep, method) |> filter(t == max(t)) |> 
+  group_by(method) |> summarise(mean = mean(reward), sd = sd(reward))
+
+
+```
+
+
+```{r}
+# set up for plots:
+
+msy_sim <- msy_df |>
+    filter(action == best_action) |> 
+    group_by(rep) |>
+    pivot_longer(c("X", "Y", "Z"),
+                names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "msy") # natural units, policy name
+
+actions <- unique(msy_df$action)
+i <- which.min(abs(actions - best_action* 0.8))
+tac_sim <- msy_df |> 
+    filter(action == actions[[i]]) |>
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "tac")
+
+ppo_sim <- ppo_df |> 
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1, policy = "ppo")
+
+esc_sim_df <- escapement_df |> 
+    pivot_longer(c("X", "Y", "Z"),
+        names_to = "species", values_to = "abundance") |>
+    mutate(abundance = abundance + 1)
+
+msy_tac_ppo <- bind_rows(msy_sim, tac_sim, ppo_sim)
+```
+
+```{r}
+msy_rewards <- msy_df |>
+  group_by(action, rep) |>
+  filter(t == max(t)) |> 
+  group_by(action) |>
+  summarise(mean_reward = mean(reward),
+            sd = sd(reward))
+
+msy_rewards |>
+  ggplot(aes(action, mean_reward, 
+             ymin = mean_reward - 2*sd,
+             ymax=mean_reward+2*sd)) +
+  geom_point() + geom_ribbon(alpha=0.4) +
+  labs(y = "episode reward", x = "constant mortality") +
+  theme(aspect.ratio = 1/1) + 
+  geom_vline(aes(xintercept=best_action), color="seagreen3", size=1) + 
+  geom_vline(aes(xintercept=0.8*best_action), color="violetred3", size=1) +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        aspect.ratio = 1) 
+```
+
+
+<!-- Resuts figures -->
+
+```{r} 
+policy_labels <- list("msy" = "MSY Const. Mortality", "tac"= "80% MSY Const. Mortality", "ppo"= "DRL")
+policy_labeller <- function(variable,value){
+  return(policy_labels[value])
+}
+msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(rep == 6) |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+        labs(y = "abundance", x = "time") +
+        theme_bw() +
+        theme(aspect.ratio = 2/3)
+```
+
+```{r} 
+p1 <- msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), species == "X", rep < 30) |>
+    ggplot(aes(rep, t)) + 
+      geom_col() +
+      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+      labs(y = "episode length", x = "repetition") +
+      theme_bw() + 
+      theme(axis.text.x = element_blank())
+
+p2 <- msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), species == "X", rep < 30) |>
+    ggplot(aes(rep, reward)) + 
+      geom_col() +
+      facet_wrap(~factor(policy, levels = c("msy", "tac", "ppo")), labeller = policy_labeller ) +
+      labs(y = "episode harvest", x = "repetition") +
+      theme_bw() + 
+      theme(axis.text.x = element_blank())
+
+(p1 / p2) + plot_annotation(tag_levels = 'A')
+```
+
+```{r}
+opt_escapement_harvest <- function(X) case_when(
+  X > best_e ~ X - best_e,
+  X <= best_e ~ 0
+)
+
+opt_escapement_escapement <- function(X) case_when(
+  X <= best_e ~ X,
+  X > best_e ~ best_e
+)
+
+msy_harvest <- function(X) best_action*X
+tac_harvest <- function(X) 0.8*msy_harvest(X)
+
+py <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
+  ggplot(aes(X, harvest, color = Y)) +
+  geom_point() +
+  theme_bw() + 
+  theme(aspect.ratio = 1/1) +
+  stat_function(fun = opt_escapement_harvest, col = 'deeppink', size = 0.7) + 
+  stat_function(fun = msy_harvest, col = 'seagreen2', size = 0.7)
+
+pz <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, harvest = action*X) |>
+  ggplot(aes(X, harvest, color = Z)) +
+  geom_point() +
+  theme_bw() + 
+  theme(aspect.ratio = 1/1) +
+  stat_function(fun = opt_escapement_harvest, col = 'deeppink', size = 0.7) + 
+  stat_function(fun = msy_harvest, col = 'seagreen2', size = 0.7)
+
+escxy <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
+  ggplot(aes(X, escapement, color = Y)) +
+  geom_point() +
+  theme_bw() + 
+  theme(aspect.ratio = 1/1) +
+  stat_function(fun = opt_escapement_escapement, col = 'deeppink', size = 0.7)
+
+escxz <- ppo_df |>
+  mutate(X = X+1, Y = Y+1, Z = Z+1, escapement = (1-action)*X) |>
+  ggplot(aes(X, escapement, color = Z)) +
+  geom_point() +
+  theme_bw() + 
+  theme(aspect.ratio = 1/1) +
+  stat_function(fun = opt_escapement_escapement, col = 'deeppink', size = 0.7)
+
+((py | pz)/ (escxy | escxz)) + plot_annotation(tag_levels = c('A'))
+```
+
+<!-- time series -->
+```{r} 
+msy_tac_ppo |> 
+    group_by(rep) |>
+    filter(rep < 9, policy == "msy") |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(rep)) +
+        labs(y = "abundance", x = "time") +
+        theme_bw() + 
+        theme(aspect.ratio = 0.5)
+```
+
+```{r} 
+msy_tac_ppo |> 
+    group_by(rep) |>
+    filter(rep < 9, policy == "tac") |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(rep)) +
+        labs(y = "abundance", x = "time") +
+        theme_bw() + 
+        theme(aspect.ratio = 0.5)
+```
+
+```{r} 
+msy_tac_ppo |> 
+    group_by(rep) |>
+    filter(rep < 9, policy == "ppo") |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(rep)) +
+        labs(y = "abundance", x = "time") +
+        theme_bw() + 
+        theme(aspect.ratio = 0.5)
+```
+
+```{r} 
+esc_sim_df |> 
+    group_by(rep) |>
+    filter(rep < 9, escapement == best_e) |>
+    ggplot(aes(t, abundance, col = species)) + 
+        geom_line()  + 
+        scale_color_manual(values=c('palegreen3', 'coral1', 'deepskyblue4')) +
+        facet_wrap(~factor(rep)) +
+        labs(y = "abundance", x = "time") +
+        theme_bw() + 
+        theme(aspect.ratio = 0.5)
+```
+<!-- escapement tuning and evaluation -->
+
+```{r}
+esc_rewards <- escapement_df |>
+  group_by(escapement, rep) |>
+  filter(t == max(t)) |> 
+  group_by(escapement) |>
+  summarise(mean_reward = mean(reward),
+            sd = sd(reward))
+
+resc <- esc_rewards |>
+  ggplot(aes(escapement, mean_reward, 
+             ymin = mean_reward - 2*sd,
+             ymax=mean_reward+2*sd)) +
+  geom_point() + geom_ribbon(alpha=0.4) +
+  labs(y = "episode reward", x = "constant escapement") +
+  theme_bw() +
+  theme(aspect.ratio = 1/1)
+
+esc_len <- esc_sim_df |>
+  group_by(rep) |>
+  filter(t==max(t), species == "X", escapement == best_e, rep < 50) |>
+  ggplot(aes(rep, t)) + 
+      geom_col() +
+      labs(y = "episode length", x = "repetition") +
+      theme_bw() + 
+      theme(axis.text.x = element_blank())
+
+esc_rew <- esc_sim_df |>
+  group_by(rep) |>
+  filter(t==max(t), species == "X", escapement == best_e, rep < 50) |>
+  ggplot(aes(rep, reward)) + 
+      geom_col() +
+      labs(y = "episode harvest", x = "repetition", title = "Escapement") +
+      ylim(0,12.8) +
+      #ggtitle("Escapement") + 
+      theme_bw() + 
+      theme(axis.text.x = element_blank(), plot.title = element_text(hjust = 0.5))
+
+drl_rew <- msy_tac_ppo |> 
+    group_by(rep, policy) |>
+    filter(t==max(t), species == "X", policy == "ppo", rep < 50) |>
+    ggplot(aes(rep, reward)) + 
+      geom_col() +
+      labs(y = "episode harvest", x = "repetition", title = "DRL") +
+      ylim(0,12.8) +
+      #ggtitle("DRL") + 
+      theme_bw() + 
+      theme(axis.text.x = element_blank(), plot.title = element_text(hjust = 0.5))
+
+(resc | esc_rew | drl_rew)
+```

@@ -1,0 +1,26 @@
+Performance at various fractions of the msy constant mortality
+
+reward                  1.417840
+reward_std              0.012346
+fraction ep len == 200: 1.0
+
+
+fraction = 0.9
+
+reward                  1.598040
+reward_std              0.014881
+fraction ep len == 200: 1.0
+
+
+fraction = 0.95
+
+reward                  1.686451
+reward_std              0.013075
+fraction ep len == 200: 1.0
+
+
+fraction = 1
+
+reward                  1.771803
+reward_std              0.015652
+fraction ep len == 200: 1.0
