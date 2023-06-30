@@ -127,8 +127,8 @@ This special issue highlights the development of novel data-driven methods, incl
 
 Much effort has been spent grappling with the complexity of our natural world in contrast to the relative simplicity of the models we use to understand it.
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
- But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
-While simplified models have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform. <!-- ML: Can we clarify that we are talking about dynamics/process models here? Model is a very overloaded term for me-->
+But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
+While simplified process models for the population dynamics have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
 For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of seven emissions marker scenarios from the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
@@ -261,7 +261,7 @@ This way, we equate economic output with harvested biomass.
 Conversely, more conservative, lower, mortality rates lead to lower total reward on average.
 The DRL approach side-steps this trade-off by optimizing over a more complex family of possible policies--—policies parametrized by a neural network, as opposed to policies labeled by a single parameter (the mortality rate).
 
-Our findings paint a picture of how a single-species optimal management strategy may loose performance rather dramatically when controlling a more complex ecosystem.
+Our findings paint a picture of how a single-species optimal management strategy may lose performance rather dramatically when controlling a more complex ecosystem.
 Here, DRL performs better from both economical *and* conservation points of view.
 Moreover, rather unintuitively, CMort -- known to be suboptimal and unsustainable for single-species models -- can turn out to even outperform the CEsc -- the single-species optimal strategy -- for complex ecosystems.
 Finally, within this regime of complex, possibly varying, ecosystems, we show that DRL consistently finds a policy which effectively either matches the best classical strategy, or outperforms it.
@@ -420,9 +420,11 @@ An MDP may be defined by the following data:
 
 - $\mathcal{A}$: *action space*, the set of actions which the agent may choose from,
 
-- $T(N_{t+1}|N_t, a_t)$: *transition operator*, a conditional distribution which describes the dynamics of the system (where $N_i\in\mathcal{S}$ are states of the environment),
+- $T(N_{t+1}|N_t, a_t, t)$: *transition operator*, a conditional distribution which describes the dynamics of the system (where $N_i\in\mathcal{S}$ are states of the environment),\footnote{
+Transition operators are commonly discussed without having a direct time-dependence for simplicity, but the inclusion of $t$ as an argument to $T$ does not alter the structure of the learning problem appreciably.
+}
 
-- $r(N_t, a_t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $N_t$,
+- $r(N_t, a_t, t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $N_t$,
 
 - $d(N_0)$: *initial state distribution*, the initial state of the environment is sampled from this distribution,
 
@@ -438,7 +440,7 @@ sampled randomly from the distribution
 \begin{align*}
   p_\pi(\tau) = 
   d(N_0) \prod_{t=0}^{ t_{\text{fin.}}-1 }
-  \pi( a_t | N_t ) T( N_{t+1} | N_t, a_t ).
+  \pi( a_t | N_t ) T( N_{t+1} | N_t, a_t, t ).
 \end{align*}
 Reinforcement learning seeks to optimize $\pi$ such that the expected rewards are maximal,
 $$  
@@ -446,7 +448,7 @@ $$
 $$
 where,
 $$
-  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, N_t),
+  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, N_t, t),
 $$
 is the cumulative reward of path $\tau$.
 The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expected return*.
@@ -536,7 +538,7 @@ In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{th
 The reward function defining our policy optimization problem had two components.
 The first was economical: the total biomass harvested over an episode.
 The second seeked to reflect conservation goals: if a near-extinction event occurred at time $t$, the episode was ended early and a negative reward of $-100/t$ was awarded.
-This reward function balanced the extractive motivation of the fishery with conservation goals which went beyond the scope of long-term sustainable harvests.
+This reward function balanced the extractive motivation of the fishery with conservation goals which went beyond the scope of long-term sustainable harvests commonly used in fishery management.
 
 
 \textbf{Training a DRL agent.}
@@ -663,7 +665,7 @@ Thus, distribution of episode durations seems to be widest for CEsc, followed by
 
 ```{r}
 #| label: ephistograms
-#| fig.cap: "Histograms of episode lengths and rewards for the four different management strategies considered. Only the first 50 evaluation episodes (from a total of 100) were included, for ease of visualization."
+#| fig.cap: "Hisotgrams of episode lengths and rewards for the four different management strategies considered. Only the first 50 evaluation episodes (from a total of 100) were included, for ease of visualization. From left to right, the four management strategies compared are CEsc, CMort, PPO, and PPO+GP."
 #| out.width: "6in"
 esc_len <- esc_ends %>%
   filter(rep<50) %>%
@@ -671,26 +673,34 @@ esc_len <- esc_ends %>%
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="", y="ep. duration")
+  labs(x="", y="ep. duration") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("CEsc")
 msy_len <- msy_ends %>%
   filter(rep<50) %>%
   ggplot(
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="", y="")
+  labs(x="", y="") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("CMort")
 ppo_len <- ppo_ends %>%
   filter(rep<50) %>%
   ggplot(mapping = aes(x = rep, y = t)) +
   geom_col() +
-  labs(x="", y="")
+  labs(x="", y="")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("PPO")
 gpp_len <- gpp_ends %>%
   filter(rep<50) %>%
   ggplot(
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="", y="")
+  labs(x="", y="")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("PPO+GP")
 
 esc_rew <- esc_ends %>%
   filter(rep<50) %>%
@@ -838,20 +848,6 @@ This figure shows that, for a wide range of parameter values, DRL-based strategi
 
 # Discussion
 
-## Pasted to-be-discussed
-
-Eqs. \eqref{eq:3d model} are a generalization of the single-species model \eqref{eq:may}: this can be seen by setting 
-\begin{align*}
-  c_{XY} = d = f = \sigma_Z = 0.
-\end{align*}
-Throughout most of our paper, we use the parameter values given in eq. \eqref{eq:param vals}.
-In particular, $c_{XY} = d = f = 0.1$ and $\sigma_Z=0.05$ so, in broad strokes, our three-species model is a slight perturbation of the single-species model.
-
-Here we note two surprising things:
-First, optimal constant escapement performs considerably worse than not only DRL-based methods, but also than MSY.
-This conceptually shows how one-dimensional intuitions on ecological control may loose validity for complex ecosystems. **(this might be unwelcome by the reviewers if not discussed properly)**
-Second, we see that classical strategies have relatively spread out reward distributions as compared to DRL methods.
-
 ## Discussion
 
 Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
@@ -870,25 +866,52 @@ While the latter are inspired by the shape of optimal solutions in the single-sp
 
 Because of the simplicity of the classical policy functions, the optimal such policy may be easily estimated through a grid-search.
 This is the case since these policy functions are only specified by one or two parameters (respectively in the single fishery, or two fishery cases).
-In contrast, DRL optimizes over the more expressive -- and more complicated -- family of policies parameterized by neural networks.
-Because of this, our DRL approach uses a variant of *gradient ascent* (the proximal policy optimization algorithm) to obtain a good candidate policy. <!-- ML: I don't think this sentence is the most helpful here. Might just be better to say something like how NN's do well in approximating just about any function empirically-->
+In contrast, DRL optimizes over the more expressive -- and more complicated -- family of policies parametrized by a neural network.
+Neural networks are often used as flexible function approximators that can be efficiently optimized over.
 
-We showed that for sufficiently complex management scenarios -- with multiple harvested species and, possibly, time-varying parameters -- DRL-based management strategies perform significantly better than constant escapement.
-This is with respect to both average rewards received and conservation goals.
+We showed that for sufficiently complex management scenarios -- Models 3 and 4 -- DRL-based management strategies perform significantly better than CEsc.
+This with respect to both average rewards received and conservation goals.
 In this sense, an approximate solution to a more complicated and expressive model, can outperform the optimal solution of the single-species problem---even when the parameters of the single-species solution are empirically optimized.
 
-What is more, this DRL advantage happened within a regime of parameter space where species interaction terms were much smaller than the single-species logistic growth terms.
-Indeed, interaction parameters in \eqref{eq:3d model} are about an order of magnitude smaller than $r_X$ and $r_Y$.
-In this situation logistic growth is a reasonable approximation of the system, and thus a constant escapement solution is a plausible control strategy.
-
-We found that the optimal constant mortality policy surprisingly performs much better than constant escapement (Fig. \ref{fig:main}).
+We found that the optimal CMort policy surprisingly performs much better than constant escapement (Fig. \ref{fig:main}).
 However, it can be observed in Fig. \ref{fig:fracmsy} that the constant mortality strategy faces a trade-off: high sustainability is achieved for sub-optimal constant mortality rates, but only at a significant decrease in the mean episode reward.
 We expect that with increasing ecosystem complexity this phenomenon might become more pronounced.
 We can understand this as a consequence of the rigidity of classical strategies: the simplicity of their expressions, depending only on a few parameters, means that policy optimization is constrained to a rather reduced subset of the space of possible policies.
 
+The question of when multi-species models are well-approximated by single-species models was studied in detail in [@burgess].
+Here our approach is dual to that of the aforementioned paper.
+Rather than first optimizing a single-species model to approximate a more complex model and then finding the MSY value for the single-species model, we used simulated data to optimize CMort and CEsc directly on the three-species model.
+We do not investigate further whether our three-species models are well approximated by a single-species model in the sense of [@burgess].
+However:
+*1)* Because the interaction terms in \eqref{eq:3d model} are about an order of magnitude smaller than $r_X$ and $r_Y$, Models 2-4 are ‘‘close’’ in parameter-space to a single-species model.
+*2)* The fact that for Model 2 all strategies match in performance suggests that \eqref{eq:3d model} might be well-approximated by a single species model.
+This in turn suggests that the reason that DRL outperforms both single-species strategies for Models 3 and 4 is not due a lack of a single-species approximation for either $X$ or $Y$, but due to the complexity of having two harvested species.
+Moreover, non-stationarity exacerbated the advantage of DRL over CEsc and CMort, which can be expected as non-stationary parameters have been observed to introduce bias into single-species reference point estimation [@burgess].
+
 Finally, we performed a stability analysis to ensure that the advantage of DRL-based techniques over constant escapement is a ubiquitous phenomenon and not a result of a lucky selection of parameter values.
 We found (in Fig. \ref{fig:stability}) that an advantage can be observed even for relatively high-noise perturbations of the parameters---noise with a variance of 20% of the parameter values.
 The aforementioned Figure summarizes the statistics of 100 parameter perturbations so that we may expect perturbations of up to 60% (i.e. three sigmas) in the parameter values to appear in these statistics. <!--ML: Great to have this paragraph in here, but it doesn't strike me as the most satisfying one to end on. Might be better to end on a paragraph that points to future directions or gives a high-level review/takeaway. -->
+
+## Future directions
+
+There are a number of interesting directions that would be interseting to explore in future work.
+
+First, benchmarking our results against increasingly more compex and realistic fishery models.
+This would include non-stationarities in the dynamical parameters to accurately reflect the effects of climate change on the ecosystem.
+This added complexity would likely pose a computational challenge---in future work we will likely need to test several different DRL training algorithms (see e.g. [@rl-intro] for a non-exhaustive list), and it is very likely that hyperparameter tuning will need to be performed.
+Moreover, it may be that larger neural networks than the one we used in this research will be needed for the policy function.
+This all will mean that considerable technical work will be needed in order to make this next step computationally feasible (e.g. we might need to make more extensive use of GPUs and parallelization).
+
+Second, to account for noisy estimates of the system's state and imperfect policy implementation.
+This could be done straightforwardly, albeit it might increase the training time before DRL approaches converge, as well as introducing the need for hyperparameter tuning.
+
+Third, to account for the systematic uncertainties behind the dynamics of the ecosystem---that is, to account for model biases with respect to reality.
+Here, one can employ tools from curriculum learning in order to train an agent that is *generally capable* of good management over a range of different dynamical models.
+This way, one can incorporate different models---expressing different aspects of the ecosystem---into the learning process of the agent.
+We believe that this step will likely be necessary if DRL algorithms are to be applied successfully in the fishery management problem.
+Curriculum learning is rather expensive computationally, however, and involves a non-trivial *curriculum design* which will guide the agent in its learning process.
+This way, considerable technical work would be needed for this direction.
+
 
 
 ## Acknowledgements
@@ -901,9 +924,8 @@ This material is based upon work supported by the National Science Foundation un
 
 \appendix
 
-# Appendix
 
-## Results for stationary models
+# Appendix: Results for stationary models
 
 In the main text we focused on the non-stationary model (‘‘three species, two fisheries, non-stationary’’ in Table 1) for the sake of space and because our results were most compelling there.
 Here we present the reward distributions for the other models considered---the three stationary models, lines 1-3 in Table 1.
@@ -923,7 +945,7 @@ summary_11 <- read_csv("manuscript_data/comparison_1-1_100.csv.xz") %>%
 
 ```{r}
 #| label: main_32
-#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘three species, two fisheries’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 3 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
 #| out.width: "6in"
 summary_32 %>% 
   ggplot() +
@@ -936,7 +958,7 @@ summary_32 %>%
 
 ```{r}
 #| label: main_31
-#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘three species, one fishery’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 2 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
 #| out.width: "6in"
 summary_31 %>% 
   ggplot() +
@@ -949,7 +971,7 @@ summary_31 %>%
 
 ```{r}
 #| label: main_11
-#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of the ‘‘one species, one fishery’’ model in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
+#| fig.cap: "Reward distributions for the four strategies considered. These are based on 100 evaluation episodes of Model 1 in Table 1. We denote CEsc for constant escapement, CMort for constant mortality, PPO for the output policy of the PPO optimization algorithm, and PPO GP for the Gaussian process interpolation of the PPO policy."
 #| out.width: "6in"
 summary_11 %>% 
   ggplot() +
@@ -960,7 +982,7 @@ summary_11 %>%
   )
 ```
 
-## PPO policy function for non-stationary model
+# Appendix: PPO policy function for non-stationary model
 
 In the main text, Fig. \ref{fig:gpp-policy}, we presented a visualization of the PPO+GP policy function obtained for the ‘‘three species, two fisheries, non-stationary’’ model.
 This policy function is a Gaussian process regression of scatter data of the PPO policy function.
@@ -973,12 +995,12 @@ In Fig. \ref{fig:ppo-policy} we present a representation of this scatter data in
   \label{fig:ppo-policy}
 \end{figure}
 
-## Gaussian process interpolation
+# Appendix: Gaussian process interpolation
 
 Here we summarize the procedure used to interpolate the PPO policy (visualized in Fig. \ref{fig:ppo-policy}).
 We use the *GaussianProcessRegressor* object of the *sklearn* Python library with a kernel given by
 \begin{align*}
-  \text{RBF}(\text{length scale = 10}) + \text{WhiteNosie}(\text{noise level = 0.1}).
+  \text{RBF}(\text{length scale = 10}) + \text{WhiteNoise}(\text{noise level = 0.1}).
 \end{align*}
 This interpolation method is applied to scatter data of the PPO policy evaluated on 3 different grids on $(X,Y,Z)$ states:
 $G_X$, a $51\times 5 \times 5$ grid; $G_Y$, a $5\times 51 \times 5$ grid; and $G_Z$, a $5\times 5 \times 51$ grid.
