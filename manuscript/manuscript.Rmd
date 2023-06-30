@@ -421,9 +421,11 @@ An MDP may be defined by the following data:
 
 - $\mathcal{A}$: *action space*, the set of actions which the agent may choose from,
 
-- $T(N_{t+1}|N_t, a_t)$: *transition operator*, a conditional distribution which describes the dynamics of the system (where $N_i\in\mathcal{S}$ are states of the environment),
+- $T(N_{t+1}|N_t, a_t, t)$: *transition operator*, a conditional distribution which describes the dynamics of the system (where $N_i\in\mathcal{S}$ are states of the environment),\footnote{
+Transition operators are commonly discussed without having a direct time-dependence for simplicity, but the inclusion of $t$ as an argument to $T$ does not alter the structure of the learning problem appreciably.
+}
 
-- $r(N_t, a_t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $N_t$,
+- $r(N_t, a_t, t)$: *reward function*, the reward obtained after performing action $a_t\in\mathcal{A}$ in state $N_t$,
 
 - $d(N_0)$: *initial state distribution*, the initial state of the environment is sampled from this distribution,
 
@@ -439,7 +441,7 @@ sampled randomly from the distribution
 \begin{align*}
   p_\pi(\tau) = 
   d(N_0) \prod_{t=0}^{ t_{\text{fin.}}-1 }
-  \pi( a_t | N_t ) T( N_{t+1} | N_t, a_t ).
+  \pi( a_t | N_t ) T( N_{t+1} | N_t, a_t, t ).
 \end{align*}
 Reinforcement learning seeks to optimize $\pi$ such that the expected rewards are maximal,
 $$  
@@ -447,7 +449,7 @@ $$
 $$
 where,
 $$
-  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, N_t),
+  R(\tau) = \sum_{t=0}^{ t_{\text{fin.}}-1 } \gamma^t r(a_t, N_t, t),
 $$
 is the cumulative reward of path $\tau$.
 The function $J(\pi):=\mathbb{E}_{\tau\sim p_\pi}[R(\tau)]$ is called the *expected return*.
@@ -543,7 +545,7 @@ In our setting we have chosen $X_{\text{thresh.}}=Y_{\text{thresh.}}=Z_{\text{th
 The reward function defining our policy optimization problem had two components.
 The first was economical: the total biomass harvested over an episode.
 The second seeked to reflect conservation goals: if a near-extinction event occurred at time $t$, the episode was ended early and a negative reward of $-100/t$ was awarded.
-This reward function balanced the extractive motivation of the fishery with conservation goals which went beyond the scope of long-term sustainable harvests.
+This reward function balanced the extractive motivation of the fishery with conservation goals which went beyond the scope of long-term sustainable harvests commonly used in fishery management.
 
 
 \textbf{Training a DRL agent.}
@@ -670,7 +672,7 @@ Thus, distribution of episode durations seems to be widest for CEsc, followed by
 
 ```{r}
 #| label: ephistograms
-#| fig.cap: "Hisotgrams of episode lengths and rewards for the four different management strategies considered. Only the first 50 evaluation episodes (from a total of 100) were included, for ease of visualization."
+#| fig.cap: "Hisotgrams of episode lengths and rewards for the four different management strategies considered. Only the first 50 evaluation episodes (from a total of 100) were included, for ease of visualization. From left to right, the four management strategies compared are CEsc, CMort, PPO, and PPO+GP."
 #| out.width: "6in"
 esc_len <- esc_ends %>%
   filter(rep<50) %>%
@@ -678,26 +680,34 @@ esc_len <- esc_ends %>%
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="", y="ep. duration")
+  labs(x="", y="ep. duration") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("CEsc")
 msy_len <- msy_ends %>%
   filter(rep<50) %>%
   ggplot(
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="", y="")
+  labs(x="", y="") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("CMort")
 ppo_len <- ppo_ends %>%
   filter(rep<50) %>%
   ggplot(mapping = aes(x = rep, y = t)) +
   geom_col() +
-  labs(x="", y="")
+  labs(x="", y="")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("PPO")
 gpp_len <- gpp_ends %>%
   filter(rep<50) %>%
   ggplot(
     mapping = aes(x = rep, y = t)
   ) +
   geom_col() +
-  labs(x="", y="")
+  labs(x="", y="")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggtitle("PPO+GP")
 
 esc_rew <- esc_ends %>%
   filter(rep<50) %>%
@@ -997,7 +1007,7 @@ In Fig. \ref{fig:ppo-policy} we present a representation of this scatter data in
 Here we summarize the procedure used to interpolate the PPO policy (visualized in Fig. \ref{fig:ppo-policy}).
 We use the *GaussianProcessRegressor* object of the *sklearn* Python library with a kernel given by
 \begin{align*}
-  \text{RBF}(\text{length scale = 10}) + \text{WhiteNosie}(\text{noise level = 0.1}).
+  \text{RBF}(\text{length scale = 10}) + \text{WhiteNoise}(\text{noise level = 0.1}).
 \end{align*}
 This interpolation method is applied to scatter data of the PPO policy evaluated on 3 different grids on $(X,Y,Z)$ states:
 $G_X$, a $51\times 5 \times 5$ grid; $G_Y$, a $5\times 51 \times 5$ grid; and $G_Z$, a $5\times 5 \times 51$ grid.
