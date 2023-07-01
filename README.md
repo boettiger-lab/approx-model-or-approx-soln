@@ -65,22 +65,22 @@ the number of fisheries (i.e. the number of harvested species).
   + **envs/twoThreeFishing.py, envs/oneSpecies.py:**
     Classes RL environments (envs) for the three-species and single-species models respectively. The former includes
     env classes for the single-fishery and two-fishery cases.
-  parameters.py
+  + **parameters.py:**
     Includes a class of objects that contain all the dynamical parameters of models. There are two classes in this file:
     - parameters() parametrizes the three-species model
     - parameters_oneSp() parametrizes the single-species model
 
 ### Function files:
 
-    eval_util.py: Data generation.
+    + **eval_util.py:** Data generation.
       Generating simulated data under DRL and classical policies, interpolating policies, plotting results.
-    msy_fns.py: Functions used to optimize a constant mortality policy (i.e. find the MSY).
-    one_fishery_esc_fns.py: Functions used to optimize a constant escapement policy in the single-fishery cases
-    two_fishery_esc_fns.py: Functions used to optimize a constant escapement policy in the two-fishery cases
-    uncontrolled_fns.py: Functions used to generate and plot the natural dynamics of the system (with no harvest)
-    envs/growth_fns.py: a collection of growth functions (i.e. dynamical recruitment models) that define the actual
+    + **msy_fns.py:** Functions used to optimize a constant mortality policy (i.e. find the MSY).
+    + **one_fishery_esc_fns.py:** Functions used to optimize a constant escapement policy in the single-fishery cases
+    + **two_fishery_esc_fns.py:** Functions used to optimize a constant escapement policy in the two-fishery cases
+    + **uncontrolled_fns.py:** Functions used to generate and plot the natural dynamics of the system (with no harvest)
+    + **envs/growth_fns.py:** a collection of growth functions (i.e. dynamical recruitment models) that define the actual
                         dynamical model used in policy optimization.
-    util.py: general miscellaneous utility functions
+    + **util.py:** general miscellaneous utility functions
 
 ### Supporting scripts:
 
