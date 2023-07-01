@@ -45,9 +45,9 @@ the two. The latter script produces the stability result. That script might
 take a long time running.
 
 To produce new data, the user may delete the contents of `data/results_data` 
-and run the scripts above from the terminal while on the /src/ subdirectory. The 
-options inside those scripts allow one to specify the dynamical model desired and 
-the number of fisheries (i.e. the number of harvested species).
+and run the scripts above from the the `src` subdirectory. The options inside 
+those scripts allow one to specify the dynamical model desired and the number 
+of fisheries (i.e. the number of harvested species).
 
 ## Detailed structure of the code: 
 
