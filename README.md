@@ -55,8 +55,8 @@ the number of fisheries (i.e. the number of harvested species).
 
   + **workflow.py, workflow_oneSp.py:**
     Scripts that train a DRL agent, a constant mortality policy and a constant escapement policy.
-    workflow.py is used for three species model cases (including the single fishery, two fishery, and time-varying cases),
-    workflow_oneSp.py is used for the one species model.
+    **workflow.py** is used for three species model cases (Models 2-4 in the manuscript),
+    **workflow_oneSp.py** is used for the single species model (Model 1).
   + **jiggle_workflow.py:**
     Script to perform the stability analysis
 
@@ -67,8 +67,8 @@ the number of fisheries (i.e. the number of harvested species).
     env classes for the single-fishery and two-fishery cases.
   + **parameters.py:**
     Includes a class of objects that contain all the dynamical parameters of models. There are two classes in this file:
-    1. parameters() parametrizes the three-species model
-    2. parameters_oneSp() parametrizes the single-species model
+    1. **parameters()** parametrizes the three-species model
+    2. **parameters_oneSp()** parametrizes the single-species model
 
 ### Function files:
 
@@ -83,12 +83,12 @@ the number of fisheries (i.e. the number of harvested species).
 
 ### Supporting scripts:
 
-    esc_heatmap.py: generates a heatmap of the constant escapement strategy for different
+  + **esc_heatmap.py:** generates a heatmap of the constant escapement strategy for different
                     values of costant escapement in the two fishery case.
-    esc_oneSp_performance.py: plots the performance of constant escapement strategies for
+  + **esc_oneSp_performance.py:** plots the performance of constant escapement strategies for
                     several values of constant escapement in the single fishery case.
-    delete_cache.py: deletes all DRL policies saved in the 'cache' subdirectory
-    rl_vs_esc_t.py: plots the average difference between DRL and optimal constant escapement
+  + **delete_cache.py:** deletes all DRL policies saved in the 'cache' subdirectory
+  + **rl_vs_esc_t.py:** plots the average difference between DRL and optimal constant escapement
                     policy actions as a function of time (averaged over time-bins).
 
 **Quickstart**
