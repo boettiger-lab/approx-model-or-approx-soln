@@ -47,7 +47,8 @@ take a long time running.
 To produce new data, the user may delete the contents of `data/results_data` 
 and run the scripts above from the the `src` subdirectory. The options inside 
 those scripts allow one to specify the dynamical model desired and the number 
-of fisheries (i.e. the number of harvested species).
+of fisheries (i.e. the number of harvested species). An image of the agent
+trained this way will be saved at `src/cache`.
 
 ## Detailed structure of the code: 
 
@@ -62,8 +63,8 @@ of fisheries (i.e. the number of harvested species).
 
 ### Class files:
 
-  + `envs/twoThreeFishing.py`, `envs/oneSpecies.py`:
-    Classes RL environments (envs) for the three-species and single-species models respectively. The former includes
+  + `envs/oneSpecies.py`, `envs/twoThreeFishing.py`:
+    Classes RL environments (envs) for the single-species and three-species models respectively. The latter includes
     env classes for the single-fishery and two-fishery cases.
   + `parameters.py`:
     Includes a class of objects that contain all the dynamical parameters of models. There are two classes in this file:
@@ -72,22 +73,22 @@ of fisheries (i.e. the number of harvested species).
 
 ### Function files:
 
+  + `envs/growth_fns.py`: a collection of growth functions (i.e. dynamical recruitment models) that define the actual dynamical model used in policy optimization.
   + `eval_util.py`: Data generation.
       Generating simulated data under DRL and classical policies, interpolating policies, plotting results.
   + `msy_fns.py`: Functions used to optimize a constant mortality policy (i.e. find the MSY).
   + `one_fishery_esc_fns.py`: Functions used to optimize a constant escapement policy in the single-fishery cases
   + `two_fishery_esc_fns.py`: Functions used to optimize a constant escapement policy in the two-fishery cases
   + `uncontrolled_fns.py`: Functions used to generate and plot the natural dynamics of the system (with no harvest)
-  + `envs/growth_fns.py`: a collection of growth functions (i.e. dynamical recruitment models) that define the actual dynamical model used in policy optimization.
   + `util.py`: general miscellaneous utility functions
 
 ### Supporting scripts:
 
+  + `delete_cache.py`: deletes all DRL policies saved in the 'cache' subdirectory.
   + `esc_heatmap.py`: generates a heatmap of the constant escapement strategy for different
                     values of costant escapement in the two fishery case.
   + `esc_oneSp_performance.py`: plots the performance of constant escapement strategies for
                     several values of constant escapement in the single fishery case.
-  + `delete_cache.py`: deletes all DRL policies saved in the 'cache' subdirectory
   + `rl_vs_esc_t.py`: plots the average difference between DRL and optimal constant escapement
                     policy actions as a function of time (averaged over time-bins).
 
