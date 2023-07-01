@@ -243,13 +243,13 @@ knitr::include_graphics("figures/conceptual-v2.jpeg")
 ```
 
 Regarding control for these 4 models, we show the following. 
-*Model 1:* DRL-based strategies recover the optimal CEsc policy function.  
-Constant mortality performs considerably worse than these three.\footnote{
+*Model 1:* DRL-based strategies recover the optimal constant escapement (CEsc) policy function.  
+Constant mortality (CMort) performs considerably worse than these three.\footnote{
 As will be explained later, all our models are stochastic. 
-If we set stochasticity to zero in Model 1, constant mortality matches the performance of the other management strategies.
+If we set stochasticity to zero in Model 1, CMort matches the performance of the other management strategies.
 }
 *Model 2:* Here, all management strategies perform similarly.
-*Model 3:* For this model, DRL outperforms both classical strategies, with CMort surprisingly performing significantly better than constant escapement.
+*Model 3:* For this model, DRL outperforms both classical strategies, with CMort surprisingly performing significantly better than CEsc.
 In particular, we observe that DRL strategies are more sensitive to stochastic variations of the system which allows it to adaptively manage the system to prevent population collapses below the threshold.
 *Model 4:* Here, the performance gap between DRL and classical management strategies is broadened.
 In this case, as in Model 3, constant CEsc performs significantly worse than DRL and CMort.
@@ -265,7 +265,7 @@ Our findings paint a picture of how a single-species optimal management strategy
 Here, DRL performs better from both economical *and* conservation points of view.
 Moreover, rather unintuitively, CMort -- known to be suboptimal and unsustainable for single-species models -- can turn out to even outperform the CEsc -- the single-species optimal strategy -- for complex ecosystems.
 Finally, within this regime of complex, possibly varying, ecosystems, we show that DRL consistently finds a policy which effectively either matches the best classical strategy, or outperforms it.
-We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms constant escapement.
+We strengthen this result with a stability investigation: we show that random perturbations in the model's parameter values used do not significantly vary the conclusion that DRL outperforms CEsc.
 
 # Mathematical models of fisheries considered
 
@@ -331,7 +331,7 @@ This also creates the phenomenon of *hysteresis*, where returning $H$ to its ori
 
 ```{r}
 #| label: may
-#| fig.cap: "The fixed point diagram for model (TBD) as a function of varying the parameter $\\beta H$, assuming zero noise.
+#| fig.cap: "The fixed point diagram for the unharvested dynamics of Model 1 as a function of varying the parameter $\\beta H$, assuming zero noise.
 #| Stable fixed points (also known as attractors) are plotted using a solid line, while the unstable fixed point is shown as a dotted line."
 #| out.width: "6.5in"
 
@@ -571,7 +571,7 @@ The optimal mortality rate was the value $(M_X^*,\ M_Y^*)$ for which the mean ep
 
 
 \textbf{Tuning the CEsc strategy.}
-This tuning procedure was analogous to that of the constant mortality strategy just summarized.
+This tuning procedure was analogous to that of the CMort strategy just summarized.
 Namely:
 A grid of 101 escapement values was laid out on the interval $[0,1]$ for Models 1 and 2; and a $51\times 51$ grid on $[0,1]^2$ was laid out for Models 3 and 4.
 Each grid point represented a CEsc policy.
@@ -615,7 +615,7 @@ Moreover, $\beta$ was slightly increased simply to put more predation pressure o
 
 \textbf{Stability analysis.}
 To ensure that our results do not strongly depend on our parameter choices, we performed a stability analysis.
-Here, we perturbed parameters randomly and measured the difference in performance between our DRL-based methods and the constant escapement strategy.
+Here, we perturbed parameters randomly and measured the difference in performance between our DRL-based methods and the CEsc strategy.
 We observed that the difference in performance is maintained for even relatively high noise strengths.
 We only considered the most complex case here, Model 4. 
 
@@ -632,8 +632,8 @@ The parametric noise strength values used were $[0.04, 0.08, \dots, 0.2]$.
 
 We evaluated each of the four management strategies considered on Models 1-4.
 To recap, the management strategies were CEsc, CMort, PPO and a Gaussian process interpolation of PPO (‘‘PPO+G’’).
-Furthermore, we characterized the trade-off between economic output and sustainability faced by constant mortality policies.
-This was done by evaluating constant mortality policies with a fraction of the optimal mortality rate (specifically, 80%, 90% and 95%).
+Furthermore, we characterized the trade-off between economic output and sustainability faced by CMort policies.
+This was done by evaluating CMort policies with a fraction of the optimal mortality rate (specifically, 80%, 90% and 95%).
 All evaluations were based on 100 replicate episodes. 
 
 We will visualize the results concerning Model 4 in this section, leaving the other models for App. A.
@@ -748,7 +748,7 @@ We expect a similar and, possibly, more pronounced effect for the CEsc strategy 
 
 ```{r}
 #| label: fracmsy
-#| fig.cap: "Trade-off between reward and probability of a near-extinction event for constant mortality policies. We evaluated policies at the full optimal constant escapement value, and also at 0.8, 0.9, 0.95 of the latter. Each evaluation is based on 100 episodes. On the left we plot the percentage of episodes which last their maximum time window, i.e. that do not see a near-extinction event. On the right, we plot the mean episdoe reward and standard deviation for each policy."
+#| fig.cap: "Trade-off between reward and probability of a near-extinction event for CMort policies. We evaluated policies at the full optimal constant escapement value, and also at 0.8, 0.9, 0.95 of the latter. Each evaluation is based on 100 episodes. On the left we plot the percentage of episodes which last their maximum time window, i.e. that do not see a near-extinction event. On the right, we plot the mean episdoe reward and standard deviation for each policy."
 #| out.width: "6in"
 lengths <- frac_msy %>%
   ggplot(aes(x=msy_fraction, y=num_full_eps)) +
@@ -791,10 +791,10 @@ In that figure, the shape of the optimal escapement strategy is provided for com
 
 
 
-We notice that the DRL-derived policy has similarities to a constant escapement policy.
+We notice that the DRL-derived policy has similarities to a CEsc policy.
 Here, the key difference is that the escapement value for each of the fished species is sensitive to variations in the other populations. 
 This can be seen as color gradients in the plots of $(X, M_X)$ and $(Y, M_Y)$, where the gradient corresponds to differing values of $Z$.
-Moreover, this can be seen as an anti-correlation in the plot of $(X, M_Y)$---for optimal constant escapement, $M_Y$ is uncorrelated to $X$.
+Moreover, this can be seen as an anti-correlation in the plot of $(X, M_Y)$---for optimal CEsc, $M_Y$ is uncorrelated to $X$.
 
 This sensitivity of the policy to, for instance, the values of $Z$ can be seen in the sample time series displayed in Fig. \ref{fig:gpp-ep}.
 Here, we can see that species $Z$ becomes endangered due to harvesting for all management strategies.
@@ -811,8 +811,8 @@ This pattern is rather common among the whole dataset---early episode ends are l
 
 ## Recovering constant escapement for a single species
 
-While the optimal control for our single-species model \eqref{eq:may} can not be easily proven to be constant escapement (since the right-hand side of that equation is not concave), from experience we can expect constant escapement to either be optimal or near-optimal.
-We give evidence for this intuition by showing that our DRL method recovers a constant escapement solution when trained.
+While the optimal control for our single-species model \eqref{eq:may} can not be easily proven to be CEsc (since the right-hand side of that equation is not concave), from experience we can expect CEsc to either be optimal or near-optimal.
+We give evidence for this intuition by showing that our DRL method recovers a CEsc solution when trained.
 These results are shown in Fig. \ref{fig:1sp-pol}
 Here we show both the output PPO policy, and its Gaussian process interpolation.
 This helps build an intuition about the relationship between our ‘‘PPO’’ and ‘‘PPO+GP’’ management strategies.
@@ -821,7 +821,7 @@ There is a presence of certain high-mortality points at low $X$ values in the PP
 This is likely due to experience of near-extinctions early on in the training process---where, given an impending extinction, there is a higher reward for intensive fishing. 
 These ‘‘jitters’’ are likely not fully erased through the optimization algorithm since near-extinction events become extremely rare after only a few training iterations.
 This way, the agent does not further explore that region of state space to generate new experience.
-We believe the most important aspect of the constant escapement policy reproduced by PPO is the fact that there is some sufficiently-wide window below the threshold of the policy (i.e. below the optimal escapement value), on which no fishing is performed.
+We believe the most important aspect of the CEsc policy reproduced by PPO is the fact that there is some sufficiently-wide window below the threshold of the policy (i.e. below the optimal escapement value), on which no fishing is performed.
 That is, there exists some sufficiently large $\varepsilon$ such that if $X_{\text{thresh.}}$ is the optimal escapement value of the system, then $\pi_{PPO}(X)=0$ for all $X\in[X_{\text{thresh.}}-\varepsilon,\ X_{\text{thresh.}}]$.
 
 \begin{figure}
@@ -836,13 +836,13 @@ That is, there exists some sufficiently large $\varepsilon$ such that if $X_{\te
 In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values. <!--ML: For clarity, I think it would be good to specify that you are referring to parameters of the dynamics model.-->
 
 Our main result in this respect is Fig. \ref{fig:stability}.
-There, we plot the *median episode reward difference* between the two DRL-based methods we considered, and the optimal constant escapement strategy.
-This figure shows that, for a wide range of parameter values, DRL-based strategies can have a considerable advantage over an optimized constant escapement policy (the single-species optimal solution).
+There, we plot the *median episode reward difference* between the two DRL-based methods we considered, and the optimal CEsc strategy.
+This figure shows that, for a wide range of parameter values, DRL-based strategies can have a considerable advantage over an optimized CEsc policy (the single-species optimal solution).
 
 \begin{figure}
   \centering
   \includegraphics[scale=0.8]{figures/jiggle_v1.png}
-  \caption{Mean reward difference between DRL methods (resp. our ‘‘PPO’’ and ‘‘PPO+GP’’ strategies), on the one hand, and the optimal constant escapement policy (‘‘CEsc’’) on the other. The dynamic parameters in eq. \eqref{eq:3d model} were randomly perturbed from the values given in \eqref{eq:param vals} according to the procedure detailed in Sec. 4. The noise strength of this perturbation is plotted as the x-axis. For each noise strength, 100 parameter perturbations were sampled---each one giving rise to a \emph{realization} of the model. For each such realization, we optimized a constant escapement policy and trained a PPO agent. Moreover, we interpolated the PPO policy using a Gaussian process, as detailed in Sec 4. Then, for each realization we compared the performance of these policies: we measured the mean reward difference betwen PPO and constant escapement, and between PPO+GP and constant escapement. The plot represents the distribution of reward differences observed at a given noise strength---we plot the mean and the standard deviation of the mean reward differences observed. In an equation, we plot the means $\mathbb{E}_{P}[\mu_P^{\text{DRL}}-\mu_P^{\text{CEsc}}]$, where $P$ are the paramter values, $\mu_P^{\text{DRL}}$ is the mean reward for a DRL policy trained on the problem with parameter values $P$, and, similarly, $\mu_P^{\text{CEsc}}$ is the mean reward of the optimal constant escpament policy for parameter values $P$.}
+  \caption{Mean reward difference between DRL methods (resp. our ‘‘PPO’’ and ‘‘PPO+GP’’ strategies), on the one hand, and the optimal constant escapement policy (‘‘CEsc’’) on the other. The dynamic parameters in eq. \eqref{eq:3d model} were randomly perturbed from the values given in \eqref{eq:param vals} according to the procedure detailed in Sec. 4. The noise strength of this perturbation is plotted as the x-axis. For each noise strength, 100 parameter perturbations were sampled---each one giving rise to a \emph{realization} of the model. For each such realization, we optimized a CEsc policy and trained a PPO agent. Moreover, we interpolated the PPO policy using a Gaussian process, as detailed in Sec 4. Then, for each realization we compared the performance of these policies: we measured the mean reward difference betwen PPO and CEsc, and between PPO+GP and CEsc. The plot represents the distribution of reward differences observed at a given noise strength---we plot the mean and the standard deviation of the mean reward differences observed. In an equation, we plot the means $\mathbb{E}_{P}[\mu_P^{\text{DRL}}-\mu_P^{\text{CEsc}}]$, where $P$ are the paramter values, $\mu_P^{\text{DRL}}$ is the mean reward for a DRL policy trained on the problem with parameter values $P$, and, similarly, $\mu_P^{\text{CEsc}}$ is the mean reward of the optimal constant escpament policy for parameter values $P$.}
   \label{fig:stability}
 \end{figure}
 
@@ -852,7 +852,7 @@ This figure shows that, for a wide range of parameter values, DRL-based strategi
 
 Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
 While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making. <!-- ML: First half of this sentence comes off as vague, esp. without a citation -->
-This provides easily interpretable solutions, such as constant mortality policies.
+This provides easily interpretable solutions, such as CMort policies.
 There is a drawback here, however: due to the simplicity of these dynamical models, the policies might not respond effectively in many situations---situations where the predictions of these simple models deviate considerably from reality.
 Because of this, policies such as MSY have faced pushback and are believed to have contributed to the depletion of fish stocks [@Worm2006; @Costello2016].
 
@@ -861,8 +861,8 @@ Furthermore, rather than computing the optimal control policy for the model (som
 This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model}) as a black box of input-output pairs.
 By not relying on precise knowledge of the model's parameter values, but rather just relying on input-output statistics, model-free approaches have gained traction in a variety of control theory settings (see, e.g., [@sato2019; @ramirez2022; @zeng2019]).
 
-We compare deep reinforcement learning-based policies against classical management strategies (optimal constant mortality and optimal constant escapement policies policies). 
-While the latter are inspired by the shape of optimal solutions in the single-species setting, they are optimized in a model-free way as well: e.g. the optimal constant mortality rate is computed empirically from simulated data.
+We compare deep reinforcement learning-based policies against classical management strategies (optimal CMort and optimal CEsc policies policies). 
+While the latter are inspired by the shape of optimal solutions in the single-species setting, they are optimized in a model-free way as well: e.g. the optimal mortality rate is computed empirically from simulated data.
 
 Because of the simplicity of the classical policy functions, the optimal such policy may be easily estimated through a grid-search.
 This is the case since these policy functions are only specified by one or two parameters (respectively in the single fishery, or two fishery cases).
@@ -873,22 +873,22 @@ We showed that for sufficiently complex management scenarios -- Models 3 and 4 -
 This with respect to both average rewards received and conservation goals.
 In this sense, an approximate solution to a more complicated and expressive model, can outperform the optimal solution of the single-species problem---even when the parameters of the single-species solution are empirically optimized.
 
-We found that the optimal CMort policy surprisingly performs much better than constant escapement (Fig. \ref{fig:main}).
-However, it can be observed in Fig. \ref{fig:fracmsy} that the constant mortality strategy faces a trade-off: high sustainability is achieved for sub-optimal constant mortality rates, but only at a significant decrease in the mean episode reward.
+We found that the optimal CMort policy surprisingly performs much better than CEsc (Fig. \ref{fig:main}).
+However, it can be observed in Fig. \ref{fig:fracmsy} that the CMort strategy faces a trade-off: high sustainability is achieved for sub-optimal mortality rates, but only at a significant decrease in the mean episode reward.
 We expect that with increasing ecosystem complexity this phenomenon might become more pronounced.
 We can understand this as a consequence of the rigidity of classical strategies: the simplicity of their expressions, depending only on a few parameters, means that policy optimization is constrained to a rather reduced subset of the space of possible policies.
 
-The question of when multi-species models are well-approximated by single-species models was studied in detail in [@burgess].
+The question of when multi-species models are well-approximated by single-species models was studied in detail in [@burgess2017describing].
 Here our approach is dual to that of the aforementioned paper.
 Rather than first optimizing a single-species model to approximate a more complex model and then finding the MSY value for the single-species model, we used simulated data to optimize CMort and CEsc directly on the three-species model.
-We do not investigate further whether our three-species models are well approximated by a single-species model in the sense of [@burgess].
+We do not investigate further whether our three-species models are well approximated by a single-species model in the sense of [@burgess2017describing].
 However:
 *1)* Because the interaction terms in \eqref{eq:3d model} are about an order of magnitude smaller than $r_X$ and $r_Y$, Models 2-4 are ‘‘close’’ in parameter-space to a single-species model.
 *2)* The fact that for Model 2 all strategies match in performance suggests that \eqref{eq:3d model} might be well-approximated by a single species model.
 This in turn suggests that the reason that DRL outperforms both single-species strategies for Models 3 and 4 is not due a lack of a single-species approximation for either $X$ or $Y$, but due to the complexity of having two harvested species.
-Moreover, non-stationarity exacerbated the advantage of DRL over CEsc and CMort, which can be expected as non-stationary parameters have been observed to introduce bias into single-species reference point estimation [@burgess].
+Moreover, non-stationarity exacerbated the advantage of DRL over CEsc and CMort, which can be expected as non-stationary parameters have been observed to introduce bias into single-species reference point estimation [@burgess2017describing].
 
-Finally, we performed a stability analysis to ensure that the advantage of DRL-based techniques over constant escapement is a ubiquitous phenomenon and not a result of a lucky selection of parameter values.
+Finally, we performed a stability analysis to ensure that the advantage of DRL-based techniques over CEsc is a ubiquitous phenomenon and not a result of a lucky selection of parameter values.
 We found (in Fig. \ref{fig:stability}) that an advantage can be observed even for relatively high-noise perturbations of the parameters---noise with a variance of 20% of the parameter values.
 The aforementioned Figure summarizes the statistics of 100 parameter perturbations so that we may expect perturbations of up to 60% (i.e. three sigmas) in the parameter values to appear in these statistics. <!--ML: Great to have this paragraph in here, but it doesn't strike me as the most satisfying one to end on. Might be better to end on a paragraph that points to future directions or gives a high-level review/takeaway. -->
 
