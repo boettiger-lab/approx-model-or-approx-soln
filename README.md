@@ -53,16 +53,16 @@ the number of fisheries (i.e. the number of harvested species).
 
 ### Main scripts:
 
-  workflow.py, workflow_oneSp.py:
+  + **workflow.py, workflow_oneSp.py:**
     Scripts that train a DRL agent, a constant mortality policy and a constant escapement policy.
     workflow.py is used for three species model cases (including the single fishery, two fishery, and time-varying cases),
     workflow_oneSp.py is used for the one species model.
-  jiggle_workflow.py:
+  + **jiggle_workflow.py:**
     Script to perform the stability analysis
 
 ### Class files:
 
-  envs/twoThreeFishing.py, envs/oneSpecies.py:
+  + **envs/twoThreeFishing.py, envs/oneSpecies.py:**
     Classes RL environments (envs) for the three-species and single-species models respectively. The former includes
     env classes for the single-fishery and two-fishery cases.
   parameters.py
