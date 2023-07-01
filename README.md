@@ -68,8 +68,8 @@ trained this way will be saved at `src/cache`.
     env classes for the single-fishery and two-fishery cases.
   + `parameters.py`:
     Includes a class of objects that contain all the dynamical parameters of models. There are two classes in this file:
-    1. `parameters()` parametrizes the three-species model
-    2. `parameters_oneSp()` parametrizes the single-species model
+    1. `parameters()` parametrizes the three-species models (Models 2-4 in the manuscript)
+    2. `parameters_oneSp()` parametrizes the single-species model (Model 1)
 
 ### Function files:
 
