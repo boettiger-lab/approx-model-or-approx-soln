@@ -227,23 +227,24 @@ This experimental design is summrized in Fig.  \ref{fig:conceptual-v2}.
 #| message: FALSE
 #| fig.align: 'center'
 #| fig.cap:  'An experimental-design type of visualization of the management scenarios considered in this paper. 
-#| On the x-axis are four different fishery management problems: a single species model, and three three-species models.
-#| From left to right, the latter are: three species out of which one, X, is harvested, and all parameters are constant in time; 
-#| three species out of which two, X and Y, are harvested and all parameters are constant in time;
-#| and finally three species out of which two, X and Y, are harvested and one parameter depends on time. 
-#| We represent the latter’s time-dependence with a clock next to the X variable, and we intend to use it as an example of a possible simplified model for the effects of climate change.
+#| On the x-axis are four different fishery management problems (Table 1).
+#| We represent the Model 4’s non-stationarity with a clock next to the X variable, and we intend to use it as an example of a possible simplified model for the effects of climate change.
 #| On the y-axis we have different management strategies with which one may control each of the models. 
-#| On the bottom we have the constant mortality strategy (CMort), where one optimizes over constant fishing effort strategies.
-#| Above that is the constant escapement strategy (CEsc), based on calling off all fishing below a certain threshold population value.
-#| Finally, on top we have DRL-based strategies where policies are in general functions of the full state of the system, and they are parametrized by a neural network.'
+#| On the bottom we have the constant escapement strategy (CEsc), based on calling off all fishing below a certain threshold population value.
+#| Above that is the constant mortality strategy (CMort), where one optimizes over constant fishing effort strategies.
+#| Finally, on top we have DRL-based strategies where policies are in general functions of the full state of the system, and they are parametrized by a neural network.
+#| The specific DRL-based strategy is referred to as PPO+GP in the main text, due to the algorithm used to produce the policy.
+#| The results plotted are the average reward obtained by the strategy over 100 episodes, and the fraction of those episodes which do not end with a near-extinction event.
+#| We have normalized to the highest reward in each column in order to enhance the comparison between strategies.
+#| For illustrative purposes we have color-coded the results using a two-dimensional color legend displayed on the bottom left.'
 #| out.width: '6.5in' 
 #| fig.pos: 'H'
  
-knitr::include_graphics("figures/conceptual-v2.jpeg")
+knitr::include_graphics("figures/conceptual-v3.jpeg")
 ```
 
-Regarding control for these 4 models, we show the following. 
-*Model 1:* DRL-based strategies recover the optimal constant escapement (CEsc) policy function.  
+Regarding control for these 4 models, we show the following.
+*Model 1:* DRL-based strategies recover the optimal constant escapement (CEsc) policy function.
 Constant mortality (CMort) performs considerably worse than these three.\footnote{
 As will be explained later, all our models are stochastic. 
 If we set stochasticity to zero in Model 1, CMort matches the performance of the other management strategies.
@@ -251,8 +252,7 @@ If we set stochasticity to zero in Model 1, CMort matches the performance of the
 *Model 2:* Here, all management strategies perform similarly.
 *Model 3:* For this model, DRL outperforms both classical strategies, with CMort surprisingly performing significantly better than CEsc.
 In particular, we observe that DRL strategies are more sensitive to stochastic variations of the system which allows it to adaptively manage the system to prevent population collapses below the threshold.
-*Model 4:* Here, the performance gap between DRL and classical management strategies is broadened.
-In this case, as in Model 3, constant CEsc performs significantly worse than DRL and CMort.
+*Model 4:* Here, the performance gap between DRL and CEsc is broadened, and the gap between DRL and CMort is maintained.
 
 We show that in the most complex scenario, Model 4, CMort is faced with a tradeoff---the optimal mortality rate leads a rather large fraction of episodes ending with a population crash, whose negative reward is counteracted with a higher economic output.\footnote{
 In our mathematical formulation of the decision problem, we have assumed for simplicity that the fishing effort cost is zero and that fish price is stable over time.
