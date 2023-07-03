@@ -234,7 +234,7 @@ This experimental design is summrized in Fig.  \ref{fig:conceptual-v2}.
 #| Above that is the constant mortality strategy (CMort), where one optimizes over constant fishing effort strategies.
 #| Finally, on top we have DRL-based strategies where policies are in general functions of the full state of the system, and they are parametrized by a neural network.
 #| The specific DRL-based strategy is referred to as PPO+GP in the main text, due to the algorithm used to produce the policy.
-#| The results plotted are the average reward obtained by the strategy over 100 episodes, and the fraction of those episodes which do not end with a near-extinction event (denoted 'Perc' for 'Percentage').
+#| The results plotted are the average reward obtained by the strategy over 100 episodes, and the fraction of those episodes which do not end with a near-extinction event (denoted Perc for Percentage).
 #| We have normalized to the highest reward in each column in order to enhance the comparison between strategies.
 #| For illustrative purposes we have color-coded the results using a two-dimensional color legend displayed on the bottom left.'
 #| out.width: '6.5in' 
