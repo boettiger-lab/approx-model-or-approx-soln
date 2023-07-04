@@ -129,7 +129,7 @@ Much effort has been spent grappling with the complexity of our natural world in
 Heroic amounts of data and computation are being brought to bear on developing better, more realistic models of our environments and ecosystems, in hopes of improving our capacity to address the many planetary crises.
 But despite these efforts and advances, we remain faced with the difficult task of figuring out how best to respond to these crises.
 While simplified process models for the population dynamics have historically allowed for exploration of large decision spaces, the new wave of rich models are applied to highly oversimplified descriptions of potential actions they seek to inform.
-For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled as one of seven emissions marker scenarios from the IPCC [@riahi2017shared].
+For instance, Global Circulation Models (GCMs) such as HadCM3 [@pope2000impact; @gordon2000simulation; @collins2001internal] model earth's climate using 1.5M variables, while the comparably vast potential action space is modeled much more minimalistically, with 5 SSP socioeconomic storylines and 7 SSP-RCP marker scenarios summarizing the action space at the IPCC [@riahi2017shared].
 
 Even as our research community develops simulations of the natural world that fit only in supercomputers, we analyze a space of policies that would fit on index cards.
 Similar combinations of rich process models and highly simplified decision models (often not even given the status of 'model') are common.
@@ -355,7 +355,7 @@ Models 2-4 are three-species models and they are all closely related---in fact, 
 \begin{split}
   f_X(N_t) &= L(X_t;\ r_X, K_X) - F(X_t, Z_t;\ \beta, c) - c_{XY}X_tY_t, \\
   f_Y(N_t) &= L(Y_t;\ r_Y, K_Y) - D F(Y_t, Z_t;\ \beta, c) - c_{XY}X_tY_t,\\
-  f_Z(N_t) &= \left(f(X_t + DY_t\right) - d_Z)Z_t.
+  f_Z(N_t) &= \left(b(X_t + DY_t\right) - d_Z)Z_t.
 \end{split}
 \end{align}
 The three species modeled are $X$, $Y$ and $Z$.
@@ -365,7 +365,7 @@ The growth rate and carrying capacity, $r_X$, $K_X$, $r_Y$ and $K_Y$, of $X$ and
 A parameter $c_{XY}$ mediating a Lotka-Volterra competition between $X$ and $Y$.
 A maximum predation rate $\beta$ and a predation rate half-maximum biomass $c$ specifying how $Z$ forages on $X$ and $Y$.
 A parameter $D$ regulating a relative preference of $Z$ to prey on $Y$.
-A death rate $d_Z$ and a parameter $f$ scaling the birth rate of $Z$.
+A death rate $d_Z$ and a parameter $b$ scaling the birth rate of $Z$.
 Finally, the noise variances $\sigma_X$, $\sigma_Y$ and $\sigma_Z$.
 
 The three models will branch off of eq. \eqref{eq:3d model} in the following way.
@@ -390,24 +390,39 @@ Eq. \eqref{eq:rx(t)} is intended to reflect in a simple manner a possible effect
 Reinforcement learning (RL) is a way of approaching *sequential decision problems* through machine learning.
 All applications of RL can be conceptually separated into two parts: an *agent* and an *environment* which the agent interacts with.
 That is, the agent performs actions within the environment.
-As a result of an agent's action, the environment will transition to a new state and return a numerical *reward* to the agent. (See Fig. 1 in [@rl-intro] for a conceptual description of reinforcement learning algorithms.)
+
+After the agent takes an action, the environment will transition to a new state and return a numerical *reward* to the agent. (See Fig. 1 in [@rl-intro] for a conceptual description of reinforcement learning algorithms.)
 The rewards encode the agent's goal.
 The main task of any RL algorithm is then to maximize the cumulative reward received. 
 This objective is achieved by aggregating experience in what is called the *training* period and learning from such experience.
-<!-- ML: We could cite our deep RL paper here instead of going into further details. Not sure what we are expecting as the audience. -->.
+<!-- ML: We could cite our deep RL paper here instead of going into further details. Not sure what we are expecting as the audience. -->
 
 <!-- The *environment* is commonly a computer simulation, although it sometimes can be a real world system.
 The *agent*, on the other hand, is a computer program which interacts with the environment. -->
 
-For this paper, we will consider four environments corresponding to each of the models considered (Table \ref{tab:models}).
+The *environment* is commonly a computer simulation.
+It is important to note here the role that real time-series data of stock sizes can play in this process.
+This data is not used directly to train the RL agent, but rather to estimate the model defining the environment.
+This environment is subsequently used to train the agent.
+In this paper, we focus on the second step---we take the estimated model of reality as a given, and train an RL agent on it.\footnote{
+In this sense, it is important to note that the classical management strategies we compare against have a similar flow of information.
+Namely, data is used to estimate a dynamical model, and this model is used to generate a policy function.
+The difference to our approach is located in the process of *how* the model is used to optimize a policy.
+Because of this difference, RL-based approaches can produce good heuristic solutions for complex problems.
+}
+
+Specifically, we consider four environments corresponding to each of the models considered (Table \ref{tab:models}).
 At each time step, the agent observes the state $S$ and enacts some harvest---reducing $X_t$ to $X_t - M_X(N_t)\cdot X_t$, and, for Models 3 and 4, also reducing $Y_t$ to $Y_t - M_Y(N_t)\cdot Y_t$.
 Here the fish mortality-rates-from-harvest (i.e. $M_X=M_X(N_t)$ and $M_Y=M_Y(N_t)$), are the agent's action at time $t$. 
 This secures a reward of $M_X(N_t)X$ for Models 1 and 2, and, similarly, a reward of $M_X(N_t)X + M_Y(N_t)Y$ for Models 3 and 4.
-After this harvest portion of the time step, the environment changes according to its natural dynamics (see eq. \eqref{eq:3d model}).
+After this harvest portion of the time step, the environment evolves naturally according to eqs. \eqref{eq:may} and \eqref{eq:3d model} (Sec. 2).
 
 As mentioned previously, discretising time allows a simplification of the possibly seasonal mating behavioral patterns of the species involved. 
 This approximation is commonly used in fisheries for species with annual reproductive cycles (see e.g. [@mangel2006theoretical], Chap. 6).
-The division of the time-step into two parts (harvest and dynamics) happening sequentially is performed for all control methods evaluated, not only RL-based approaches.
+Moreover, the separation of each time-step into a harvest period and a natural growth period assumes that harvest has little disruption on the reproductive process.
+A detailed model which includes such a disruption is outside of the scope of this work.
+
+
 
 ## Mathematical framework for RL
 
@@ -473,7 +488,7 @@ Deep reinforcement learning uses this strategy, focusing on function families pa
 
 
 We will focus on deep reinforcement learning throughout this paper.
-Within the DRL literature there is a wealth of algorithms from which to choose from to optimize $\pi$, each with its pros and cons.
+Within the DRL literature there is a wealth of algorithms from which to choose to optimize $\pi$, each with its pros and cons.
 Most of these are based on gradient ascent by using the technique of *back-propagation* to efficiently compute the gradient.
 Here we have used only one such algorithm (*proximal policy optimization (PPO)*) to draw a clear comparison between the RL-based and the classical fishery management approaches.
 In practice, further improvements can be expected by a careful selection of the optimization algorithm. 
@@ -599,7 +614,7 @@ For Models 2 and 3, their dynamic parameters (in eq. \eqref{eq:3d model}) were c
 \label{eq:param vals}
 \begin{split}
   r_X = K_X = r_Y = K_Y = 1, \quad \beta = 0.3, \quad c = 0.3\\
-  c_{XY} = 0.1,\quad f = 0.1,\quad D = 1.1, \quad d_Z = 0.1.
+  c_{XY} = 0.1,\quad b = 0.1,\quad D = 1.1, \quad d_Z = 0.1.
 \end{split}
 \end{align}
 Moreover, the variances for the stochastic terms were chosenas
@@ -836,7 +851,7 @@ That is, there exists some sufficiently large $\varepsilon$ such that if $X_{\te
 In this section we present results intended to show that the effects that we observe in this paper are not the result of a careful selection of parameter values, but rather arise for a wide variety of parameter values. <!--ML: For clarity, I think it would be good to specify that you are referring to parameters of the dynamics model.-->
 
 Our main result in this respect is Fig. \ref{fig:stability}.
-There, we plot the *median episode reward difference* between the two DRL-based methods we considered, and the optimal CEsc strategy.
+There, we plot the *average episode reward difference* between the two DRL-based methods we considered, and the optimal CEsc strategy.
 This figure shows that, for a wide range of parameter values, DRL-based strategies can have a considerable advantage over an optimized CEsc policy (the single-species optimal solution).
 
 \begin{figure}
@@ -886,7 +901,9 @@ However:
 *1)* Because the interaction terms in \eqref{eq:3d model} are about an order of magnitude smaller than $r_X$ and $r_Y$, Models 2-4 are ‘‘close’’ in parameter-space to a single-species model.
 *2)* The fact that for Model 2 all strategies match in performance suggests that \eqref{eq:3d model} might be well-approximated by a single species model.
 This in turn suggests that the reason that DRL outperforms both single-species strategies for Models 3 and 4 is not due a lack of a single-species approximation for either $X$ or $Y$, but due to the complexity of having two harvested species.
-Moreover, non-stationarity exacerbated the advantage of DRL over CEsc and CMort, which can be expected as non-stationary parameters have been observed to introduce bias into single-species reference point estimation [@burgess2017describing].
+Moreover, the non-stationarity in Model 4 maintained the advantage of DRL over CEsc and CMort. 
+Here, one may have expected an exacerbation of that advantage due to non-stationarities introducing biases to single-species approximate models [@burgess2017describing].
+We did, however, measure a decrease in the sustainability of CEsc in Model 4 with respect to Model 3.
 
 Finally, we performed a stability analysis to ensure that the advantage of DRL-based techniques over CEsc is a ubiquitous phenomenon and not a result of a lucky selection of parameter values.
 We found (in Fig. \ref{fig:stability}) that an advantage can be observed even for relatively high-noise perturbations of the parameters---noise with a variance of 20% of the parameter values.
