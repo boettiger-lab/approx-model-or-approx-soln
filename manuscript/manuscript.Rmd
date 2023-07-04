@@ -142,7 +142,11 @@ However, emerging data-driven methods from machine learning offer a new choice -
 In this paper, we focus on a well-developed application of model-based management of the natural world that has long illustrated the trade-offs between model complexity and policy complexity: the management of marine fisheries.
 Fisheries management is both an important issue to society and a rich & frequent test-bed of ecological management more generally.
 Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006, @Costello2016].
-Fisheries management has  roots in both the fields of _ecosystem management_ and _natural resource economics_.
+Fisheries management centers around the process of sampling populations to determine fishing quotas based on population estimates.
+This decision is often guided by a model of the dynamics of the system.
+Our paper focuses on the decision side of this problem rather than the measurement step.
+
+Fisheries management has roots in both the fields of _ecosystem management_ and _natural resource economics_.
 Both fields might trace their origins to the notion of maximum sustainable yield (MSY), introduced independently by a fisheries ecologist [@Schaefer1954] and the economist [@Gordon1954] in the same year.
 From this shared origin, each field would depart from the simplifying assumptions of the Gordon-Schaefer model in divergent ways, leading to different techniques for deriving policies from models.The heart of the management problem is easily understood: a manager seeks to set quotas on fishing that will ensure the long-term profitability and sustainability of the industry.
 Mathematical approaches developed over the past century may be roughly divided between these two fields: (A) ecologists, focused on ever more realistic models of the biological processes of growth and recruitment of fish while considering a relatively stylized suite of potential management strategies, and (B) economists, focused on far more stylized models of the ecology while exploring a far less constrained set of possible policies.
@@ -191,8 +195,17 @@ knitr::include_graphics("figures/conceptual.png")
 -->
 
 <!--NEED some kind of map paragraph here saying what's ahead, what we show  -->
-In this article, we compare the performance of a DRL solution to that of classical management strategies (see Textbox 1).\footnote{A repository with all the relevant code to reproduce our results may be found at \url{https://github.com/boettiger-lab/approx-model-or-approx-soln} in the ‘‘src’’ subdirectory. 
-The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.} 
+
+In most US fisheries, the mortality policy is often piecewise linear (often with one constant and one linear piece), and the allowable biological catch (ABC) or total allowable catch (TAC) is set at some heuristic (e.g. 80%) below the ‘overfishing limit’, $F_{MSY}$, i.e. the highest (constant) mortality that can be sustained indefinitely (in the model – reality of course does not permit such definitions).
+This fixed mortality management can be seen, for instance, in most of the fisheries listed in the widely used R.A. Myers Legacy Stock Assessment Database.
+Here, we have focused on purely constant mortality policies, rather than piecewise linear mortality funcitons, for simplicity.
+Escapement-based management is less common, except in salmonoids, as it requires closing a fishery whenever the measured biomass falls below $B_{MSY}$.
+
+In this article, we compare against two common methods: constant mortality (CMort) and constant escapement (CEsc), introduced in Text Box 1.\footnote{
+A repository with all the relevant code to reproduce our results may be found at \url{https://github.com/boettiger-lab/approx-model-or-approx-soln} in the ‘‘src’’ subdirectory. 
+The data used is found in the ‘‘data’’ subdirectory, but the user may use the code provided to generate new data sets.
+} 
+
 We consider the problem of devising harvest strategies in a for a series of ecosystem models with increasing complexity (Table \ref{tab:models}):
 *1) one species, one fishery:* a simple single-species recruitment model based on [@may77];
 *2) three species, one fishery:* a three-species generalization of model *1)*, where one of the species is harvested;
