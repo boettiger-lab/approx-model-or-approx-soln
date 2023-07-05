@@ -83,7 +83,7 @@ header-includes:
 
 output: 
   rticles::arxiv_article:
-    keep_tex: true
+    keep_tex: yes
 
 editor_options: 
   markdown: 
