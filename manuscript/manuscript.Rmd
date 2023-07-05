@@ -140,7 +140,7 @@ This simplification reflects trade-offs between tractablity and complexity at th
 However, emerging data-driven methods from machine learning offer a new choice -- algorithms that can find good strategies in previously intractable problems, but at the cost of opacity.
 
 In this paper, we focus on a well-developed application of model-based management of the natural world that has long illustrated the trade-offs between model complexity and policy complexity: the management of marine fisheries.
-Fisheries management is both an important issue to society and a rich & frequent test-bed of ecological management more generally.
+Fisheries management is both an important issue to society as well as a rich and frequent test-bed of ecological management more generally.
 Fisheries are an essential natural resource that provide the primary source of protein for one in every four humans, and have faced widely documented declines due to over-fishing [@Worm2006, @Costello2016].
 Fisheries management centers around the process of sampling populations to determine fishing quotas based on population estimates.
 This decision is often guided by a model of the dynamics of the system.
@@ -876,8 +876,6 @@ This figure shows that, for a wide range of parameter values, DRL-based strategi
 
 # Discussion
 
-## Discussion
-
 Fisheries are complex ecosystems, with interactions between species leading to highly non-linear dynamics.
 While current models for population estimation include many important aspects of this complexity, it is still common to use simplified dynamical models in order to guide decision making. <!-- ML: First half of this sentence comes off as vague, esp. without a citation -->
 This provides easily interpretable solutions, such as CMort policies.
@@ -889,7 +887,7 @@ Furthermore, rather than computing the optimal control policy for the model (som
 This policy is estimated in a *model-free* setting, i.e., the agent treats the dynamical model (e.g. eq. \eqref{eq:3d model}) as a black box of input-output pairs.
 By not relying on precise knowledge of the model's parameter values, but rather just relying on input-output statistics, model-free approaches have gained traction in a variety of control theory settings (see, e.g., [@sato2019; @ramirez2022; @zeng2019]).
 
-We compare deep reinforcement learning-based policies against classical management strategies (optimal CMort and optimal CEsc policies policies). 
+We compare deep reinforcement learning-based policies against classical management strategies (CMort and CEsc). 
 While the latter are inspired by the shape of optimal solutions in the single-species setting, they are optimized in a model-free way as well: e.g. the optimal mortality rate is computed empirically from simulated data.
 
 Because of the simplicity of the classical policy functions, the optimal such policy may be easily estimated through a grid-search.
